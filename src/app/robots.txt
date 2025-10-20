@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /health/
+
+Host: gdguam.es
+Sitemap: https://gdguam.es/sitemap.xml

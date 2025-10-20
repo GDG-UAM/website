@@ -1,0 +1,15 @@
+name: Check Docker Build (Stage 1 Only)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build up to "builder" stage
+        run: docker build --target builder -t temp-check .

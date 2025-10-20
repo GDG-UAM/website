@@ -1,0 +1,623 @@
+@import "./daltonism.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-body: "Open Sans", "Roboto", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-title: "Poppins", "Open Sans", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+
+  /* Global Colors */
+  --color-white: #ffffff;
+  --color-black: #171717;
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+
+  /* Google Palette */
+  --google-blue: #1a73e8;
+  --google-red: #ea4335;
+  --google-yellow: #fbbc05;
+  --google-green: #34a853;
+  --google-dark-gray: #3c4043;
+  --google-light-gray: #5f6368;
+  --google-extra-light-gray: #dadce0;
+  --google-super-light-gray: #f8f9fa;
+  --google-error-red: #d93025;
+  --google-error-bg: #fce8e6;
+
+  /* Spinner */
+  --spinner-border-color: #f3f3f3;
+  --spinner-border-top-color: #1a73e8;
+}
+
+/* Buttons */
+:root {
+  --button-default-bg: #666;
+  --button-primary-bg: #0070f0;
+  --button-secondary-bg: #7828c8;
+  --button-success-bg: #17c964;
+  --button-warning-bg: #f5a524;
+  --button-danger-bg: #f31260;
+  --button-disabled-bg: #999;
+
+  --button-instagram-hover-text: #c13584;
+  --button-linkedin-hover-text: #0a66c2;
+  --button-email-hover-text: #d47f1e;
+  --button-whatsapp-hover-text: #21ba59;
+  --button-website-hover-text: #1e4fd4;
+  --button-x-hover-text: #000000;
+  --button-github-hover-text: #501daf;
+  --button-gdg-community-hover-text: #4285f4;
+}
+
+/* Toasts */
+:root {
+  --toast-success-bg: #4caf50;
+  --toast-error-bg: #f44336;
+  --toast-info-bg: #2196f3;
+}
+
+/* Base */
+:root {
+  /* Global Error page */
+  --global-error-bg: #f8d7da;
+  --global-error-text: #721c24;
+
+  /* Loading page */
+  --loading-border: var(--spinner-border-color);
+  --loading-border-top: var(--spinner-border-top-color);
+  --loading-text: #eeeeee;
+
+  /* Not Found page */
+  --not-found-bg: var(--google-super-light-gray);
+  --not-found-title-text: #333333;
+  --not-found-message-text: #666666;
+}
+
+/* Settings */
+:root {
+  /* Settings page */
+  --settings-experiment-sub: #555;
+  --settings-chip-bg: color-mix(in srgb, var(--google-blue) 10%, transparent);
+  --settings-chip-text: var(--google-blue);
+  --settings-chip-disabled-bg: color-mix(in srgb, var(--google-red) 10%, transparent);
+  --settings-chip-disabled-text: var(--google-red);
+  --settings-input-error: var(--google-error-red);
+  --settings-preview-box-border: #cccccc;
+  --settings-preview-box-border-accent: color-mix(in srgb, var(--google-blue) 75%, transparent);
+  --settings-socials-meta-text: var(--google-light-gray);
+
+  /* Settings sidebar */
+  --settings-sidebar-container-bg: var(--background);
+  --settings-sidebar-chip-bg-active: var(--google-blue);
+  --settings-sidebar-chip-bg-inactive: #e1ecfb;
+  --settings-sidebar-chip-text-active: var(--color-white);
+  --settings-sidebar-chip-text-inactive: var(--google-blue);
+  --settings-sidebar-item-bg-active: color-mix(in srgb, var(--google-blue) 10%, transparent);
+  --settings-sidebar-item-text-active: var(--google-blue);
+  --settings-sidebar-item-text-inactive: var(--google-dark-gray);
+  --settings-sidebar-item-bg-hover-active: color-mix(in srgb, var(--google-blue) 14%, transparent);
+  --settings-sidebar-item-bg-hover-inactive: rgba(60, 64, 67, 0.08);
+  --settings-sidebar-item-icon-text-active: var(--google-blue);
+  --settings-sidebar-item-icon-text-inactive: var(--google-light-gray);
+}
+
+/* Auth */
+:root {
+  --auth-layout-bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  /* Auth Error page */
+  --auth-error-title-text: var(--google-red);
+  --auth-error-bg: var(--google-error-bg);
+  --auth-error-text: var(--google-error-red);
+  --auth-error-border: var(--google-error-bg);
+  --auth-error-description-text: var(--google-light-gray);
+  --auth-error-primary-button-bg: var(--google-blue);
+  --auth-error-primary-button-bg-hover: #1557b0;
+  --auth-error-primary-button-shadow: color-mix(in srgb, var(--google-blue) 20%, transparent);
+  --auth-error-secondary-button-border: var(--google-extra-light-gray);
+  --auth-error-secondary-button-text: var(--google-dark-gray);
+  --auth-error-secondary-button-hover-border: var(--google-blue);
+
+  /* Auth Login page */
+  --auth-login-title-text: #202124;
+  --auth-login-subtitle-text: var(--google-light-gray);
+  --auth-login-button-border: var(--google-extra-light-gray);
+  --auth-login-button-text: var(--google-dark-gray);
+  --auth-login-button-bg: var(--color-white);
+  --auth-login-button-border-hover: var(--google-blue);
+  --auth-login-button-shadow: color-mix(in srgb, var(--google-blue) 20%, transparent);
+  --auth-login-button-border-disabled-hover: var(--google-extra-light-gray);
+  --auth-login-loading-spinner-border: var(--spinner-border-color);
+  --auth-login-loading-spinner-border-top: var(--spinner-border-top-color);
+  --auth-login-error-bg: var(--google-error-bg);
+  --auth-login-error-text: var(--google-error-red);
+  --auth-login-error-border: var(--google-error-bg);
+
+  /* Auth Logout page */
+  --auth-logout-title-text: #202124;
+  --auth-logout-subtitle-text: var(--google-light-gray);
+  --auth-logout-button-bg: var(--google-red);
+  --auth-logout-button-text: var(--color-white);
+  --auth-logout-button-bg-hover: #d33b2c;
+  --auth-logout-button-shadow: color-mix(in srgb, var(--google-red) 20%, transparent);
+  --auth-logout-button-bg-disabled-hover: var(--google-red);
+  --auth-logout-loading-spinner-border: var(--spinner-border-color);
+  --auth-logout-loading-spinner-border-top: var(--spinner-border-top-color);
+  --auth-logout-cancel-button-bg: var(--color-white);
+  --auth-logout-cancel-button-text: var(--google-dark-gray);
+  --auth-logout-cancel-button-border: var(--google-extra-light-gray);
+  --auth-logout-cancel-button-border-hover: var(--google-blue);
+  --auth-logout-cancel-button-text-hover: var(--google-blue);
+  --auth-logout-cancel-button-shadow: color-mix(in srgb, var(--google-blue) 20%, transparent);
+  --auth-logout-user-info-bg: var(--google-super-light-gray);
+  --auth-logout-user-info-name-text: #202124;
+  --auth-logout-user-info-email-text: var(--google-light-gray);
+}
+
+/* Navbar */
+:root {
+  /* User Menu */
+  --navbar-user-menu-link-text: var(--google-light-gray);
+  --navbar-user-menu-logout-text: var(--google-red);
+
+  /* Language Switcher */
+  --navbar-language-switcher-dropdown-arrow-text: #888888;
+
+  /* Translation Banner */
+  --navbar-translation-banner-bg: #fff8e1;
+  --navbar-translation-banner-text: #8a6d3b;
+  --navbar-translation-banner-bar-bg: #f6e7b5;
+  --navbar-translation-banner-bar-fill-bg: linear-gradient(90deg, var(--google-yellow), #f9a825);
+
+  /* Navbar component */
+  /* Top bar */
+  --navbar-bar-bg: var(--color-white);
+  --navbar-bar-text: #202124;
+  --navbar-bar-border-bottom: color-mix(in srgb, var(--color-black) 6%, transparent);
+  --navbar-bar-shadow: 0 1px 2px color-mix(in srgb, var(--color-black) 6%, transparent);
+
+  /* Mobile menu panel */
+  --navbar-mobile-bg: var(--color-white);
+  --navbar-mobile-border-bottom: color-mix(in srgb, var(--color-black) 6%, transparent);
+  --navbar-mobile-shadow: 0 1px 2px color-mix(in srgb, var(--color-black) 6%, transparent);
+
+  /* Mobile overlay */
+  --navbar-overlay-bg: color-mix(in srgb, var(--color-black) 50%, transparent);
+
+  /* Nav link base */
+  --navbar-link-text: var(--google-dark-gray);
+  --navbar-link-bg-hover-default: color-mix(in srgb, var(--google-dark-gray) 12%, transparent);
+
+  /* Nav link text (active per route) */
+  --navbar-link-text-active-root: var(--google-blue);
+  --navbar-link-text-active-events: var(--google-red);
+  --navbar-link-text-active-newsletter: var(--google-yellow);
+  --navbar-link-text-active-blog: var(--google-blue);
+  --navbar-link-text-active-about: var(--google-green);
+  --navbar-link-text-active-contact: var(--google-red);
+
+  /* Nav link backgrounds (active per route) */
+  --navbar-link-bg-active-root: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-root) 10%,
+    transparent
+  );
+  --navbar-link-bg-active-events: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-events) 10%,
+    transparent
+  );
+  --navbar-link-bg-active-newsletter: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-newsletter) 10%,
+    transparent
+  );
+  --navbar-link-bg-active-blog: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-blog) 10%,
+    transparent
+  );
+  --navbar-link-bg-active-about: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-about) 10%,
+    transparent
+  );
+  --navbar-link-bg-active-contact: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-contact) 10%,
+    transparent
+  );
+
+  /* Nav link backgrounds (hover when active per route) */
+  --navbar-link-bg-hover-active-root: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-root) 14%,
+    transparent
+  );
+  --navbar-link-bg-hover-active-events: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-events) 14%,
+    transparent
+  );
+  --navbar-link-bg-hover-active-newsletter: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-newsletter) 14%,
+    transparent
+  );
+  --navbar-link-bg-hover-active-blog: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-blog) 14%,
+    transparent
+  );
+  --navbar-link-bg-hover-active-about: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-about) 14%,
+    transparent
+  );
+  --navbar-link-bg-hover-active-contact: color-mix(
+    in srgb,
+    var(--navbar-link-text-active-contact) 14%,
+    transparent
+  );
+
+  /* Language button */
+  --navbar-lang-button-text: var(--google-dark-gray);
+  --navbar-lang-button-bg-hover: color-mix(in srgb, var(--google-dark-gray) 8%, transparent);
+
+  /* Language menu (dropdown) */
+  --navbar-lang-menu-bg: var(--color-white);
+  --navbar-lang-menu-border: color-mix(in srgb, var(--color-black) 8%, transparent);
+  --navbar-lang-menu-shadow: 0 6px 18px color-mix(in srgb, var(--color-black) 12%, transparent);
+
+  /* Language menu item */
+  --navbar-lang-item-text: var(--google-dark-gray);
+  --navbar-lang-item-bg-hover: color-mix(in srgb, var(--google-dark-gray) 8%, transparent);
+  --navbar-lang-item-bg-disabled: #f3f4f6;
+  --navbar-lang-item-text-disabled: #9ca3af;
+
+  /* Language search input */
+  --navbar-search-input-border: color-mix(in srgb, var(--color-black) 12%, transparent);
+  --navbar-search-input-focus-border: var(--google-blue);
+  --navbar-search-input-focus-ring: 0 0 0 3px
+    color-mix(in srgb, var(--google-blue) 12%, transparent);
+
+  /* AI language status icons */
+  --navbar-ai-available-icon: #16a34a; /* green-600 */
+  --navbar-ai-spinner-icon: #f59e0b; /* amber-500 */
+
+  /* Avatar button */
+  --navbar-avatar-bg-hover: color-mix(in srgb, var(--google-dark-gray) 8%, transparent);
+  --navbar-avatar-focus-ring: 0 0 0 3px color-mix(in srgb, var(--google-blue) 35%, transparent);
+
+  /* User menu divider */
+  --navbar-user-divider-bg: color-mix(in srgb, var(--color-black) 8%, transparent);
+
+  /* User menu popup */
+  --navbar-user-menu-bg: var(--color-white);
+  --navbar-user-menu-border: color-mix(in srgb, var(--color-black) 8%, transparent);
+  --navbar-user-menu-shadow: 0 6px 18px color-mix(in srgb, var(--color-black) 12%, transparent);
+
+  /* User menu item */
+  --navbar-user-menu-item-text: var(--google-dark-gray);
+  --navbar-user-menu-item-bg-hover: color-mix(in srgb, var(--google-dark-gray) 8%, transparent);
+  --navbar-user-menu-item-bg-focus: color-mix(in srgb, var(--google-dark-gray) 12%, transparent);
+}
+
+/* Footer */
+:root {
+  --footer-bg: var(--background);
+  --footer-text: var(--google-dark-gray);
+  --footer-wrapper-border-top: color-mix(in srgb, var(--color-black) 6%, transparent);
+  --footer-wrapper-shadow: color-mix(in srgb, var(--color-black) 6%, transparent);
+  --footer-title-text: #202124;
+  --footer-link-text: var(--google-dark-gray);
+  --footer-disclaimer-text: var(--google-light-gray);
+  --footer-copyright-border-top: color-mix(in srgb, var(--color-black) 6%, transparent);
+  --footer-copyright-text: var(--google-light-gray);
+}
+
+/* Markdown */
+:root {
+  /* Base */
+  --markdown-base-text: #222222;
+  --markdown-heading-text: #111111;
+  --markdown-h2-border: #eeeeee;
+
+  /* Links */
+  --markdown-link: #0b6bcb;
+  --markdown-link-hover: #094f94;
+
+  /* Inline code */
+  --markdown-inline-code-bg: #f6f8fa;
+  --markdown-inline-code-border: #e6e8eb;
+
+  /* Code blocks */
+  --markdown-code-bg: #0f172a;
+  --markdown-code-text: #e5e7eb;
+  --markdown-code-border: #0b1223;
+
+  /* Syntax highlighting */
+  --markdown-hl-comment: var(--color-gray-400);
+  --markdown-hl-keyword: #7dd3fc;
+  --markdown-hl-literal: #c4b5fd;
+  --markdown-hl-number: #fca5a5;
+  --markdown-hl-string: #86efac;
+  --markdown-hl-title: #fde68a;
+  --markdown-hl-built-in: #93c5fd;
+  --markdown-hl-attribute: #f9a8d4;
+  --markdown-hl-params: var(--color-gray-50);
+
+  /* Blockquote */
+  --markdown-blockquote-border: #e0e7ff;
+  --markdown-blockquote-bg: var(--color-gray-50);
+  --markdown-blockquote-text: var(--color-gray-700);
+
+  /* Tables */
+  --markdown-table-border: #e5e7eb;
+  --markdown-thead-bg: var(--color-gray-100);
+
+  /* HR */
+  --markdown-hr-border: #e5e7eb;
+
+  /* Callouts */
+  --markdown-callout-border: #e5e7eb;
+  --markdown-callout-left: var(--color-gray-400);
+  --markdown-callout-bg: var(--color-gray-50);
+  --markdown-callout-note-left: #60a5fa;
+  --markdown-callout-note-bg: #f0f9ff;
+  --markdown-callout-tip-left: #34d399;
+  --markdown-callout-tip-bg: #ecfdf5;
+  --markdown-callout-warning-left: #f59e0b;
+  --markdown-callout-warning-bg: #fffbeb;
+  --markdown-callout-danger-left: #ef4444;
+  --markdown-callout-danger-bg: #fef2f2;
+}
+
+/* Accessibility */
+:root[data-dyslexic-font] {
+  --font-body: "OpenDyslexic", "Atkinson Hyperlegible", "Lexend", var(--font-body);
+}
+:root[data-reduce-motion] * {
+  transition: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  animation-play-state: paused !important;
+  animation-fill-mode: both !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-contrast] {
+  body {
+    filter: contrast(2) saturate(1.25) brightness(1.05);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  img,
+  svg {
+    filter: contrast(0.5) saturate(0.8);
+  }
+}
+
+/* Other styles */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  margin: 0;
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  background: var(--color-gray-50);
+  flex: 1;
+  display: table;
+  height: max-content;
+}
+
+/* ===================== */
+/* Default Element Colors */
+/* ===================== */
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+  color: var(--markdown-heading-text, var(--color-black));
+}
+
+/* Links */
+a {
+  color: var(--markdown-link, var(--google-blue));
+  text-decoration: underline;
+}
+a:hover,
+a:focus {
+  color: var(--markdown-link-hover, var(--google-dark-gray));
+}
+
+a.intext {
+  color: var(--markdown-link, var(--google-blue));
+  text-decoration: none;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--markdown-link, var(--google-blue)), transparent 65%);
+  transition: border-bottom-color 0.2s ease-in-out;
+}
+a.intext:hover,
+a.intext:focus {
+  border-bottom-color: var(--blue);
+}
+
+/* Paragraph text */
+p {
+  color: var(--markdown-base-text, var(--foreground));
+}
+
+/* Lists */
+ul,
+ol {
+  color: var(--markdown-base-text, var(--foreground));
+}
+li::marker {
+  color: var(--google-blue);
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--markdown-blockquote-border, var(--color-gray-300));
+  background-color: var(--markdown-blockquote-bg, var(--color-gray-50));
+  color: var(--markdown-blockquote-text, var(--color-gray-700));
+}
+
+/* Code (inline) */
+code {
+  background-color: var(--markdown-inline-code-bg, var(--color-gray-100));
+  border: 1px solid var(--markdown-inline-code-border, var(--color-gray-200));
+  color: var(--google-red);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+/* Code blocks (pre) */
+pre {
+  background-color: var(--markdown-code-bg, var(--color-gray-900));
+  border: 1px solid var(--markdown-code-border, var(--color-gray-800));
+  color: var(--markdown-code-text, var(--color-gray-50));
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  color: var(--markdown-base-text, var(--foreground));
+}
+th,
+td {
+  border: 1px solid var(--markdown-table-border, var(--color-gray-300));
+  padding: 0.5rem;
+}
+thead {
+  background-color: var(--markdown-thead-bg, var(--color-gray-100));
+}
+th {
+  font-weight: bold;
+}
+
+/* Horizontal Rule */
+hr {
+  border: none;
+  border-top: 1px solid var(--markdown-hr-border, var(--color-gray-300));
+  margin: 2rem 0;
+}
+
+/* Forms */
+input,
+select,
+textarea {
+  border: 1px solid var(--google-extra-light-gray);
+  background-color: var(--color-white);
+  color: var(--foreground);
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--google-blue);
+  outline: none;
+}
+label {
+  color: var(--markdown-base-text, var(--foreground));
+}
+
+/* Buttons */
+button,
+input[type="submit"],
+input[type="button"] {
+  background-color: var(--button-default-bg);
+  color: var(--color-white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
+/* Alerts (generic HTML5) */
+.alert-success {
+  background-color: var(--toast-success-bg);
+  color: var(--color-white);
+}
+.alert-error {
+  background-color: var(--toast-error-bg);
+  color: var(--color-white);
+}
+.alert-info {
+  background-color: var(--toast-info-bg);
+  color: var(--color-white);
+}
+
+/* Figures & Captions */
+figure {
+  margin: 1rem 0;
+}
+figcaption {
+  color: var(--color-gray-500);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+/* Strong / Bold */
+strong,
+b {
+  color: var(--foreground);
+}
+
+/* Emphasis / Italic */
+em,
+i {
+  color: var(--foreground);
+}
+
+/* Address */
+address {
+  font-style: normal;
+  color: var(--color-gray-600);
+}
+
+/* Default selection highlight */
+::selection {
+  background: color-mix(in srgb, var(--google-blue) 75%, transparent);
+  color: var(--color-white);
+}
+
+/* Scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-400) transparent;
+}

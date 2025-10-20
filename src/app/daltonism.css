@@ -1,0 +1,91 @@
+/* Deuteranopia Palette (Red-Green Color Blindness) 
+* Green -> Blue (h +50) | Yellow -> Orange (h -15) */
+:root[data-deuteranopia] {
+  --google-yellow: hsl(30, 97%, 50%);
+  --google-green: hsl(186, 53%, 43%);
+  --button-success-bg: hsl(196, 79%, 44%);
+  --button-warning-bg: hsl(22, 91%, 55%);
+  --button-email-hover-text: hsl(17, 75%, 47%);
+  --button-whatsapp-hover-text: hsl(192, 70%, 43%);
+  --toast-success-bg: hsl(172, 39%, 49%);
+  --navbar-translation-banner-bg: hsl(31, 100%, 94%);
+  --navbar-translation-banner-text: hsl(23, 40%, 39%);
+  --navbar-translation-banner-bar-bg: hsl(31, 78%, 84%);
+  --navbar-translation-banner-bar-fill-bg: linear-gradient(
+    90deg,
+    var(--google-yellow),
+    hsl(22, 95%, 56%)
+  );
+  --navbar-ai-available-icon: hsl(192, 76%, 36%);
+  --navbar-ai-spinner-icon: hsl(23, 92%, 50%);
+  --markdown-hl-string: hsl(192, 77%, 73%);
+  --markdown-hl-title: hsl(33, 97%, 77%);
+  --markdown-callout-tip-left: hsl(208, 64%, 52%);
+  --markdown-callout-tip-bg: hsl(202, 81%, 96%);
+  --markdown-callout-warning-left: hsl(23, 92%, 50%);
+  --markdown-callout-warning-bg: hsl(33, 100%, 96%);
+}
+
+/* Protanopia Palette (Red-Green Color Blindness) 
+* Red -> Magenta (h +310) | Yellow -> Desaturated Yellow (s -20) */
+:root[data-protanopia] {
+  --google-red: hsl(315, 81%, 56%);
+  --google-yellow: hsl(45, 77%, 50%);
+  --google-error-red: hsl(314, 71%, 50%);
+  --button-warning-bg: hsl(37, 71%, 55%);
+  --button-danger-bg: hsl(289, 90%, 51%);
+  --button-instagram-hover-text: hsl(276, 57%, 48%);
+  --button-email-hover-text: hsl(32, 55%, 47%);
+  --toast-error-bg: hsl(314, 90%, 58%);
+  --global-error-text: hsl(304, 61%, 28%);
+  --auth-logout-button-bg-hover: hsl(315, 65%, 50%);
+  --navbar-translation-banner-bg: hsl(46, 80%, 94%);
+  --navbar-translation-banner-text: hsl(38, 20%, 39%);
+  --navbar-translation-banner-bar-bg: hsl(46, 58%, 84%);
+  --navbar-translation-banner-bar-fill-bg: linear-gradient(
+    90deg,
+    var(--google-yellow),
+    hsl(37, 75%, 56%)
+  );
+  --navbar-ai-spinner-icon: hsl(38, 72%, 50%);
+  --markdown-hl-number: hsl(310, 94%, 82%);
+  --markdown-hl-title: hsl(48, 77%, 77%);
+  --markdown-callout-warning-left: hsl(38, 72%, 50%);
+  --markdown-callout-warning-bg: hsl(48, 80%, 96%);
+  --markdown-callout-danger-left: hsl(310, 84%, 60%);
+  --markdown-callout-danger-bg: hsl(310, 86%, 97%);
+}
+
+/* Tritanopia Palette (Blue-Yellow Color Blindness) 
+ * Blue -> Purple (h +60) | Yellow -> Red (h -30) */
+:root[data-tritanopia] {
+  --google-blue: hsl(274, 82%, 51%);
+  --google-yellow: hsl(15, 97%, 50%);
+  --spinner-border-top-color: hsl(274, 82%, 51%);
+  --button-primary-bg: hsl(272, 100%, 47%);
+  --button-warning-bg: hsl(7, 91%, 55%);
+  --button-linkedin-hover-text: hsl(270, 90%, 40%);
+  --button-email-hover-text: hsl(2, 75%, 47%);
+  --button-gdg-community-hover-text: hsl(277, 89%, 61%);
+  --toast-info-bg: hsl(267, 90%, 54%);
+  --settings-sidebar-chip-bg-inactive: hsl(275, 76%, 93%);
+  --auth-error-primary-button-bg-hover: hsl(274, 79%, 39%);
+  --navbar-translation-banner-bg: hsl(16, 100%, 94%);
+  --navbar-translation-banner-text: hsl(8, 40%, 39%);
+  --navbar-translation-banner-bar-bg: hsl(16, 78%, 84%);
+  --navbar-translation-banner-bar-fill-bg: linear-gradient(
+    90deg,
+    var(--google-yellow),
+    hsl(7, 95%, 56%)
+  );
+  --navbar-ai-spinner-icon: hsl(8, 92%, 50%);
+  --markdown-link: hsl(270, 90%, 42%);
+  --markdown-link-hover: hsl(270, 89%, 31%);
+  --markdown-hl-keyword: hsl(259, 95%, 74%);
+  --markdown-hl-title: hsl(18, 97%, 77%);
+  --markdown-hl-built-in: hsl(272, 96%, 78%);
+  --markdown-callout-note-left: hsl(273, 94%, 68%);
+  --markdown-callout-note-bg: hsl(264, 100%, 97%);
+  --markdown-callout-warning-left: hsl(8, 92%, 50%);
+  --markdown-callout-warning-bg: hsl(18, 100%, 96%);
+}

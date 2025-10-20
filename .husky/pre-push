@@ -1,0 +1,7 @@
+echo "Running build check before push..."
+npm run next-build || {
+  echo "❌ Build failed. Push aborted."
+  exit 1
+}
+
+echo "✅ Build passed. Proceeding with push."
