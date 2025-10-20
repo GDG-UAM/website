@@ -5,7 +5,6 @@ import {
   deleteGiveaway,
   GiveawayInput
 } from "@/lib/controllers/giveawayController";
-import type { IGiveaway } from "@/lib/models/Giveaway";
 import { emitToRoom } from "@/lib/realtime/io";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -80,8 +79,8 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
     const curStartAt = current.startAt ? current.startAt.getTime() : null;
     const curDurationS = typeof current.durationS === "number" ? current.durationS : null;
     const curRemainingS =
-      typeof (current as IGiveaway & { remainingS?: number | null }).remainingS === "number"
-        ? (current as IGiveaway & { remainingS?: number | null }).remainingS!
+      typeof (current as unknown as { remainingS?: number | null }).remainingS === "number"
+        ? (current as unknown as { remainingS?: number | null }).remainingS
         : null;
 
     // Only enforce exclusivity if both timing fields are being changed in this request
@@ -178,7 +177,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
         startAt: updated.startAt,
         endAt: updated.endAt,
         durationS: updated.durationS,
-        remainingS: (updated as IGiveaway & { remainingS?: number | null }).remainingS ?? null
+        remainingS: (updated as unknown as { remainingS?: number | null }).remainingS ?? null
       } as Record<string, unknown>;
       emitToRoom(`giveaway:${id}`, "giveaway:config", payload);
       emitToRoom(`giveaway:${id}`, "giveaway:status", { id, status: updated.status });

@@ -168,7 +168,9 @@ export async function listUserActiveParticipations(userId: string): Promise<User
   const giveaways = await GiveawayModel.find({ _id: { $in: gIds } })
     .lean()
     .exec();
-  const gMap = new Map<string, IGiveaway>(giveaways.map((g) => [g._id.toString(), g as IGiveaway]));
+  const gMap = new Map<string, IGiveaway>(
+    giveaways.map((g) => [g._id.toString(), g as unknown as IGiveaway])
+  );
 
   const out: UserParticipation[] = [];
   for (const e of entries) {

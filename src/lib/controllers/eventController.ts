@@ -36,7 +36,7 @@ export async function createEvent(input: EventInput): Promise<IEvent> {
     slug,
     status: input.status || "draft"
   });
-  return event;
+  return event as IEvent;
 }
 
 /**
@@ -55,7 +55,7 @@ export async function updateEvent(id: string, input: Partial<EventInput>): Promi
   }
 
   const event = await Event.findByIdAndUpdate(id, update, { new: true, runValidators: true });
-  return event;
+  return event as IEvent | null;
 }
 
 /**
@@ -79,7 +79,7 @@ export async function getEventById(
   if (eventPublished && event && event.status !== "published") {
     return null;
   }
-  return event;
+  return event as IEvent | null;
 }
 
 /**
@@ -94,7 +94,7 @@ export async function getEventBySlug(
   if (eventPublished && event && event.status !== "published") {
     return null;
   }
-  return event;
+  return event as IEvent | null;
 }
 
 /**
@@ -141,5 +141,5 @@ export async function listEvents(params: {
     .limit(pageSize)
     .lean();
 
-  return { items, total, page, pageSize };
+  return { items: items as unknown as IEvent[], total, page, pageSize };
 }

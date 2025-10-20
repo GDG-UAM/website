@@ -57,7 +57,7 @@ export async function deleteLink(id: string): Promise<boolean> {
 export async function getLinkById(id: string): Promise<ILink | null> {
   await db.connect();
   const link = await Link.findById(id).lean();
-  return link;
+  return link as ILink | null;
 }
 
 /**
@@ -67,7 +67,7 @@ export async function getLinkBySlug(slug: string): Promise<ILink | null> {
   await db.connect();
   const normalizedSlug = toSlug(slug);
   const link = await Link.findOne({ slug: normalizedSlug }).lean();
-  return link;
+  return link as ILink | null;
 }
 
 /**
@@ -120,5 +120,5 @@ export async function listLinks(params?: {
     .limit(pageSize)
     .lean();
 
-  return { items, total, page, pageSize };
+  return { items: items as unknown as ILink[], total, page, pageSize };
 }
