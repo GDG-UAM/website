@@ -28,17 +28,58 @@ const Card = styled.div`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 `;
 
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    /* Show scrollbar hint on mobile */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+`;
+
 const Controls = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
   padding: 8px 0;
+
+  @media (max-width: 900px) {
+    /* Allow search field to take full width on smaller screens */
+    & > div:last-child {
+      flex: 1 1 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Stack all controls vertically on mobile */
+    & > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
   th,
   td {
     padding: 10px 6px;
@@ -47,6 +88,15 @@ const Table = styled.table`
   th {
     text-align: left;
     border-bottom-width: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 700px; /* Ensure table doesn't collapse on mobile */
+
+    td {
+      white-space: nowrap;
+    }
   }
 `;
 
@@ -159,61 +209,68 @@ function ArticleList({
             {search ? t("noResults") : t("noArticles")}
           </div>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th>{t("columns.title")}</th>
-                <th>{t("columns.status")}</th>
-                <th>{t("columns.views")}</th>
-                <th>{t("columns.published")}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r._id.toString()}>
-                  <td>
-                    <TitleCell>{r.title || ""}</TitleCell>
-                    <SlugCell>{r.slug}</SlugCell>
-                  </td>
-                  <td>
-                    {(() => {
-                      const key: ArticleStatus =
-                        r.status === "draft" || r.status === "published" || r.status === "url_only"
-                          ? (r.status as ArticleStatus)
-                          : "draft";
-                      const colors = {
-                        draft: "warning",
-                        published: "success",
-                        url_only: "secondary"
-                      } as const;
-                      return (
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          color={colors[key]}
-                          label={t(`status.${key}`)}
-                        />
-                      );
-                    })()}
-                  </td>
-                  <td>{r.views}</td>
-                  <td>{r.publishedAt ? new Date(r.publishedAt).toLocaleString() : "—"}</td>
-                  <td>
-                    <RowActions>
-                      <ViewButton onClick={() => onView(r._id.toString(), r.type)} iconSize={20} />
-                      <EditButton onClick={() => onEdit(r._id.toString())} iconSize={20} />
-                      <DeleteButton
-                        onClick={() => onDelete(r._id.toString())}
-                        confirmationDuration={3000}
-                        iconSize={20}
-                      />
-                    </RowActions>
-                  </td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <th>{t("columns.title")}</th>
+                  <th>{t("columns.status")}</th>
+                  <th>{t("columns.views")}</th>
+                  <th>{t("columns.published")}</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r._id.toString()}>
+                    <td>
+                      <TitleCell>{r.title || ""}</TitleCell>
+                      <SlugCell>{r.slug}</SlugCell>
+                    </td>
+                    <td>
+                      {(() => {
+                        const key: ArticleStatus =
+                          r.status === "draft" ||
+                          r.status === "published" ||
+                          r.status === "url_only"
+                            ? (r.status as ArticleStatus)
+                            : "draft";
+                        const colors = {
+                          draft: "warning",
+                          published: "success",
+                          url_only: "secondary"
+                        } as const;
+                        return (
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            color={colors[key]}
+                            label={t(`status.${key}`)}
+                          />
+                        );
+                      })()}
+                    </td>
+                    <td>{r.views}</td>
+                    <td>{r.publishedAt ? new Date(r.publishedAt).toLocaleString() : "—"}</td>
+                    <td>
+                      <RowActions>
+                        <ViewButton
+                          onClick={() => onView(r._id.toString(), r.type)}
+                          iconSize={20}
+                        />
+                        <EditButton onClick={() => onEdit(r._id.toString())} iconSize={20} />
+                        <DeleteButton
+                          onClick={() => onDelete(r._id.toString())}
+                          confirmationDuration={3000}
+                          iconSize={20}
+                        />
+                      </RowActions>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Card>
 

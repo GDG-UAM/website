@@ -27,17 +27,58 @@ const Card = styled.div`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 `;
 
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    /* Show scrollbar hint on mobile */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+`;
+
 const Controls = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
   padding: 8px 0;
+
+  @media (max-width: 900px) {
+    /* Allow search field to take full width on smaller screens */
+    & > div:last-child {
+      flex: 1 1 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Stack all controls vertically on mobile */
+    & > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
   th,
   td {
     padding: 10px 6px;
@@ -46,6 +87,15 @@ const Table = styled.table`
   th {
     text-align: left;
     border-bottom-width: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 800px; /* Ensure table doesn't collapse on mobile */
+
+    td {
+      white-space: nowrap;
+    }
   }
 `;
 
@@ -187,67 +237,69 @@ export function LinkList({
             {search ? "No links match your search" : "No links yet. Create one to get started!"}
           </div>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th>Slug</th>
-                <th>Title</th>
-                <th>Destination</th>
-                <th>Status</th>
-                <th>Clicks</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.map((row) => (
-                <tr key={row._id}>
-                  <td>
-                    <MonoText>/{row.slug}</MonoText>
-                  </td>
-                  <td>
-                    <strong>{row.title}</strong>
-                    {row.description && (
-                      <div style={{ fontSize: "0.85rem", color: "#666", marginTop: "2px" }}>
-                        {row.description}
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    <LinkDestination href={row.destination} target="_blank" rel="noopener">
-                      {row.destination}
-                    </LinkDestination>
-                  </td>
-                  <td>
-                    <Chip
-                      label={row.isActive ? "Active" : "Inactive"}
-                      color={row.isActive ? "success" : "default"}
-                      size="small"
-                    />
-                  </td>
-                  <td style={{ textAlign: "right" }}>{row.clicks.toLocaleString()}</td>
-                  <td>
-                    <Actions>
-                      <CopyButton
-                        content={`${typeof window !== "undefined" ? window.location.origin : ""}/link/${row.slug}`}
-                        ariaLabel="Copy link URL"
-                        iconSize={20}
-                      />
-                      <EditButton
-                        onClick={() => onEdit(row._id)}
-                        ariaLabel="Edit link"
-                        iconSize={20}
-                      />
-                      <DeleteButton
-                        onClick={() => handleDelete(row._id, row.slug)}
-                        ariaLabel="Delete link"
-                        iconSize={20}
-                      />
-                    </Actions>
-                  </td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Slug</th>
+                  <th>Title</th>
+                  <th>Destination</th>
+                  <th>Status</th>
+                  <th>Clicks</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {filteredRows.map((row) => (
+                  <tr key={row._id}>
+                    <td>
+                      <MonoText>/{row.slug}</MonoText>
+                    </td>
+                    <td>
+                      <strong>{row.title}</strong>
+                      {row.description && (
+                        <div style={{ fontSize: "0.85rem", color: "#666", marginTop: "2px" }}>
+                          {row.description}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <LinkDestination href={row.destination} target="_blank" rel="noopener">
+                        {row.destination}
+                      </LinkDestination>
+                    </td>
+                    <td>
+                      <Chip
+                        label={row.isActive ? "Active" : "Inactive"}
+                        color={row.isActive ? "success" : "default"}
+                        size="small"
+                      />
+                    </td>
+                    <td style={{ textAlign: "right" }}>{row.clicks.toLocaleString()}</td>
+                    <td>
+                      <Actions>
+                        <CopyButton
+                          content={`${typeof window !== "undefined" ? window.location.origin : ""}/link/${row.slug}`}
+                          ariaLabel="Copy link URL"
+                          iconSize={20}
+                        />
+                        <EditButton
+                          onClick={() => onEdit(row._id)}
+                          ariaLabel="Edit link"
+                          iconSize={20}
+                        />
+                        <DeleteButton
+                          onClick={() => handleDelete(row._id, row.slug)}
+                          ariaLabel="Delete link"
+                          iconSize={20}
+                        />
+                      </Actions>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Card>
 

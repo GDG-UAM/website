@@ -33,17 +33,58 @@ const Card = styled.div`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 `;
 
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    /* Show scrollbar hint on mobile */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+`;
+
 const Controls = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
   padding: 8px 0;
+
+  @media (max-width: 900px) {
+    /* Allow search field to take full width on smaller screens */
+    & > div:last-child {
+      flex: 1 1 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Stack all controls vertically on mobile */
+    & > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+
   th,
   td {
     padding: 10px 6px;
@@ -52,6 +93,15 @@ const Table = styled.table`
   th {
     text-align: left;
     border-bottom-width: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 700px; /* Ensure table doesn't collapse on mobile */
+
+    td {
+      white-space: nowrap;
+    }
   }
 `;
 
@@ -265,69 +315,71 @@ export function EventList({
               : t("noEvents")}
           </div>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th>{t("columns.title")}</th>
-                <th>{t("columns.date")}</th>
-                <th>{t("columns.status")}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.map((r) => (
-                <tr key={r._id}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{r.title}</div>
-                    <div style={{ color: "#6b7280", fontSize: 12 }}>/{r.slug}</div>
-                  </td>
-                  <td>
-                    <LocalTime iso={r.date} dateOnly={false} />
-                  </td>
-                  <td>
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      color={r.status === "published" ? "success" : "warning"}
-                      label={t(`status.${r.status}`)}
-                    />
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                      {/* View action (public or admin detail) */}
-                      <ViewButton
-                        onClick={() =>
-                          onView ? onView(r.slug) : router.push(`/admin/events/${r.slug}`)
-                        }
-                        iconSize={20}
-                      />
-                      {r.status === "draft" ? (
-                        <AcceptButton
-                          ariaLabel={t("actions.publish", { defaultValue: "Publicar" })}
-                          onClick={() => toggleStatus(r._id, "published")}
-                          iconSize={20}
-                          confirmationDuration={1000}
-                        />
-                      ) : (
-                        <HideButton
-                          ariaLabel={t("actions.unpublish", { defaultValue: "Despublicar" })}
-                          onClick={() => toggleStatus(r._id, "draft")}
-                          iconSize={20}
-                          confirmationDuration={1000}
-                        />
-                      )}
-                      <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
-                      <DeleteButton
-                        onClick={() => onDelete(r._id)}
-                        confirmationDuration={3000}
-                        iconSize={20}
-                      />
-                    </div>
-                  </td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <th>{t("columns.title")}</th>
+                  <th>{t("columns.date")}</th>
+                  <th>{t("columns.status")}</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {filteredRows.map((r) => (
+                  <tr key={r._id}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{r.title}</div>
+                      <div style={{ color: "#6b7280", fontSize: 12 }}>/{r.slug}</div>
+                    </td>
+                    <td>
+                      <LocalTime iso={r.date} dateOnly={false} />
+                    </td>
+                    <td>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color={r.status === "published" ? "success" : "warning"}
+                        label={t(`status.${r.status}`)}
+                      />
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                        {/* View action (public or admin detail) */}
+                        <ViewButton
+                          onClick={() =>
+                            onView ? onView(r.slug) : router.push(`/admin/events/${r.slug}`)
+                          }
+                          iconSize={20}
+                        />
+                        {r.status === "draft" ? (
+                          <AcceptButton
+                            ariaLabel={t("actions.publish", { defaultValue: "Publicar" })}
+                            onClick={() => toggleStatus(r._id, "published")}
+                            iconSize={20}
+                            confirmationDuration={1000}
+                          />
+                        ) : (
+                          <HideButton
+                            ariaLabel={t("actions.unpublish", { defaultValue: "Despublicar" })}
+                            onClick={() => toggleStatus(r._id, "draft")}
+                            iconSize={20}
+                            confirmationDuration={1000}
+                          />
+                        )}
+                        <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
+                        <DeleteButton
+                          onClick={() => onDelete(r._id)}
+                          confirmationDuration={3000}
+                          iconSize={20}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Card>
 

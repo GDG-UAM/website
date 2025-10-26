@@ -49,9 +49,10 @@ type FeatureFlag = {
 };
 
 const Container = styled.div`
-  padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  overflow-x: hidden; /* Prevent horizontal overflow */
 `;
 
 const Header = styled.div`
@@ -70,6 +71,24 @@ const Controls = styled.div`
   align-items: center;
   flex-wrap: wrap;
   padding: 8px 0;
+
+  @media (max-width: 900px) {
+    /* Allow search field to take full width on smaller screens */
+    & > div:last-child {
+      flex: 1 1 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Stack all controls vertically on mobile */
+    & > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
 `;
 
 const Card = styled.div`
@@ -78,6 +97,29 @@ const Card = styled.div`
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  max-width: 100%; /* Prevent card from exceeding container */
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    /* Show scrollbar hint on mobile */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
 `;
 
 const Table = styled.table`
@@ -97,6 +139,15 @@ const Table = styled.table`
     color: #374151;
     font-weight: 600;
     border-bottom-width: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 800px; /* Ensure table doesn't collapse on mobile */
+
+    td {
+      white-space: nowrap;
+    }
   }
 `;
 
@@ -423,54 +474,56 @@ export default function FeatureFlagsAdminPage() {
               : "No feature flags yet. Create one to get started!"}
           </div>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <th>{t("table.key")}</th>
-                <th style={{ width: 200 }}>{t("table.name")}</th>
-                <th>{t("table.description")}</th>
-                <th>{t("table.env")}</th>
-                <th>{t("table.rollout")}</th>
-                <th>{t("table.active")}</th>
-                <th>{t("table.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((f) => (
-                <tr key={`${f.key}-${f.environment}`}>
-                  <td>
-                    <MonoText>{f.key}</MonoText>
-                  </td>
-                  <td>{f.name}</td>
-                  <td style={{ color: "#374151" }}>{f.description || "—"}</td>
-                  <td>
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      color={f.environment === "production" ? "success" : "warning"}
-                      label={t(`env.${f.environment}`)}
-                    />
-                  </td>
-                  <td>{f.rolloutPercentage}</td>
-                  <td>
-                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                      <Checkbox checked={f.isActive} disabled />
-                      <span>{f.isActive ? t("status.on") : t("status.off")}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <EditButton
-                        onClick={() => setModal({ type: "edit", flag: f })}
-                        iconSize={20}
-                      />
-                      <DeleteButton onClick={() => remove(f)} iconSize={20} />
-                    </div>
-                  </td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <th>{t("table.key")}</th>
+                  <th style={{ width: 200 }}>{t("table.name")}</th>
+                  <th>{t("table.description")}</th>
+                  <th>{t("table.env")}</th>
+                  <th>{t("table.rollout")}</th>
+                  <th>{t("table.active")}</th>
+                  <th>{t("table.actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {items.map((f) => (
+                  <tr key={`${f.key}-${f.environment}`}>
+                    <td>
+                      <MonoText>{f.key}</MonoText>
+                    </td>
+                    <td>{f.name}</td>
+                    <td style={{ color: "#374151" }}>{f.description || "—"}</td>
+                    <td>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color={f.environment === "production" ? "success" : "warning"}
+                        label={t(`env.${f.environment}`)}
+                      />
+                    </td>
+                    <td>{f.rolloutPercentage}</td>
+                    <td>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <Checkbox checked={f.isActive} disabled />
+                        <span>{f.isActive ? t("status.on") : t("status.off")}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <EditButton
+                          onClick={() => setModal({ type: "edit", flag: f })}
+                          iconSize={20}
+                        />
+                        <DeleteButton onClick={() => remove(f)} iconSize={20} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Card>
 
