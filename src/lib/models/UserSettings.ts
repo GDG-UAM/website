@@ -23,6 +23,7 @@ export interface IUserSettings extends Document {
     x?: string;
     instagram?: string;
     website?: string;
+    customTags?: Array<"founder" | "president" | "vice-president" | "treasurer" | "secretary">;
   };
   privacy: {
     showAttendance: boolean;
@@ -78,7 +79,12 @@ const UserSettingsSchema = new Schema<IUserSettings>(
       linkedin: String,
       x: String,
       instagram: String,
-      website: String
+      website: String,
+      customTags: {
+        type: [String],
+        enum: ["founder", "president", "vice-president", "treasurer", "secretary"],
+        default: []
+      }
     },
     privacy: {
       showAttendance: { type: Boolean, default: false },

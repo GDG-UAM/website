@@ -4,6 +4,8 @@ export type UserProfileDTO = {
   image?: string;
   bio?: string;
   isPrivate?: boolean;
+  role?: "user" | "team" | "admin";
+  customTags?: Array<"founder" | "president" | "vice-president" | "treasurer" | "secretary">;
   socials: {
     website?: string;
     github?: string;

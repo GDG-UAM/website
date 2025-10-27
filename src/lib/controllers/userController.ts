@@ -14,6 +14,7 @@ type PublicSettingsProfile = {
     x?: string;
     instagram?: string;
     website?: string;
+    customTags?: Array<"founder" | "president" | "vice-president" | "treasurer" | "secretary">;
   };
 } | null;
 
@@ -330,6 +331,38 @@ export async function updateUserRole(
   return { ok: true };
 }
 
+/** Update custom profile tags for a user (admin only) */
+export async function updateUserCustomTags(
+  userId: string,
+  customTags: Array<"founder" | "president" | "vice-president" | "treasurer" | "secretary">,
+  opts: { requesterRole: "user" | "team" | "admin"; requesterEmail?: string | null }
+): Promise<{ ok: true }> {
+  await db.connect();
+
+  const assoc = config.associationEmail?.toLowerCase();
+  const requesterIsAssoc = assoc && (opts.requesterEmail || "").toLowerCase() === assoc;
+
+  // Only admins or association email can modify custom tags
+  if (opts.requesterRole !== "admin" && !requesterIsAssoc) {
+    const err: ErrorWithStatus = new Error("Forbidden");
+    err.status = 403;
+    throw err;
+  }
+
+  const user = await User.findById(userId);
+  if (!user) throw new Error("NotFound");
+
+  const settings = await UserSettings.findOneAndUpdate(
+    { userId: user._id },
+    { $set: { "profile.customTags": customTags } },
+    { new: true, upsert: true }
+  );
+
+  if (!settings) throw new Error("Failed to update custom tags");
+
+  return { ok: true };
+}
+
 /** Set or update the user's data export cooldown timestamp */
 export async function setUserDataExportCooldown(userId: string, until: Date) {
   await db.connect();
@@ -358,6 +391,8 @@ export type PublicUserProfile = {
   bio?: string;
   /** Whether the user's profile is private (showProfilePublicly === false) */
   isPrivate: boolean;
+  role?: "user" | "team" | "admin";
+  customTags?: Array<"founder" | "president" | "vice-president" | "treasurer" | "secretary">;
   socials: {
     instagram?: string;
     linkedin?: string;
@@ -378,13 +413,16 @@ export async function getPublicUserProfile(
 ): Promise<PublicUserProfile | null> {
   await db.connect();
 
-  type LeanUserPublic = Pick<IUser, "name" | "displayName" | "image" | "showProfilePublicly"> & {
+  type LeanUserPublic = Pick<
+    IUser,
+    "name" | "displayName" | "image" | "showProfilePublicly" | "role"
+  > & {
     _id: unknown;
   };
   let user: LeanUserPublic | null = null;
   try {
     user = (await User.findById(id)
-      .select("name displayName image showProfilePublicly")
+      .select("name displayName image showProfilePublicly role")
       .lean()) as LeanUserPublic | null;
   } catch {
     return null;
@@ -394,7 +432,7 @@ export async function getPublicUserProfile(
 
   const settings = (await UserSettings.findOne({ userId: user._id })
     .select(
-      "profile.shortBio profile.github profile.linkedin profile.x profile.instagram profile.website"
+      "profile.shortBio profile.github profile.linkedin profile.x profile.instagram profile.website profile.customTags"
     )
     .lean()) as PublicSettingsProfile;
 
@@ -405,6 +443,8 @@ export async function getPublicUserProfile(
     image: user.image || undefined,
     bio: settings?.profile?.shortBio,
     isPrivate: user.showProfilePublicly === false,
+    role: user.role,
+    customTags: settings?.profile?.customTags,
     socials: {
       instagram: settings?.profile?.instagram,
       linkedin: settings?.profile?.linkedin,
