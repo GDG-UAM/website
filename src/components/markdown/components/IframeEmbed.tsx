@@ -14,22 +14,22 @@ type IframeEmbedProps = {
 const Container = styled.div`
   width: 100%;
   margin: 1em 0;
-  border: 1px solid var(--markdown-table-border, #e5e7eb);
-  border-radius: 8px;
+  border: 2px solid var(--color-gray-300);
+  border-radius: 12px;
   overflow: hidden;
   background: var(--color-white, #fff);
 `;
 
 const TitleBar = styled.div`
   padding: 8px 12px;
-  background: var(--markdown-thead-bg, #f9fafb);
-  border-bottom: 1px solid var(--markdown-table-border, #e5e7eb);
+  background: var(--markdown-thead-bg);
+  border-bottom: 1px solid var(--color-gray-300);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: var(--markdown-base-text, #374151);
+  color: var(--markdown-base-text);
 
   @media (min-width: 768px) {
     flex-wrap: nowrap;
@@ -69,7 +69,7 @@ const FaviconPlaceholder = styled.div`
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  background: var(--markdown-inline-code-border, #d1d5db);
+  background: var(--markdown-inline-code-border);
   border-radius: 2px;
 `;
 
@@ -88,12 +88,12 @@ const URLBar = styled.a`
   width: 100%;
   flex-basis: 100%;
   padding: 4px 12px;
-  background: var(--color-white, #fff);
-  border: 1px solid var(--markdown-table-border, #e5e7eb);
-  border-bottom: 1px solid var(--markdown-table-border, #e5e7eb) !important;
+  background: var(--color-white);
+  border: 1px solid var(--markdown-table-border);
+  border-bottom: 1px solid var(--markdown-table-border) !important;
   border-radius: 16px;
   font-size: 0.85rem;
-  color: var(--markdown-base-text, #6b7280);
+  color: var(--markdown-base-text);
   text-decoration: none;
   white-space: nowrap;
   overflow: hidden;
@@ -103,8 +103,8 @@ const URLBar = styled.a`
   order: 3;
 
   &:hover {
-    background: var(--markdown-callout-bg, #f9fafb);
-    border-color: var(--markdown-inline-code-border, #d1d5db);
+    background: var(--markdown-callout-bg);
+    border-color: var(--markdown-inline-code-border);
   }
 
   @media (min-width: 768px) {
@@ -128,7 +128,7 @@ const RightSection = styled.div`
   flex-shrink: 0;
 
   &:hover {
-    background: var(--markdown-callout-bg, #e5e7eb);
+    background: var(--markdown-callout-bg);
   }
 
   @media (min-width: 768px) {
@@ -183,8 +183,8 @@ const LoadingOverlay = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--markdown-callout-bg, #f9fafb);
-  color: var(--markdown-base-text, #6b7280);
+  background: var(--markdown-callout-bg);
+  color: var(--markdown-base-text);
   font-size: 0.9rem;
 `;
 
