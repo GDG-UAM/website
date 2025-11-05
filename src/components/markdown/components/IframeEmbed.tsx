@@ -20,10 +20,10 @@ const Container = styled.div`
   background: var(--color-white, #fff);
 `;
 
-const TitleBar = styled.div`
+const TitleBar = styled.div<{ $showBorder: boolean }>`
   padding: 8px 12px;
   background: var(--markdown-thead-bg);
-  border-bottom: 1px solid var(--color-gray-300);
+  border-bottom: ${({ $showBorder }) => ($showBorder ? "1px solid var(--color-gray-300)" : "none")};
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -127,12 +127,12 @@ const RightSection = styled.div`
   order: 2;
   flex-shrink: 0;
 
-  &:hover {
-    background: var(--markdown-callout-bg);
-  }
-
   @media (min-width: 768px) {
     order: 3;
+
+    &:hover {
+      background: var(--markdown-callout-bg);
+    }
   }
 `;
 
@@ -142,13 +142,8 @@ const BrowserButton = styled.button`
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
   padding: 0;
   flex-shrink: 0;
-
-  &:hover {
-    transform: scale(1.1);
-  }
 `;
 
 const MinimizeButton = styled(BrowserButton)`
@@ -197,6 +192,7 @@ export default function IframeEmbed({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [showBorder, setShowBorder] = useState(true);
   const [fetchedTitle, setFetchedTitle] = useState<string | null>(null);
 
   // Check if URL is valid
@@ -259,7 +255,17 @@ export default function IframeEmbed({
   };
 
   const toggleCollapse = () => {
-    setCollapsed(!collapsed);
+    if (!collapsed) {
+      // Collapsing: hide border after animation completes
+      setCollapsed(true);
+      setTimeout(() => {
+        setShowBorder(false);
+      }, 300); // Match the IframeWrapper transition duration
+    } else {
+      // Expanding: show border immediately
+      setShowBorder(true);
+      setCollapsed(false);
+    }
   };
 
   const handleURLClick = (e: React.MouseEvent) => {
@@ -270,7 +276,7 @@ export default function IframeEmbed({
   return (
     <Container>
       {showTitleBar && (
-        <TitleBar>
+        <TitleBar $showBorder={showBorder}>
           <TopRow>
             <LeftSection>
               {faviconUrl ? (
