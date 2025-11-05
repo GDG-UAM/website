@@ -87,6 +87,25 @@ function renderSeeMoreButton(href: string, text?: string, label?: string): strin
   return ret;
 }
 
+// Helper to render iframe embed HTML
+function renderIframeEmbed(
+  url: string,
+  height?: string,
+  title?: string,
+  showTitleBar?: string
+): string {
+  const safeUrl = escapeHtml(url);
+  const safeHeight = height ? escapeHtml(height) : "450";
+  const safeShowTitleBar = showTitleBar === "false" ? "false" : "true";
+  let ret = `<embedweb data-url="${safeUrl}" data-height="${safeHeight}" data-show-title-bar="${safeShowTitleBar}"`;
+  if (title && title.trim()) {
+    const safeTitle = escapeHtml(title.trim());
+    ret += ` data-title="${safeTitle}"`;
+  }
+  ret += `></embedweb>`;
+  return ret;
+}
+
 marked.use({
   extensions: [
     // inline user mention: <user data-id="..." />
@@ -202,6 +221,41 @@ marked.use({
       },
       renderer(token: Token & { href?: string; text?: string; label?: string }) {
         return renderSeeMoreButton(token.href || "", token.text, token.label);
+      }
+    },
+    // block iframe embed: <embedweb url="..." height="..." title="..." showTitleBar="..." />
+    {
+      name: "embed_web_block",
+      level: "block",
+      start(src: string) {
+        return src.indexOf("<embedweb");
+      },
+      tokenizer(src: string) {
+        const cap = /^<embedweb\b([^>]*?)(?:\s*\/>|>(?:\s*<\/embedweb\s*>))(?:\s*\n)?/.exec(src);
+        if (!cap) return undefined;
+        const attrs = cap[1] || "";
+        const url = extractAttr(attrs, "url");
+        const height = extractAttr(attrs, "height");
+        const title = extractAttr(attrs, "title");
+        const showTitleBar = extractAttr(attrs, "showTitleBar");
+        return {
+          type: "embed_web_block",
+          raw: cap[0],
+          url,
+          height,
+          title,
+          showTitleBar
+        } as Token & {
+          url: string;
+          height?: string;
+          title?: string;
+          showTitleBar?: string;
+        };
+      },
+      renderer(
+        token: Token & { url?: string; height?: string; title?: string; showTitleBar?: string }
+      ) {
+        return renderIframeEmbed(token.url || "", token.height, token.title, token.showTitleBar);
       }
     },
     // subscript: ~text~ (avoid ~~ which is strikethrough)
@@ -406,7 +460,9 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
     // custom inline audio player tag
     "audioplayer",
     // custom see more button tag
-    "seemorebutton"
+    "seemorebutton",
+    // custom iframe embed tag
+    "embedweb"
   ]),
   allowedAttributes: {
     a: ["href", "name", "target", "rel"],
@@ -428,7 +484,11 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
       // allow data-href, data-text and data-label for <seemorebutton />
       "data-href",
       "data-text",
-      "data-label"
+      "data-label",
+      // allow data-url, data-height, data-title and data-show-title-bar for <embedweb />
+      "data-height",
+      "data-title",
+      "data-show-title-bar"
     ]
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],

@@ -149,7 +149,7 @@ function addSecurityHeaders(response: NextResponse, request: NextRequest): NextR
     if (request.nextUrl.pathname.startsWith("/admin")) {
       response.headers.set(
         "Content-Security-Policy",
-        "default-src 'self'; img-src 'self' https: data:; connect-src 'self' https: ws: wss:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+        "default-src 'self'; img-src 'self' https: data:; connect-src 'self' https: ws: wss:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-src 'self' https:;"
       );
     }
   }

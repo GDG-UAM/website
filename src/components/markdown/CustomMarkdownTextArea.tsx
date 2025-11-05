@@ -17,9 +17,9 @@ type ComponentConfig = {
   props: Array<{
     name: string;
     label: string;
-    type: "text" | "number";
+    type: "text" | "number" | "boolean";
     required?: boolean;
-    default?: string | number;
+    default?: string | number | boolean;
     placeHolderOnly?: boolean;
   }>;
   render: (props: Record<string, string>, raw: string) => React.ReactNode;
@@ -79,6 +79,44 @@ const COMPONENT_REGISTRY: ComponentConfig[] = [
           }
         })()}{" "}
         ({props.label || "Default aria label"})
+      </span>
+    )
+  },
+  {
+    id: "embedweb",
+    label: "Embed Web",
+    color: "#dbeafe", // blue-100
+    props: [
+      { name: "url", label: "Website URL", type: "text", required: true },
+      { name: "height", label: "Height (px)", type: "number", default: 450 },
+      {
+        name: "title",
+        label: "Title Override",
+        type: "text",
+        required: false,
+        default: "Auto-detect from URL",
+        placeHolderOnly: true
+      },
+      {
+        name: "showTitleBar",
+        label: "Show Title Bar",
+        type: "boolean",
+        default: true
+      }
+    ],
+    render: (props) => (
+      <span style={{ color: "#1d4ed8", fontWeight: 600 }}>
+        🌐 Embed:{" "}
+        {(() => {
+          try {
+            const url = new URL(props.url || "");
+            return url.hostname.replace(/^www\./, "");
+          } catch {
+            return props.url || "invalid URL";
+          }
+        })()}{" "}
+        ({props.height || 450}px
+        {props.showTitleBar === "false" ? ", no title bar" : ""})
       </span>
     )
   }
@@ -204,6 +242,22 @@ const PropInput = styled.input`
   margin-bottom: 8px;
   font-size: 14px;
   box-sizing: border-box;
+`;
+
+const CheckboxWrapper = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+`;
+
+const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 `;
 
 const PropLabel = styled.label`
@@ -593,7 +647,11 @@ export default function CustomMarkdownTextArea({
       ...componentPropsState.propsCollected,
       [currentProp.name]:
         currentPropValue ||
-        (currentProp.placeHolderOnly ? undefined : String(currentProp.default || ""))
+        (currentProp.placeHolderOnly
+          ? undefined
+          : currentProp.type === "boolean"
+            ? String(currentProp.default ?? true)
+            : String(currentProp.default || ""))
     };
 
     if (componentPropsState.currentPropIndex < comp.props.length - 1) {
@@ -604,7 +662,10 @@ export default function CustomMarkdownTextArea({
         currentPropIndex: componentPropsState.currentPropIndex + 1
       });
       const nextProp = comp.props[componentPropsState.currentPropIndex + 1];
-      setCurrentPropValue(newPropsCollected[nextProp.name] || "");
+      setCurrentPropValue(
+        newPropsCollected[nextProp.name] ||
+          (nextProp.type === "boolean" ? String(nextProp.default ?? true) : "")
+      );
     } else {
       // All props collected, insert or update component
       if (componentPropsState.isEditing) {
@@ -625,7 +686,9 @@ export default function CustomMarkdownTextArea({
 
       const prevPropIndex = componentPropsState.currentPropIndex - 1;
       const prevProp = comp.props[prevPropIndex];
-      const prevValue = componentPropsState.propsCollected[prevProp.name] || "";
+      const prevValue =
+        componentPropsState.propsCollected[prevProp.name] ||
+        (prevProp.type === "boolean" ? String(prevProp.default ?? true) : "");
 
       setComponentPropsState({
         ...componentPropsState,
@@ -709,7 +772,12 @@ export default function CustomMarkdownTextArea({
     // Set the first prop value
     const firstProp = comp.props[0];
     if (firstProp) {
-      setCurrentPropValue(propsCollected[firstProp.name] || String(firstProp.default || ""));
+      setCurrentPropValue(
+        propsCollected[firstProp.name] ||
+          (firstProp.type === "boolean"
+            ? String(firstProp.default ?? true)
+            : String(firstProp.default || ""))
+      );
     }
 
     setDropdownMode("componentProps");
@@ -961,29 +1029,52 @@ export default function CustomMarkdownTextArea({
               Editing {currentComponent.label}
             </div>
           )}
-          <PropLabel>
-            {currentProp.label}
-            {currentProp.required && <span style={{ color: "#ef4444" }}> *</span>}
-          </PropLabel>
-          <PropInput
-            type={currentProp.type === "number" ? "number" : "text"}
-            value={currentPropValue}
-            onChange={(e) => setCurrentPropValue(e.target.value)}
-            placeholder={currentProp.default ? `Default: ${currentProp.default}` : ""}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                // Only submit if not a required empty field
-                if (!currentProp.required || currentPropValue.trim()) {
-                  handlePropSubmit();
-                }
-              } else if (e.key === "Escape") {
-                e.preventDefault();
-                close();
-              }
-            }}
-            autoFocus
-          />
+          {currentProp.type === "boolean" ? (
+            <CheckboxWrapper>
+              <Checkbox
+                type="checkbox"
+                checked={currentPropValue === "true" || currentPropValue === ""}
+                onChange={(e) => setCurrentPropValue(e.target.checked ? "true" : "false")}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handlePropSubmit();
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    close();
+                  }
+                }}
+                autoFocus
+              />
+              <span style={{ fontSize: "14px", color: "#374151" }}>{currentProp.label}</span>
+            </CheckboxWrapper>
+          ) : (
+            <>
+              <PropLabel>
+                {currentProp.label}
+                {currentProp.required && <span style={{ color: "#ef4444" }}> *</span>}
+              </PropLabel>
+              <PropInput
+                type={currentProp.type === "number" ? "number" : "text"}
+                value={currentPropValue}
+                onChange={(e) => setCurrentPropValue(e.target.value)}
+                placeholder={currentProp.default ? `Default: ${currentProp.default}` : ""}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    // Only submit if not a required empty field
+                    if (!currentProp.required || currentPropValue.trim()) {
+                      handlePropSubmit();
+                    }
+                  } else if (e.key === "Escape") {
+                    e.preventDefault();
+                    close();
+                  }
+                }}
+                autoFocus
+              />
+            </>
+          )}
           <div style={{ fontSize: "12px", color: "#6b7280", marginBottom: "8px" }}>
             {componentPropsState && currentComponent ? (
               <>

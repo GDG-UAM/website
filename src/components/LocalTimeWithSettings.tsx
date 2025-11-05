@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/lib/settings/SettingsContext";
-import LocalTime from "./LocalTime";
+import { useLocale } from "next-intl";
 
 type Props = {
   iso: string;
@@ -19,8 +19,8 @@ export default function LocalTimeWithSettings({
   timeZone: propTimeZone
 }: Props) {
   const { settings } = useSettings();
+  const currentLocale = useLocale();
   const hour12 = (settings?.general.timeFormat ?? "24h") === "12h";
-  const options: Intl.DateTimeFormatOptions = { hourCycle: hour12 ? "h12" : "h23" };
 
   if (compact) {
     const locale = propLocale;
@@ -44,5 +44,35 @@ export default function LocalTimeWithSettings({
     return <time dateTime={iso}>{`${dowClean}, ${day} ${monClean} · ${hm}`}</time>;
   }
 
-  return <LocalTime iso={iso} dateOnly={dateOnly} options={options} />;
+  // Format as "2 nov 2025, 09:00"
+  const locale = propLocale ?? currentLocale;
+  const timeZone =
+    propTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "Europe/Madrid";
+  const d = new Date(iso);
+
+  // Get day (without leading zero)
+  const day = d.toLocaleDateString(locale, { day: "numeric", timeZone });
+
+  // Get month (short format, lowercase)
+  const month = d
+    .toLocaleDateString(locale, { month: "short", timeZone })
+    .replace(/\./g, "")
+    .toLowerCase();
+
+  // Get year
+  const year = d.toLocaleDateString(locale, { year: "numeric", timeZone });
+
+  // Get time
+  const time = d.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+    hour12: hour12
+  });
+
+  if (dateOnly) {
+    return <time dateTime={iso}>{`${day} ${month} ${year}`}</time>;
+  }
+
+  return <time dateTime={iso}>{`${day} ${month} ${year}, ${time}`}</time>;
 }
