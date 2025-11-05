@@ -427,6 +427,18 @@
       "links": "Links",
       "permissions": "Permissions"
     },
+    "navigation": {
+      "blog": "Blog",
+      "newsletter": "Newsletter",
+      "events": "Events",
+      "giveaways": "Giveaways",
+      "games": "Games",
+      "links": "Links",
+      "permissions": "Permissions",
+      "featureFlags": "Feature Flags",
+      "test-dev": "",
+      "test-prod": ""
+    },
     "featureFlags": {
       "breadcrumbs": {
         "admin": "Admin",

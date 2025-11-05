@@ -51,7 +51,9 @@ type FeatureFlag = {
 const Container = styled.div`
   display: grid;
   gap: 12px;
-  padding: 12px;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
   overflow-x: hidden; /* Prevent horizontal overflow */
 `;
 

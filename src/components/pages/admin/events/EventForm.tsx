@@ -28,7 +28,12 @@ const TwoCol = styled.div`
 const Actions = styled.div`
   display: flex;
   gap: 10px;
-  margin-top: 8px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 // Define la estructura de los datos del formulario

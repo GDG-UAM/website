@@ -1,7 +1,6 @@
-import Link from "next/link";
 import fs from "fs";
 import path from "path";
-import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
+import AdminContent from "@/components/pages/admin/AdminContent";
 
 interface TestRoute {
   label: string;
@@ -30,48 +29,10 @@ function getTestRoutes(): TestRoute[] {
 
 export default function AdminHome() {
   const testRoutes = getTestRoutes();
+
   return (
-    <div style={{ padding: 24 }}>
-      <AdminBreadcrumbs items={[{ label: "Admin", href: "/admin" }]} />
-      <h1 style={{ marginBottom: 16 }}>Admin</h1>
-      <ul style={{ display: "grid", gap: 8, marginBottom: 24 }}>
-        <li>
-          <Link href="/admin/blog">Manage Blog</Link>
-        </li>
-        <li>
-          <Link href="/admin/newsletter">Manage Newsletter</Link>
-        </li>
-        <li>
-          <Link href="/admin/events">Manage Events</Link>
-        </li>
-        <li>
-          <Link href="/admin/giveaways">Manage Giveaways</Link>
-        </li>
-        <li>
-          <Link href="/admin/games">Manage Games</Link>
-        </li>
-        <li>
-          <Link href="/admin/links">Manage Links</Link>
-        </li>
-        <li>
-          <Link href="/admin/permissions">Permissions</Link>
-        </li>
-        <li>
-          <Link href="/admin/feature-flags">Feature Flags</Link>
-        </li>
-      </ul>
-      {testRoutes.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <h2 style={{ marginBottom: 12, fontSize: 20 }}>Tests</h2>
-          <ul style={{ display: "grid", gap: 6 }}>
-            {testRoutes.map((r) => (
-              <li key={r.href}>
-                <Link href={r.href}>{r.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+    <div style={{ padding: 20 }}>
+      <AdminContent testRoutes={testRoutes} />
     </div>
   );
 }

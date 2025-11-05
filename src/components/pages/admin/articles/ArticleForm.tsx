@@ -12,15 +12,34 @@ const Form = styled.form`
   display: grid;
   gap: 12px;
   max-width: 900px;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+
+  /* Ensure all children respect width constraints */
+  & > * {
+    min-width: 0;
+    box-sizing: border-box;
+  }
 `;
 
 const TwoCol = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  min-width: 0;
+  width: 100%;
 
-  @media (max-width: 800px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+  }
+
+  /* Ensure children don't overflow */
+  & > * {
+    min-width: 0;
   }
 `;
 
@@ -29,6 +48,24 @@ import { TextField, MenuItem } from "@mui/material";
 const Actions = styled.div`
   display: flex;
   gap: 10px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
+const StyledSaveButton = styled(SaveButton)`
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const StyledCancelButton = styled(CancelButton)`
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const FlagImg = styled.img`
@@ -38,11 +75,14 @@ const FlagImg = styled.img`
 
 const LocalePickerWrap = styled.div`
   margin: 30px auto 10px;
+  max-width: 100%;
 `;
 
 const PreviewTitle = styled.div`
   font-weight: 700;
   margin-bottom: 8px;
+  max-width: 100%;
+  word-wrap: break-word;
 `;
 
 export type ArticleFormData = {
@@ -245,8 +285,8 @@ function ArticleForm({
       </div>
 
       <Actions>
-        <SaveButton onClick={() => onSubmit(data)}>{t("save")}</SaveButton>
-        {onCancel && <CancelButton onClick={onCancel}>{t("cancel")}</CancelButton>}
+        <StyledSaveButton onClick={() => onSubmit(data)}>{t("save")}</StyledSaveButton>
+        {onCancel && <StyledCancelButton onClick={onCancel}>{t("cancel")}</StyledCancelButton>}
       </Actions>
     </Form>
   );

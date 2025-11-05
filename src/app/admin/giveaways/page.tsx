@@ -21,6 +21,116 @@ import { useTranslations } from "next-intl";
 import { TextField, Checkbox, FormControlLabel, Chip } from "@mui/material";
 import { withCsrfHeaders } from "@/lib/security/csrfClient";
 
+const Container = styled.div`
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+`;
+
+const Wrapper = styled.div`
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+`;
+
+const Card = styled.div`
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  max-width: 100%;
+  box-sizing: border-box;
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    /* Show scrollbar hint on mobile */
+    &::-webkit-scrollbar {
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  }
+`;
+
+const Controls = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  max-width: 100%;
+
+  @media (max-width: 900px) {
+    /* Allow search field to take full width on smaller screens */
+    & > div:last-child {
+      flex: 1 1 100%;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    /* Stack all controls vertically on mobile */
+    & > * {
+      flex: 1 1 100%;
+      width: 100%;
+      min-width: 100% !important;
+      margin-left: 0 !important;
+    }
+  }
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  th {
+    text-align: left;
+    border-bottom-width: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 800px; /* Ensure table doesn't collapse on mobile */
+
+    td {
+      white-space: nowrap;
+    }
+  }
+`;
+
+const Header = styled.div`
+  margin-bottom: 20px;
+  max-width: 100%;
+  box-sizing: border-box;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  word-wrap: break-word;
+`;
+
 type Mode = "list" | "create" | "edit" | "preview";
 
 type GiveawayListItem = {
@@ -199,48 +309,6 @@ export default function AdminGiveawaysPage() {
     }
   };
 
-  const Container = styled.div`
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-  `;
-
-  const Header = styled.div`
-    margin-bottom: 20px;
-  `;
-
-  const Title = styled.h1`
-    font-size: 2rem;
-    font-weight: 600;
-    margin: 0 0 8px 0;
-  `;
-
-  const Controls = styled.div`
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 8px 0;
-
-    @media (max-width: 900px) {
-      /* Allow search field to take full width on smaller screens */
-      & > div:last-child {
-        flex: 1 1 100%;
-        margin-left: 0 !important;
-      }
-    }
-
-    @media (max-width: 640px) {
-      /* Stack all controls vertically on mobile */
-      & > * {
-        flex: 1 1 100%;
-        width: 100%;
-        min-width: 100% !important;
-        margin-left: 0 !important;
-      }
-    }
-  `;
-
   return (
     <Container>
       <AdminBreadcrumbs
@@ -266,7 +334,7 @@ export default function AdminGiveawaysPage() {
       )}
 
       {mode === "list" && (
-        <div>
+        <Wrapper>
           <Controls>
             <AddButton onClick={onCreate}>{t("list.create")}</AddButton>
             <ReloadButton onClick={() => fetchList(true)}>{t("list.reload")}</ReloadButton>
@@ -285,10 +353,10 @@ export default function AdminGiveawaysPage() {
                   <thead>
                     <tr>
                       <th style={{ textAlign: "left" }}>{t("list.title")}</th>
-                      <th style={{ width: 140 }}>{t("list.status")}</th>
-                      <th style={{ width: 200 }}>{t("list.start")}</th>
-                      <th style={{ width: 200 }}>{t("list.end")}</th>
-                      <th style={{ width: 140 }}>{t("list.actions")}</th>
+                      <th style={{ width: 120 }}>{t("list.status")}</th>
+                      <th style={{ width: 100 }}>{t("list.start")}</th>
+                      <th style={{ width: 100 }}>{t("list.end")}</th>
+                      <th style={{ width: 180 }}>{t("list.actions")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -313,8 +381,8 @@ export default function AdminGiveawaysPage() {
                             label={t(`status.${it.status}`) || it.status}
                           />
                         </td>
-                        <td>{it.startAt ? new Date(it.startAt).toLocaleString() : ""}</td>
-                        <td>{it.endAt ? new Date(it.endAt).toLocaleString() : ""}</td>
+                        <td>{it.startAt ? new Date(it.startAt).toLocaleDateString() : ""}</td>
+                        <td>{it.endAt ? new Date(it.endAt).toLocaleDateString() : ""}</td>
                         <td>
                           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
                             <ViewButton
@@ -335,11 +403,7 @@ export default function AdminGiveawaysPage() {
                               />
                             )}
                             <EditButton onClick={() => onEdit(it._id)} iconSize={20} />
-                            <DeleteButton
-                              onClick={() => handleDelete(it._id)}
-                              style={{ marginLeft: 6 }}
-                              iconSize={20}
-                            />
+                            <DeleteButton onClick={() => handleDelete(it._id)} iconSize={20} />
                           </div>
                         </td>
                       </tr>
@@ -351,11 +415,11 @@ export default function AdminGiveawaysPage() {
           </Card>
 
           {!loading && items.length > 0 && (
-            <div style={{ fontSize: "0.875rem", color: "#666", marginTop: "8px" }}>
+            <div style={{ fontSize: "0.875rem", color: "#666" }}>
               {t("list.showing", { count: items.length })}
             </div>
           )}
-        </div>
+        </Wrapper>
       )}
 
       {(mode === "create" || mode === "edit") && (
@@ -503,10 +567,10 @@ function GiveawayForm({
       </TwoCol>
 
       <Actions>
-        <SaveButton onClick={submitViaButton} showSpinner>
+        <StyledSaveButton onClick={submitViaButton} showSpinner>
           {t("form.save")}
-        </SaveButton>
-        <CancelButton onClick={onCancel}>{t("form.cancel")}</CancelButton>
+        </StyledSaveButton>
+        <StyledCancelButton onClick={onCancel}>{t("form.cancel")}</StyledCancelButton>
       </Actions>
     </Form>
   );
@@ -516,58 +580,17 @@ const Form = styled.form`
   display: grid;
   gap: 16px;
   max-width: 900px;
-`;
-
-const Card = styled.div`
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  overflow: hidden;
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    /* Show scrollbar hint on mobile */
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-`;
-
-const Table = styled.table`
   width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  th {
-    text-align: left;
-    border-bottom-width: 2px;
-    white-space: nowrap;
-  }
+  box-sizing: border-box;
 
   @media (max-width: 768px) {
-    min-width: 700px; /* Ensure table doesn't collapse on mobile */
+    max-width: 100%;
+  }
 
-    td {
-      white-space: nowrap;
-    }
+  /* Ensure all children respect width constraints */
+  & > * {
+    min-width: 0;
+    box-sizing: border-box;
   }
 `;
 
@@ -575,8 +598,16 @@ const TwoCol = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  @media (max-width: 800px) {
+  min-width: 0;
+  width: 100%;
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+  }
+
+  /* Ensure children don't overflow */
+  & > * {
+    min-width: 0;
   }
 `;
 
@@ -584,4 +615,21 @@ const Actions = styled.div`
   display: flex;
   gap: 10px;
   margin-top: 8px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const StyledSaveButton = styled(SaveButton)`
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const StyledCancelButton = styled(CancelButton)`
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;

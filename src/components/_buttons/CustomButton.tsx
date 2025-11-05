@@ -23,6 +23,7 @@ const StyledButton = styled(Button)<{
   $isSlim: boolean;
   $disableHover: boolean;
   $fullWidth: boolean;
+  $justify: "center" | "flex-start" | "flex-end" | "space-between" | "space-around";
 }>`
   background-color: ${({ $noBackground, $buttonColor }) =>
     $noBackground ? "transparent" : `color-mix(in srgb, ${$buttonColor}, transparent 92.5%)`};
@@ -40,7 +41,7 @@ const StyledButton = styled(Button)<{
   box-sizing: border-box;
   font-weight: 600;
   display: flex;
-  justify-content: center;
+  justify-content: ${({ $justify }) => $justify};
   align-items: center;
   position: relative;
   overflow: hidden;
@@ -173,6 +174,7 @@ export interface CustomButtonProps {
   noHover?: boolean;
   fullWidth?: boolean;
   dontUseContext?: boolean;
+  justify?: "center" | "flex-start" | "flex-end" | "space-between" | "space-around";
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -199,6 +201,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
   noHover = false,
   fullWidth = false,
   dontUseContext = false,
+  justify = "center",
   children = null
 }) => {
   const [loading, setLoading] = useState(isLoading);
@@ -346,6 +349,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
       $isSlim={slim}
       $disableHover={noHover}
       $fullWidth={fullWidth}
+      $justify={justify}
     >
       {loading && showSpinner ? (
         <>

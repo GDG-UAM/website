@@ -427,6 +427,18 @@
       "links": "Enlaces",
       "permissions": "Permisos"
     },
+    "navigation": {
+      "blog": "Blog",
+      "newsletter": "Newsletter",
+      "events": "Eventos",
+      "giveaways": "Sorteos",
+      "games": "Juegos",
+      "links": "Enlaces",
+      "permissions": "Permisos",
+      "featureFlags": "Feature Flags",
+      "test-dev": "",
+      "test-prod": ""
+    },
     "featureFlags": {
       "breadcrumbs": {
         "admin": "Administración",

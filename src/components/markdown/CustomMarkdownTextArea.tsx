@@ -151,7 +151,7 @@ const Overlay = styled.div`
   box-sizing: border-box;
   max-height: 100%;
   -webkit-overflow-scrolling: touch;
-  width: 875.5px;
+  width: 100%;
   padding-right: 0;
   padding-bottom: 17px;
 
@@ -166,7 +166,7 @@ const Overlay = styled.div`
 `;
 
 const TextArea = styled.textarea`
-  width: 874px;
+  width: 100%;
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
@@ -177,6 +177,7 @@ const TextArea = styled.textarea`
   font-family: inherit;
   font-size: 0.95rem;
   line-height: 1.5;
+  box-sizing: border-box;
 
   &:focus {
     outline: none;
@@ -312,6 +313,7 @@ export default function CustomMarkdownTextArea({
     editStartIndex: number;
     editEndIndex: number;
   } | null>(null);
+  const [overlayWidth, setOverlayWidth] = useState<string>("100%");
   const taRef = useRef<HTMLTextAreaElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -855,6 +857,45 @@ export default function CustomMarkdownTextArea({
     return () => ta.removeEventListener("scroll", sync);
   }, []);
 
+  // Calculate and update overlay width based on scrollbar
+  useEffect(() => {
+    const ta = taRef.current;
+    if (!ta) return;
+
+    const updateOverlayWidth = () => {
+      // Calculate scrollbar width
+      const scrollbarWidth = ta.offsetWidth - ta.clientWidth + 12;
+
+      if (scrollbarWidth > 0) {
+        // If there's a scrollbar, subtract its width from overlay
+        setOverlayWidth(`calc(100% - ${scrollbarWidth}px)`);
+      } else {
+        // No scrollbar, use full width
+        setOverlayWidth("100%");
+      }
+    };
+
+    // Initial calculation
+    updateOverlayWidth();
+
+    // Update on resize
+    const resizeObserver = new ResizeObserver(updateOverlayWidth);
+    resizeObserver.observe(ta);
+
+    // Update on window resize
+    window.addEventListener("resize", updateOverlayWidth);
+
+    // Update when content changes (might affect scrollbar visibility)
+    const mutationObserver = new MutationObserver(updateOverlayWidth);
+    mutationObserver.observe(ta, { attributes: true, childList: true, subtree: true });
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      window.removeEventListener("resize", updateOverlayWidth);
+    };
+  }, [value]);
+
   useEffect(() => {
     const ta = taRef.current;
     if (!ta) return;
@@ -897,7 +938,7 @@ export default function CustomMarkdownTextArea({
     <Wrapper ref={wrapRef}>
       <Label>{label}</Label>
       <Surface>
-        <Overlay ref={overlayRef} aria-hidden>
+        <Overlay ref={overlayRef} aria-hidden style={{ width: overlayWidth }}>
           {segments.map((seg, idx) => {
             if (seg.type === "text")
               return <span key={`t-${idx}-${seg.text ?? Math.random()}`}>{seg.text}</span>;

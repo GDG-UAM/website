@@ -14,7 +14,12 @@ const Form = styled.form`
 const Actions = styled.div`
   display: flex;
   gap: 10px;
-  margin-top: 8px;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 const HelpText = styled.p`

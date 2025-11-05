@@ -2,12 +2,12 @@
 
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
-import { EventList } from "@/app/admin/events/EventList";
-import { EventForm, EventFormData } from "@/app/admin/events/EventForm";
+import { EventList } from "@/components/pages/admin/events/EventList";
+import { EventForm, EventFormData } from "@/components/pages/admin/events/EventForm";
 import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/Toast";
-import AdminEventsCalendar from "@/app/admin/events/AdminEventsCalendar";
+import AdminEventsCalendar from "@/components/pages/admin/events/AdminEventsCalendar";
 import { withCsrfHeaders } from "@/lib/security/csrfClient";
 import { useTranslations } from "next-intl";
 
