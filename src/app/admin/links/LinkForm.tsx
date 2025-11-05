@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { SaveButton, CancelButton } from "@/components/Buttons";
 import { TextField, Switch, FormControlLabel } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 const Form = styled.form`
   display: grid;
@@ -47,6 +48,7 @@ export function LinkForm({
   onSubmit: (data: LinkFormData) => Promise<void> | void;
   submitting?: boolean;
 }) {
+  const t = useTranslations("admin.links.form");
   const [data, setData] = useState<LinkFormData>({
     slug: initial?.slug || "",
     destination: initial?.destination || "",
@@ -68,46 +70,46 @@ export function LinkForm({
   return (
     <Form onSubmit={handleSubmit} id="link-form">
       <TextField
-        label="Slug (Short URL)"
+        label={t("slug")}
         value={data.slug}
         onChange={(e) => setData({ ...data, slug: e.target.value })}
         required
         fullWidth
         disabled={submitting}
-        helperText="Only lowercase letters, numbers, and hyphens (e.g., 'discord', 'meeting-link')"
+        helperText={t("slugHelp")}
         inputProps={{ pattern: "[a-z0-9-]+", style: { fontFamily: "monospace" } }}
       />
 
       <TextField
-        label="Destination URL"
+        label={t("destination")}
         value={data.destination}
         onChange={(e) => setData({ ...data, destination: e.target.value })}
         required
         fullWidth
         disabled={submitting}
         type="url"
-        helperText="Full URL where this link should redirect (e.g., 'https://discord.gg/xyz')"
+        helperText={t("destinationHelp")}
       />
 
       <TextField
-        label="Title"
+        label={t("title")}
         value={data.title}
         onChange={(e) => setData({ ...data, title: e.target.value })}
         required
         fullWidth
         disabled={submitting}
-        helperText="Human-readable name for this link"
+        helperText={t("titleHelp")}
       />
 
       <TextField
-        label="Description (Optional)"
+        label={t("description")}
         value={data.description || ""}
         onChange={(e) => setData({ ...data, description: e.target.value })}
         fullWidth
         disabled={submitting}
         multiline
         rows={3}
-        helperText="Optional notes or description for internal reference"
+        helperText={t("descriptionHelp")}
       />
 
       <FormControlLabel
@@ -118,17 +120,17 @@ export function LinkForm({
             disabled={submitting}
           />
         }
-        label="Active"
+        label={t("isActive")}
       />
-      {!data.isActive && <HelpText>Inactive links will return a 404 error when accessed.</HelpText>}
+      {!data.isActive && <HelpText>{t("isActiveHelp")}</HelpText>}
 
       <Actions>
         <SaveButton onClick={submitForm} disabled={submitting}>
-          {submitting ? "Saving..." : "Save"}
+          {submitting ? t("saving") : t("save")}
         </SaveButton>
         {onCancel && (
           <CancelButton onClick={onCancel} disabled={submitting}>
-            Cancel
+            {t("cancel")}
           </CancelButton>
         )}
       </Actions>

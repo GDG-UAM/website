@@ -437,7 +437,14 @@
       "permissions": "Permisos",
       "featureFlags": "Feature Flags",
       "test-dev": "",
-      "test-prod": ""
+      "test-prod": "",
+      "categories": {
+        "articles": "Artículos",
+        "events": "Eventos",
+        "misc": "Varios",
+        "tests": "Pruebas"
+      },
+      "testTooltip": "Solo disponible en modo de desarrollo"
     },
     "featureFlags": {
       "breadcrumbs": {
@@ -676,6 +683,12 @@
         "giveaways": "Sorteos",
         "manage": "Administrar"
       },
+      "page": {
+        "title": "Gestión de Sorteos",
+        "createTitle": "Crear Nuevo Sorteo",
+        "editTitle": "Editar Sorteo",
+        "previewTitle": "Vista Previa del Sorteo"
+      },
       "list": {
         "title": "Título",
         "status": "Estado",
@@ -753,6 +766,68 @@
         },
         "backToList": "Volver a la lista",
         "saveConfiguration": "Guardar configuración"
+      }
+    },
+    "links": {
+      "breadcrumbs": {
+        "admin": "Admin",
+        "links": "Enlaces"
+      },
+      "page": {
+        "title": "Gestión de Enlaces",
+        "createTitle": "Crear Nuevo Enlace",
+        "editTitle": "Editar Enlace"
+      },
+      "list": {
+        "loading": "Cargando...",
+        "noLinks": "No hay enlaces aún. ¡Crea uno para empezar!",
+        "noResults": "No hay enlaces que coincidan con tu búsqueda",
+        "showing": "Mostrando {count} de {total} enlaces",
+        "create": "Crear Enlace",
+        "reload": "Recargar",
+        "search": "Buscar enlaces...",
+        "columns": {
+          "slug": "Slug",
+          "title": "Título",
+          "destination": "Destino",
+          "status": "Estado",
+          "clicks": "Clicks",
+          "actions": "Acciones"
+        },
+        "status": {
+          "active": "Activo",
+          "inactive": "Inactivo"
+        },
+        "deleteConfirm": "¿Estás seguro de que quieres eliminar el enlace \"/{slug}\"?",
+        "toasts": {
+          "reloaded": "Lista recargada",
+          "loadError": "No se pudieron cargar los enlaces",
+          "deleteSuccess": "Enlace eliminado con éxito",
+          "deleteError": "No se pudo eliminar el enlace"
+        }
+      },
+      "form": {
+        "slug": "Slug (Short URL)",
+        "slugHelp": "Solo letras minúsculas, números y guiones (por ejemplo, 'discord', 'meeting-link')",
+        "destination": "URL de Destino",
+        "destinationHelp": "URL completa a la que este enlace debe redirigir (por ejemplo, 'https://discord.gg/xyz')",
+        "title": "Título",
+        "titleHelp": "Nombre legible por humanos para este enlace",
+        "description": "Descripción (Opcional)",
+        "descriptionHelp": "Notas o descripción opcional para referencia interna",
+        "isActive": "Activo",
+        "isActiveHelp": "Los enlaces inactivos devolverán un error 404 al acceder.",
+        "save": "Guardar",
+        "saving": "Guardando...",
+        "cancel": "Cancelar",
+        "backToList": "Volver a la lista"
+      },
+      "toasts": {
+        "created": "Enlace creado con éxito",
+        "updated": "Enlace actualizado con éxito",
+        "createError": "Error al guardar el enlace",
+        "updateError": "Error al guardar el enlace",
+        "loadError": "Error al cargar los datos del enlace"
       }
     }
   },

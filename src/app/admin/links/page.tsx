@@ -8,6 +8,7 @@ import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/Toast";
 import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { useTranslations } from "next-intl";
 
 const Container = styled.div`
   padding: 20px;
@@ -30,6 +31,9 @@ const Title = styled.h1`
  * It allows creating, editing, and listing links.
  */
 export default function AdminLinksManagePage() {
+  const t = useTranslations("admin.links");
+  const tPage = useTranslations("admin.links.page");
+  const tToasts = useTranslations("admin.links.toasts");
   const [mode, setMode] = useState<"list" | "create" | "edit">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -56,7 +60,7 @@ export default function AdminLinksManagePage() {
       setInitialData(data);
       setMode("edit");
     } else {
-      newErrorToast("Error loading link data");
+      newErrorToast(tToasts("loadError"));
     }
   };
 
@@ -73,17 +77,17 @@ export default function AdminLinksManagePage() {
       });
 
       if (res.ok) {
-        newSuccessToast(
-          mode === "create" ? "Link created successfully" : "Link updated successfully"
-        );
+        newSuccessToast(mode === "create" ? tToasts("created") : tToasts("updated"));
         goToList();
       } else {
         const errorData = await res.json();
-        newErrorToast(errorData.error || "Failed to save link");
+        newErrorToast(
+          errorData.error || (mode === "create" ? tToasts("createError") : tToasts("updateError"))
+        );
       }
     } catch (error) {
       console.error("Submit error:", error);
-      newErrorToast("An error occurred while saving the link");
+      newErrorToast(mode === "create" ? tToasts("createError") : tToasts("updateError"));
     } finally {
       setSubmitting(false);
     }
@@ -100,15 +104,15 @@ export default function AdminLinksManagePage() {
 
       <Header>
         <Title>
-          {mode === "list" && "Link Management"}
-          {mode === "create" && "Create New Link"}
-          {mode === "edit" && "Edit Link"}
+          {mode === "list" && tPage("title")}
+          {mode === "create" && tPage("createTitle")}
+          {mode === "edit" && tPage("editTitle")}
         </Title>
       </Header>
 
       {mode !== "list" && (
         <div style={{ marginBottom: "20px" }}>
-          <BackButton onClick={goToList}>Back to List</BackButton>
+          <BackButton onClick={goToList}>{t("form.backToList")}</BackButton>
         </div>
       )}
 

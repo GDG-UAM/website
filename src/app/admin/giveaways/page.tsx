@@ -158,6 +158,7 @@ type GiveawayFormData = {
 export default function AdminGiveawaysPage() {
   const t = useTranslations("admin.giveaways");
   const tt = useTranslations("admin.giveaways.toasts");
+  const tPage = useTranslations("admin.giveaways.page");
   const [mode, setMode] = useState<Mode>("list");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -320,10 +321,10 @@ export default function AdminGiveawaysPage() {
 
       <Header>
         <Title>
-          {mode === "list" && "Giveaway Management"}
-          {mode === "create" && "Create New Giveaway"}
-          {mode === "edit" && "Edit Giveaway"}
-          {mode === "preview" && "Giveaway Preview"}
+          {mode === "list" && tPage("title")}
+          {mode === "create" && tPage("createTitle")}
+          {mode === "edit" && tPage("editTitle")}
+          {mode === "preview" && tPage("previewTitle")}
         </Title>
       </Header>
 

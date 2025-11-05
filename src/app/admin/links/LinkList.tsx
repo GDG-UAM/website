@@ -12,6 +12,7 @@ import {
 import { Chip, TextField } from "@mui/material";
 import { newErrorToast, newInfoToast, newSuccessToast } from "@/components/Toast";
 import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { useTranslations } from "next-intl";
 
 const Wrapper = styled.div`
   display: grid;
@@ -148,34 +149,39 @@ export function LinkList({
   onEdit: (id: string) => void;
   refreshToken?: number;
 }) {
+  const t = useTranslations("admin.links.list");
+  const tToasts = useTranslations("admin.links.list.toasts");
   const [rows, setRows] = useState<LinkRow[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (notify?: boolean) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/admin/links?pageSize=200`, {
-        cache: "no-store"
-      });
+  const load = useCallback(
+    async (notify?: boolean) => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/admin/links?pageSize=200`, {
+          cache: "no-store"
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        setRows(data.items || []);
-        if (notify) {
-          newInfoToast("List reloaded");
+        if (res.ok) {
+          const data = await res.json();
+          setRows(data.items || []);
+          if (notify) {
+            newInfoToast(tToasts("reloaded"));
+          }
+        } else {
+          throw new Error("Failed to load links");
         }
-      } else {
-        throw new Error("Failed to load links");
+      } catch (e) {
+        console.error("Failed to load links:", e);
+        setRows([]);
+        newErrorToast(tToasts("loadError"));
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error("Failed to load links:", e);
-      setRows([]);
-      newErrorToast("Couldn't load links");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [tToasts]
+  );
 
   useEffect(() => {
     load();
@@ -194,7 +200,7 @@ export function LinkList({
   }, [rows, search]);
 
   const handleDelete = async (id: string, slug: string) => {
-    if (!confirm(`Are you sure you want to delete the link "/${slug}"?`)) return;
+    if (!confirm(t("deleteConfirm", { slug }))) return;
 
     try {
       const res = await fetch(`/api/admin/links/${id}`, {
@@ -203,7 +209,7 @@ export function LinkList({
       });
 
       if (res.ok) {
-        newSuccessToast("Link deleted successfully");
+        newSuccessToast(tToasts("deleteSuccess"));
         load();
       } else {
         const error = await res.json();
@@ -211,18 +217,18 @@ export function LinkList({
       }
     } catch (e) {
       console.error("Delete error:", e);
-      newErrorToast(e instanceof Error ? e.message : "Failed to delete link");
+      newErrorToast(e instanceof Error ? e.message : tToasts("deleteError"));
     }
   };
 
   return (
     <Wrapper>
       <Controls>
-        <AddButton onClick={onCreate}>Create Link</AddButton>
-        <ReloadButton onClick={() => load(true)}>Reload</ReloadButton>
+        <AddButton onClick={onCreate}>{t("create")}</AddButton>
+        <ReloadButton onClick={() => load(true)}>{t("reload")}</ReloadButton>
         <TextField
           size="small"
-          placeholder="Search links..."
+          placeholder={t("search")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ marginLeft: "auto", minWidth: "250px" }}
@@ -231,22 +237,22 @@ export function LinkList({
 
       <Card>
         {loading ? (
-          <div style={{ padding: "20px", textAlign: "center" }}>Loading...</div>
+          <div style={{ padding: "20px", textAlign: "center" }}>{t("loading")}</div>
         ) : filteredRows.length === 0 ? (
           <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            {search ? "No links match your search" : "No links yet. Create one to get started!"}
+            {search ? t("noResults") : t("noLinks")}
           </div>
         ) : (
           <TableWrapper>
             <Table>
               <thead>
                 <tr>
-                  <th>Slug</th>
-                  <th>Title</th>
-                  <th>Destination</th>
-                  <th>Status</th>
-                  <th>Clicks</th>
-                  <th>Actions</th>
+                  <th>{t("columns.slug")}</th>
+                  <th>{t("columns.title")}</th>
+                  <th>{t("columns.destination")}</th>
+                  <th>{t("columns.status")}</th>
+                  <th>{t("columns.clicks")}</th>
+                  <th>{t("columns.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -270,7 +276,7 @@ export function LinkList({
                     </td>
                     <td>
                       <Chip
-                        label={row.isActive ? "Active" : "Inactive"}
+                        label={row.isActive ? t("status.active") : t("status.inactive")}
                         color={row.isActive ? "success" : "default"}
                         size="small"
                       />
@@ -305,7 +311,7 @@ export function LinkList({
 
       {!loading && filteredRows.length > 0 && (
         <div style={{ fontSize: "0.875rem", color: "#666" }}>
-          Showing {filteredRows.length} of {rows.length} links
+          {t("showing", { count: filteredRows.length, total: rows.length })}
         </div>
       )}
     </Wrapper>

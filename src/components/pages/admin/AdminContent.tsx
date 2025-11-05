@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { AdminNavigationButton } from "@/components/Buttons";
 import styled from "styled-components";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
+import { useTranslations } from "next-intl";
 
 const Container = styled.div`
   display: flex;
@@ -64,6 +65,7 @@ interface AdminContentProps {
 
 export default function AdminContent({ testRoutes }: AdminContentProps) {
   const router = useRouter();
+  const t = useTranslations("admin.navigation");
   const isProduction = process.env.NODE_ENV === "production";
 
   const handleNavigation = (href: string) => {
@@ -80,63 +82,63 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
           <Grid>
             {/* Articles Category */}
             <Category>
-              <CategoryTitle>Articles</CategoryTitle>
+              <CategoryTitle>{t("categories.articles")}</CategoryTitle>
               <ButtonList>
                 <AdminNavigationButton type="blog" onClick={() => handleNavigation("/admin/blog")}>
-                  Blog
+                  {t("blog")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
                   type="newsletter"
                   onClick={() => handleNavigation("/admin/newsletter")}
                 >
-                  Newsletter
+                  {t("newsletter")}
                 </AdminNavigationButton>
               </ButtonList>
             </Category>
 
             {/* Events Category */}
             <Category>
-              <CategoryTitle>Events</CategoryTitle>
+              <CategoryTitle>{t("categories.events")}</CategoryTitle>
               <ButtonList>
                 <AdminNavigationButton
                   type="events"
                   onClick={() => handleNavigation("/admin/events")}
                 >
-                  Events
+                  {t("events")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
                   type="giveaways"
                   onClick={() => handleNavigation("/admin/giveaways")}
                 >
-                  Giveaways
+                  {t("giveaways")}
                 </AdminNavigationButton>
                 <AdminNavigationButton type="games" disabled>
-                  Games
+                  {t("games")}
                 </AdminNavigationButton>
               </ButtonList>
             </Category>
 
             {/* Misc Category */}
             <Category>
-              <CategoryTitle>Misc</CategoryTitle>
+              <CategoryTitle>{t("categories.misc")}</CategoryTitle>
               <ButtonList>
                 <AdminNavigationButton
                   type="links"
                   onClick={() => handleNavigation("/admin/links")}
                 >
-                  Links
+                  {t("links")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
                   type="permissions"
                   onClick={() => handleNavigation("/admin/permissions")}
                 >
-                  Permissions
+                  {t("permissions")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
                   type="featureFlags"
                   onClick={() => handleNavigation("/admin/feature-flags")}
                 >
-                  Feature Flags
+                  {t("featureFlags")}
                 </AdminNavigationButton>
               </ButtonList>
             </Category>
@@ -144,7 +146,7 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
             {/* Tests Category */}
             {testRoutes.length > 0 && (
               <Category>
-                <CategoryTitle>Tests</CategoryTitle>
+                <CategoryTitle>{t("categories.tests")}</CategoryTitle>
                 <ButtonList>
                   {testRoutes.map((route) => (
                     <AdminNavigationButton
@@ -152,7 +154,7 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
                       type={isProduction ? "test-prod" : "test-dev"}
                       onClick={() => handleNavigation(route.href)}
                       disabled={isProduction}
-                      tooltip={isProduction ? "Only available in development mode" : undefined}
+                      tooltip={isProduction ? t("testTooltip") : undefined}
                     >
                       {route.label}
                     </AdminNavigationButton>

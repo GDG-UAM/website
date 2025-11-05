@@ -437,7 +437,14 @@
       "permissions": "Permissions",
       "featureFlags": "Feature Flags",
       "test-dev": "",
-      "test-prod": ""
+      "test-prod": "",
+      "categories": {
+        "articles": "Articles",
+        "events": "Events",
+        "misc": "Misc",
+        "tests": "Tests"
+      },
+      "testTooltip": "Only available in development mode"
     },
     "featureFlags": {
       "breadcrumbs": {
@@ -676,6 +683,12 @@
         "giveaways": "Giveaways",
         "manage": "Manage"
       },
+      "page": {
+        "title": "Giveaway Management",
+        "createTitle": "Create New Giveaway",
+        "editTitle": "Edit Giveaway",
+        "previewTitle": "Giveaway Preview"
+      },
       "list": {
         "title": "Title",
         "status": "Status",
@@ -753,6 +766,68 @@
         },
         "backToList": "Back to List",
         "saveConfiguration": "Save Configuration"
+      }
+    },
+    "links": {
+      "breadcrumbs": {
+        "admin": "Admin",
+        "links": "Links"
+      },
+      "page": {
+        "title": "Link Management",
+        "createTitle": "Create New Link",
+        "editTitle": "Edit Link"
+      },
+      "list": {
+        "loading": "Loading...",
+        "noLinks": "No links yet. Create one to get started!",
+        "noResults": "No links match your search",
+        "showing": "Showing {count} of {total} links",
+        "create": "Create Link",
+        "reload": "Reload",
+        "search": "Search links...",
+        "columns": {
+          "slug": "Slug",
+          "title": "Title",
+          "destination": "Destination",
+          "status": "Status",
+          "clicks": "Clicks",
+          "actions": "Actions"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "deleteConfirm": "Are you sure you want to delete the link \"/{slug}\"?",
+        "toasts": {
+          "reloaded": "List reloaded",
+          "loadError": "Couldn't load links",
+          "deleteSuccess": "Link deleted successfully",
+          "deleteError": "Failed to delete link"
+        }
+      },
+      "form": {
+        "slug": "Slug (Short URL)",
+        "slugHelp": "Only lowercase letters, numbers, and hyphens (e.g., 'discord', 'meeting-link')",
+        "destination": "Destination URL",
+        "destinationHelp": "Full URL where this link should redirect (e.g., 'https://discord.gg/xyz')",
+        "title": "Title",
+        "titleHelp": "Human-readable name for this link",
+        "description": "Description (Optional)",
+        "descriptionHelp": "Optional notes or description for internal reference",
+        "isActive": "Active",
+        "isActiveHelp": "Inactive links will return a 404 error when accessed.",
+        "save": "Save",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "backToList": "Back to List"
+      },
+      "toasts": {
+        "created": "Link created successfully",
+        "updated": "Link updated successfully",
+        "createError": "Failed to save link",
+        "updateError": "Failed to save link",
+        "loadError": "Error loading link data"
       }
     }
   },
