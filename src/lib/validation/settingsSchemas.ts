@@ -30,14 +30,14 @@ export const privacySchema = z.object({
   allowTagLinkedIn: z.boolean().default(true),
   allowMentionBlog: z.boolean().default(true),
   // virtual fields backed by User model
-  showProfilePublicly: z.boolean().default(true),
-  photoConsent: z.boolean().default(true),
-  allowAnonUsage: z.boolean().default(true)
+  // showProfilePublicly: z.boolean().default(true),
+  photoConsent: z.boolean().default(true)
+  // allowAnonUsage: z.boolean().default(true)
 });
 
 export const eventsSchema = z.object({
   dietary: z.string().max(200).optional(),
-  tshirtSize: z.enum(["XS", "S", "M", "L", "XL", "XXL"]).default("M")
+  tshirtSize: z.enum(["XS", "S", "M", "L", "XL", "XXL"]).optional()
 });
 
 export const gamesSchema = z.object({

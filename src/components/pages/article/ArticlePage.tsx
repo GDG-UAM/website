@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useRef, useState } from "react";
 import RenderMarkdown from "@/components/markdown/RenderMarkdown";
@@ -54,12 +55,11 @@ export default function ArticlePage({ type }: { type: ArticleType }) {
         notFound();
       }
       try {
-        const endpoint = canSeeAll
-          ? `/api/admin/articles/${slug}?type=${type}`
-          : `/api/articles/${slug}?type=${type}`;
-        const res = await fetch(endpoint);
-        if (!res.ok) throw new Error("Not found");
-        const data = await res.json();
+        const { data, error } = canSeeAll
+          ? await api.admin.articles({ id: slug }).get()
+          : await api.articles({ slug }).get();
+
+        if (error) throw new Error("Not found");
         if (active) setArticle(data.article || data);
       } catch {
         notFound();

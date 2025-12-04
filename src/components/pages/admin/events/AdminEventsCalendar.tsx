@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 // Calendario de Eventos (Admin)
 // - Apariencia inspirada en Google Calendar
@@ -32,7 +33,7 @@ import Modal from "@/components/Modal";
 import LocalTime from "@/components/LocalTime";
 import { useTranslations } from "next-intl";
 import { newErrorToast, newSuccessToast } from "@/components/Toast";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 // Tipos de datos mínimos para presentar eventos en el calendario
 type EventRow = {
@@ -509,12 +510,11 @@ const AdminEventsCalendar = forwardRef<AdminEventsCalendarRef, AdminEventsCalend
     const toggleStatus = useCallback(
       async (ev: EventRow, next: "published" | "draft") => {
         try {
-          const res = await fetch(`/api/admin/events/${ev._id}`, {
-            method: "PATCH",
-            headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify({ status: next })
-          });
-          if (!res.ok) throw new Error("Toggle failed");
+          const csrfToken = await getCsrfToken();
+          const { error } = await api.admin
+            .events({ id: ev._id })
+            .patch({ status: next }, { headers: { "x-csrf-token": csrfToken || "" } });
+          if (error) throw new Error("Toggle failed");
           setRows((prev) => prev.map((r) => (r._id === ev._id ? { ...r, status: next } : r)));
           setSelected((s) => (s && s._id === ev._id ? { ...s, status: next } : s));
           newSuccessToast(
@@ -533,15 +533,21 @@ const AdminEventsCalendar = forwardRef<AdminEventsCalendarRef, AdminEventsCalend
       setLoading(true);
       try {
         const [pubRes, draftRes] = await Promise.all([
-          fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=100`, {
-            cache: "no-store"
+          api.admin.events.get({
+            query: { status: "published", sort: "newest", page: 1, pageSize: 100 }
           }),
-          fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=100`, {
-            cache: "no-store"
+          api.admin.events.get({
+            query: { status: "draft", sort: "newest", page: 1, pageSize: 100 }
           })
         ]);
-        const [pubData, draftData] = await Promise.all([pubRes.json(), draftRes.json()]);
-        setRows([...(pubData.items || []), ...(draftData.items || [])]);
+
+        if (pubRes.error || draftRes.error) throw new Error("Failed to load events");
+
+        const pubItems = pubRes.data?.items || [];
+        const draftItems = draftRes.data?.items || [];
+
+        // Cast to EventRow[] as the API type might be slightly different but compatible
+        setRows([...pubItems, ...draftItems] as unknown as EventRow[]);
         loadedRef.current = true;
       } catch (e) {
         setRows([]);

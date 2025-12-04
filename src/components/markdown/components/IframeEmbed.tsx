@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -226,12 +227,11 @@ export default function IframeEmbed({
 
     const fetchTitle = async () => {
       try {
-        const response = await fetch(`/api/fetch-page-title?url=${encodeURIComponent(url)}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.title) {
-            setFetchedTitle(data.title);
-          }
+        const { data, error } = await api["fetch-page-title"].get({
+          query: { url }
+        });
+        if (!error && data?.title) {
+          setFetchedTitle(data.title);
         }
       } catch (err) {
         // Silently fail, will use hostname as fallback

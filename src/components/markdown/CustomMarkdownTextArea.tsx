@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
@@ -556,15 +557,14 @@ export default function CustomMarkdownTextArea({
     if (dropdownMode !== "mention") return;
     let ignore = false;
     const timer = setTimeout(async () => {
-      const params = new URLSearchParams();
-      if (q) params.set("q", q);
-      params.set("pageSize", "10");
       try {
-        const res = await fetch(`/api/admin/users?${params.toString()}`, {
-          credentials: "include"
+        const { data, error } = await api.admin.users.get({
+          query: {
+            q: q || undefined,
+            pageSize: 10
+          }
         });
-        if (!res.ok) return;
-        const data = (await res.json()) as { items: UserLite[] };
+        if (error) return;
         if (!ignore) setList(data.items || []);
       } catch {}
     }, 150);

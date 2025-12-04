@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Stack, Typography, TextField, InputAdornment, Avatar, Divider } from "@mui/material";
 import { FaExclamationCircle } from "react-icons/fa";
@@ -332,9 +333,8 @@ const ProfileSection: React.FC<{
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/settings?previews=1", { credentials: "include" });
-        if (!res.ok) return;
-        const data = await res.json();
+        const { data, error } = await api.settings.get({ query: { previews: "1" } });
+        if (error) return;
         mutate(async () => data, { revalidate: false });
       } catch {}
     })();
@@ -550,14 +550,16 @@ const ProfileSection: React.FC<{
                       if (downloading || onCooldown) return;
                       try {
                         setDownloading(true);
-                        const res = await fetch("/api/users/export", { method: "GET" });
-                        if (res.status === 429) {
-                          const j = (await res.json().catch(() => ({}))) as
-                            | { nextAvailable?: string }
-                            | undefined;
-                          if (j?.nextAvailable) setCooldownUntil(j.nextAvailable);
-                        } else if (res.ok) {
-                          const blob = await res.blob();
+                        const { data, error, response } = await api.users.export.get();
+
+                        if (error) {
+                          if (error.status === 429) {
+                            const j = error.value as { nextAvailable?: string };
+                            if (j?.nextAvailable) setCooldownUntil(j.nextAvailable);
+                          }
+                        } else if (data) {
+                          // data is Blob/ArrayBuffer
+                          const blob = new Blob([data]);
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement("a");
                           a.href = url;
@@ -567,7 +569,7 @@ const ProfileSection: React.FC<{
                           a.remove();
                           URL.revokeObjectURL(url);
                           const headerNext =
-                            res.headers.get("X-Data-Export-Next-Allowed") || undefined;
+                            response.headers.get("X-Data-Export-Next-Allowed") || undefined;
                           if (headerNext) setCooldownUntil(headerNext);
                         }
                       } finally {
@@ -584,11 +586,8 @@ const ProfileSection: React.FC<{
                     onClick={async () => {
                       setShowDeleteModal(true);
                       try {
-                        const r = await fetch("/api/users", { method: "GET" });
-                        if (r.ok) {
-                          const j = (await r.json()) as { token?: string };
-                          if (j?.token) setCsrfToken(j.token);
-                        }
+                        const { data } = await api.csrf.get();
+                        if (data?.token) setCsrfToken(data.token);
                       } catch {}
                     }}
                   >
@@ -617,21 +616,18 @@ const ProfileSection: React.FC<{
                         let token = csrfToken;
                         if (!token) {
                           try {
-                            const r = await fetch("/api/users", { method: "GET" });
-                            if (r.ok) {
-                              const j = (await r.json()) as { token?: string };
-                              if (j?.token) {
-                                token = j.token;
-                                setCsrfToken(j.token);
-                              }
+                            const { data } = await api.csrf.get();
+                            if (data?.token) {
+                              token = data.token;
+                              setCsrfToken(data.token);
                             }
                           } catch {}
                         }
-                        const res = await fetch("/api/users", {
-                          method: "DELETE",
-                          headers: token ? { "x-csrf-token": token } : undefined
+                        const { error } = await api.users.delete(null, {
+                          headers: { "x-csrf-token": token || "" }
                         });
-                        if (res.ok) {
+
+                        if (!error) {
                           try {
                             const { signOut } = await import("next-auth/react");
                             await signOut({ callbackUrl: "/" });

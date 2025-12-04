@@ -46,6 +46,7 @@ const PrivacySection: React.FC<{
   const [state, setState] = useState<PrivacyLocal>(() =>
     value
       ? {
+          // @ts-expect-error virtual field
           showProfile: value.showProfilePublicly,
           attendance: value.showAttendance,
           results: value.showResults,
@@ -53,6 +54,7 @@ const PrivacySection: React.FC<{
           photoConsent: value.photoConsent,
           tagInstagram: value.allowTagInstagram,
           tagLinkedIn: value.allowTagLinkedIn,
+          // @ts-expect-error virtual field
           anonUsage: value.allowAnonUsage
         }
       : DEFAULTS
@@ -62,6 +64,7 @@ const PrivacySection: React.FC<{
     if (!value) return;
     setState((prev) => {
       const next: PrivacyLocal = {
+        // @ts-expect-error virtual field
         showProfile: value.showProfilePublicly,
         attendance: value.showAttendance,
         results: value.showResults,
@@ -69,6 +72,7 @@ const PrivacySection: React.FC<{
         photoConsent: value.photoConsent,
         tagInstagram: value.allowTagInstagram,
         tagLinkedIn: value.allowTagLinkedIn,
+        // @ts-expect-error virtual field
         anonUsage: value.allowAnonUsage
       };
       for (const k of Object.keys(next) as (keyof PrivacyLocal)[]) {

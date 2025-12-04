@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -16,7 +17,6 @@ import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import config from "@/lib/config";
 import { useTranslations } from "next-intl";
 import { newErrorToast, newSuccessToast } from "@/components/_toasts/toastEmitter";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
 
 const Wrapper = styled.div`
   padding: 24px;
@@ -96,15 +96,19 @@ export default function PermissionsPage() {
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
 
   const load = useCallback(async () => {
-    const res = await fetch(
-      `/api/admin/users?q=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}`
-    );
-    const data = await res.json();
+    const { data, error } = await api.admin.users.get({
+      query: {
+        q: search,
+        page: page,
+        pageSize: pageSize
+      }
+    });
+    if (error) {
+      newErrorToast(t("toasts.loadError"));
+      return;
+    }
     setRows(data.items || []);
     setTotal(data.total || 0);
-    if (!res.ok) {
-      newErrorToast(t("toasts.loadError"));
-    }
   }, [search, page, pageSize, t]);
 
   useEffect(() => {
@@ -129,12 +133,12 @@ export default function PermissionsPage() {
   const updateRole = async (id: string, role: "user" | "team" | "admin") => {
     const prev = rows.find((r) => r._id === id)?.role;
     setRows((prevRows) => prevRows.map((r) => (r._id === id ? { ...r, role } : r)));
-    const res = await fetch(`/api/admin/users`, {
-      method: "PATCH",
-      headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({ id, role })
-    });
-    if (!res.ok) {
+
+    // Assuming the API expects { id, role } in the body for PATCH /api/admin/users
+    // If the previous implementation was PATCH /api/admin/users with body { id, role }
+    const { error } = await api.admin.users.patch({ id, role });
+
+    if (error) {
       newErrorToast(t("toasts.updateError"));
       // revert
       setRows((prevRows) =>

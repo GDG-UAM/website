@@ -1,9 +1,10 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React from "react";
 import { RenderMarkdown } from "@/components/markdown/RenderMarkdown";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 const baseText = `# h1 Heading
 ## h2 Heading
@@ -192,14 +193,13 @@ export default function AdminMarkdownTestPage() {
     setPending(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/markdown", {
-        method: "POST",
-        headers: await withCsrfHeaders({ "content-type": "application/json" }),
-        body: JSON.stringify({ text: md })
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setHtml(String(data.html || ""));
+      const token = await getCsrfToken();
+      const headers = { "x-csrf-token": token || "" };
+      const { data, error } = await api.admin.markdown.post(md, { headers });
+      if (error)
+        // @ts-expect-error value.error may not exist
+        throw new Error(typeof error === "string" ? error : error?.value?.error || "Error");
+      setHtml(String(data || ""));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e ?? ""));
     } finally {

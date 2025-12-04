@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
@@ -11,7 +12,7 @@ import {
 } from "@/components/Buttons";
 import { TextField, Checkbox, Chip } from "@mui/material";
 import { useTranslations } from "next-intl";
-import { IArticle, ArticleStatus } from "@/lib/models/Article";
+import { ArticleStatus } from "@/lib/models/Article";
 import { newErrorToast, newInfoToast } from "@/components/Toast";
 
 const Wrapper = styled.div`
@@ -121,6 +122,17 @@ const RowActions = styled.div`
   gap: 6px;
 `;
 
+interface ArticleInterface {
+  _id: string;
+  type: "blog" | "newsletter";
+  title: string;
+  slug: string;
+  status: ArticleStatus;
+  views: number;
+  createdAt: Date;
+  publishedAt: Date;
+}
+
 function ArticleList({
   onCreate,
   onEdit,
@@ -137,7 +149,7 @@ function ArticleList({
   refreshToken?: number;
 }) {
   const t = useTranslations("admin.articles.list");
-  const [rows, setRows] = useState<IArticle[]>([]);
+  const [rows, setRows] = useState<ArticleInterface[]>([]);
   const [search, setSearch] = useState("");
   const [includeContentInSearch, setIncludeContentInSearch] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -146,20 +158,26 @@ function ArticleList({
     async (notify?: boolean) => {
       try {
         setLoading(true);
-        const res = await fetch(
-          `/api/admin/articles?q=${encodeURIComponent(search)}&page=1&pageSize=50&type=${type}&includeContentInSearch=${includeContentInSearch}`
-        );
-        const data = await res.json();
+        const { data, error } = await api.admin.articles.get({
+          query: {
+            q: encodeURIComponent(search),
+            page: 1,
+            pageSize: 50,
+            type,
+            includeContentInSearch: includeContentInSearch.toString()
+          }
+        });
+        if (error) throw error;
         setRows(
-          (data || []).map((x: IArticle) => ({
+          data.items.map((x) => ({
             _id: x._id,
             type: x.type,
-            title: x.title as unknown as string,
+            title: x.title,
             slug: x.slug,
             status: x.status,
             views: x.views,
-            createdAt: x.createdAt,
-            publishedAt: x.publishedAt
+            createdAt: new Date(x.createdAt),
+            publishedAt: new Date(x.publishedAt || "")
           }))
         );
         if (notify) {

@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React from "react";
 import Image from "next/image";
@@ -202,23 +203,31 @@ export default function UserProfileClient(context: { params: Promise<{ id: strin
   const canSeePrivate = Boolean(
     (session as SessionWithFlags)?.user?.flags?.["profile-see-private-profiles"]
   );
-  const fetcher = async (url: string) => {
-    const res = await fetch(url, { cache: "no-store" });
-    if (res.ok) return res.json();
-    const err = new Error("Failed to load profile") as HttpError;
-    err.status = res.status;
-    throw err;
+  const fetcher = async ([userId, privateAccess]: [string, boolean]) => {
+    const { data, error } = privateAccess
+      ? await api.admin.users({ id: userId }).get()
+      : await api.users({ id: userId }).get();
+
+    if (error) {
+      const err = new Error("Failed to load profile") as HttpError;
+      err.status = error.status;
+      throw err;
+    }
+    return data;
   };
 
-  const endpoint = id ? (canSeePrivate ? `/api/admin/users/${id}` : `/api/users/${id}`) : null;
-  const { data, error, isLoading } = useSWR<UserProfileDTO>(endpoint, fetcher, {
-    // Keep UI snappy without excessive refetching
-    revalidateOnFocus: false,
-    revalidateOnReconnect: true,
-    dedupingInterval: 5000,
-    errorRetryCount: 2,
-    errorRetryInterval: 1500
-  });
+  const { data, error, isLoading } = useSWR<UserProfileDTO>(
+    id ? [id, canSeePrivate] : null,
+    fetcher,
+    {
+      // Keep UI snappy without excessive refetching
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+      errorRetryCount: 2,
+      errorRetryInterval: 1500
+    }
+  );
 
   if ((error as HttpError)?.status === 404) return <NotFound />;
 

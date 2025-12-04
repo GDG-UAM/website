@@ -7,12 +7,13 @@ import {
   categorySchemas
 } from "@/lib/validation/settingsSchemas";
 import { z } from "zod";
+import { api } from "@/lib/eden";
 
-async function jsonFetcher(url: string) {
-  const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error(`Failed ${res.status}`);
-  return res.json();
-}
+const settingsFetcher = async () => {
+  const { data, error } = await api.settings.get();
+  if (error) throw error;
+  return data;
+};
 
 interface SettingsContextValue {
   settings: UserSettingsDTO | null;
@@ -36,9 +37,13 @@ const SettingsContext = createContext<SettingsContextValue | undefined>(undefine
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Base fetch without previews; SettingsClient can fetch previews explicitly
-  const { data, error, isLoading, mutate } = useSWR<UserSettingsDTO>("/api/settings", jsonFetcher, {
-    revalidateOnFocus: false
-  });
+  const { data, error, isLoading, mutate } = useSWR<UserSettingsDTO>(
+    "/api/settings",
+    settingsFetcher,
+    {
+      revalidateOnFocus: false
+    }
+  );
   const [pending, setPending] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [lastValidationError, setLastValidationError] = useState<string | null>(null);
@@ -63,14 +68,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Optimistic update
         mutate(
           async () => {
-            const res = await fetch(`/api/settings/${category}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(patch)
-            });
-            if (!res.ok) throw new Error("Update failed");
-            const updated = await res.json();
-            return updated;
+            const { data, error } = await api.settings({ category }).patch(patch);
+            if (error) throw new Error("Update failed");
+            return data;
           },
           { revalidate: false }
         );

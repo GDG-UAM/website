@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
@@ -11,8 +12,8 @@ import {
 } from "@/components/Buttons";
 import { Chip, TextField } from "@mui/material";
 import { newErrorToast, newInfoToast, newSuccessToast } from "@/components/Toast";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
 import { useTranslations } from "next-intl";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 const Wrapper = styled.div`
   display: grid;
@@ -159,12 +160,11 @@ export function LinkList({
     async (notify?: boolean) => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/links?pageSize=100`, {
-          cache: "no-store"
+        const { data, error } = await api.admin.links.get({
+          query: { pageSize: 100 }
         });
 
-        if (res.ok) {
-          const data = await res.json();
+        if (!error && data) {
           setRows(data.items || []);
           if (notify) {
             newInfoToast(tToasts("reloaded"));
@@ -203,17 +203,15 @@ export function LinkList({
     if (!confirm(t("deleteConfirm", { slug }))) return;
 
     try {
-      const res = await fetch(`/api/admin/links/${id}`, {
-        method: "DELETE",
-        headers: await withCsrfHeaders({})
-      });
+      const token = await getCsrfToken();
+      const headers = { "x-csrf-token": token || "" };
+      const { error } = await api.admin.links({ id }).delete(null, { headers });
 
-      if (res.ok) {
+      if (!error) {
         newSuccessToast(tToasts("deleteSuccess"));
         load();
       } else {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to delete link");
+        throw new Error("Failed to delete link");
       }
     } catch (e) {
       console.error("Delete error:", e);

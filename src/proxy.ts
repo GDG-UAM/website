@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { treaty } from "@elysiajs/eden";
+import type { App } from "@/elysia";
 
 const NEXTAUTH_SECRET = process.env.SESSION_SECRET;
 
@@ -7,7 +9,8 @@ const NEXTAUTH_SECRET = process.env.SESSION_SECRET;
 const ROUTE_PERMISSIONS = {
   "/settings": "user",
   "/admin": "team",
-  "/api/admin": "team"
+  "/api/admin": "team",
+  "/api/docs": "team"
 };
 
 // Routes that are completely public
@@ -214,6 +217,9 @@ export async function proxy(request: NextRequest) {
 
   // If route requires authentication but user is not logged in
   if (isProtectedRoute(pathname) && !token?.email) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     console.log(`[Middleware] Redirecting unauthenticated user to login`);
     return createRedirectResponse(request, "/login");
   }
@@ -346,12 +352,8 @@ function emitApiTelemetry(
     };
 
     const origin = request.nextUrl.origin;
-    void fetch(`${origin}/api/telemetry`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      cache: "no-store",
-      body: JSON.stringify([event])
-    }).catch(() => {});
+    const api = treaty<App>(origin).api;
+    void api.telemetry.post([event]).catch(() => {});
   } catch {
     // ignore
   }

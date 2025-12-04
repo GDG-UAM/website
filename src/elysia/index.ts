@@ -17,7 +17,55 @@ import { otherRoutes } from "./routes/other";
 
 export const app = new Elysia({ prefix: "/api" })
   .use(cors())
-  .use(swagger())
+  .use(
+    swagger({
+      path: "/docs",
+      documentation: {
+        info: {
+          title: "GDG UAM API",
+          version: "1.0.0",
+          description: "GDG UAM API"
+        }
+      },
+      version: "1.0.0",
+      autoDarkMode: false,
+      scalarConfig: {
+        darkMode: false,
+        forceDarkModeState: "light",
+        hideDarkModeToggle: true,
+        layout: "modern",
+        telemetry: false,
+        searchHotKey: "f",
+        theme: "bluePlanet",
+        showDeveloperTools: "never",
+        hiddenClients: {
+          http: false,
+          javascript: false,
+          node: false,
+          powershell: false,
+          shell: false,
+          c: true,
+          clojure: true,
+          csharp: true,
+          go: true,
+          java: true,
+          kotlin: true,
+          objc: true,
+          ocaml: true,
+          php: true,
+          python: true,
+          r: true,
+          ruby: true,
+          swift: true,
+          // @ts-expect-error definition error, but works properly
+          fsharp: true,
+          rust: true,
+          dart: true
+        },
+        customCss: "div:has(> a.open-api-client-button) { display: none !important; }"
+      }
+    })
+  )
   .use(articlesRoutes)
   .use(usersRoutes)
   .use(adminRoutes)
@@ -30,5 +78,6 @@ export const app = new Elysia({ prefix: "/api" })
   .use(settingsRoutes)
   .use(teamRoutes)
   .use(telemetryRoutes)
-  .use(otherRoutes)
-  .get("/", () => "Hello Elysia");
+  .use(otherRoutes);
+
+export type App = typeof app;

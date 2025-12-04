@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
@@ -6,7 +7,7 @@ import styled from "styled-components";
 import TextField from "@mui/material/TextField";
 import { OpenSocialButton, SendButton, PlainButton } from "@/components/Buttons";
 import FAQ from "@/components/pages/contact/FAQ";
-import { withAnonymousCsrfHeaders } from "@/lib/security/csrfClient";
+import { getAnonymousCsrfToken } from "@/lib/security/csrfClient";
 import { useSession } from "next-auth/react";
 
 const PageContainer = styled.div`
@@ -210,13 +211,10 @@ export const ContactForm: React.FC<{ csrfToken?: string }> = () => {
     }
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: await withAnonymousCsrfHeaders({ "Content-Type": "application/json" }),
-        credentials: "include",
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
+      const token = await getAnonymousCsrfToken();
+      const headers = { "x-csrf-token": token || "" };
+      const { error } = await api.contact.post(payload, { headers });
+      if (!error) {
         setName("");
         setTouchedName(false);
         setEmail("");

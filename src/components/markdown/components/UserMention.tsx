@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -90,24 +91,31 @@ export default React.memo(function UserMention({
 
     const fetchData = async () => {
       try {
-        let res: Response;
+        let data: MentionResponse | null = null;
+        let error;
+
         if (isAdmin) {
-          res = await fetch(`/api/admin/users/mentions/${encodeURIComponent(userId)}`);
+          const res = await api.admin.users.mentions({ id: userId }).get();
+          data = res.data;
+          error = res.error;
         } else {
-          res = await fetch(`/api/users/mentions/${encodeURIComponent(userId)}`);
+          const res = await api.users.mentions({ id: userId }).get();
+          data = res.data;
+          error = res.error;
         }
-        if (!res.ok) {
+
+        if (error) {
           if (!ignore) {
             setData({});
             setLoading(false);
           }
           return;
         }
-        const json = (await res.json()) as MentionResponse;
+
         if (!ignore) {
-          setData(json);
+          setData(data as MentionResponse);
           setLoading(false);
-          userMentionCache.set(cacheKey, json);
+          userMentionCache.set(cacheKey, data as MentionResponse);
         }
       } catch {
         if (!ignore) {

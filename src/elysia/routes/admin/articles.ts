@@ -92,10 +92,7 @@ export const adminArticlesRoutes = new Elysia({ prefix: "/articles" })
         NEXT_LANG: t.Optional(t.String())
       }),
       response: {
-        200: t.Union([
-          AdminArticlesListResponse,
-          t.Array(t.Any()) // For localized list
-        ]),
+        200: AdminArticlesListResponse,
         500: t.Object({ error: t.String() })
       }
     }

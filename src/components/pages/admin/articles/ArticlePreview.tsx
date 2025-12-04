@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useState } from "react";
 import RenderMarkdown from "@/components/markdown/RenderMarkdown";
@@ -22,8 +23,8 @@ export default function ArticlePreview({ type, id }: { type: "blog" | "newslette
     };
     (async () => {
       try {
-        const res = await fetch(`/api/admin/articles/${id}`);
-        const data = await res.json();
+        const { data, error } = await api.admin.articles({ id }).get();
+        if (error) throw error;
         if (active) setMarkdown(pickLocalized(data?.content) || "");
       } catch {
         if (active) setMarkdown("<p>Failed to load preview.</p>");

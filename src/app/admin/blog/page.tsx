@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -9,7 +10,7 @@ import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/_toasts/toastEmitter";
 import { useTranslations } from "next-intl";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { getCsrfToken } from "next-auth/react";
 
 export default function AdminBlogManagePage() {
   const t = useTranslations("admin.articles.toasts");
@@ -41,8 +42,11 @@ export default function AdminBlogManagePage() {
   React.useEffect(() => {
     if (mode === "edit" && editingId) {
       (async () => {
-        const res = await fetch(`/api/admin/articles/${editingId}?full=true`);
-        const data = await res.json();
+        const { data, error } = await api.admin.articles({ id: editingId }).get({
+          query: { full: "true" }
+        });
+        if (error || !data) return;
+
         const toLocalInput = (iso?: string | null) => {
           if (!iso) return "";
           const d = new Date(iso);
@@ -67,16 +71,16 @@ export default function AdminBlogManagePage() {
   }, [mode, editingId]);
 
   const handleCreate = async (data: ArticleFormData) => {
-    const res = await fetch("/api/admin/articles", {
-      method: "POST",
-      headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({
-        ...data,
-        type: "blog",
-        publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : null
-      })
-    });
-    if (res.ok) {
+    const payload = {
+      ...data,
+      type: "blog" as const,
+      publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : undefined
+    };
+    const token = await getCsrfToken();
+    const headers = { "x-csrf-token": token || "" };
+    const { error } = await api.admin.articles.post(payload, { headers });
+
+    if (!error) {
       newSuccessToast(t("created"));
       goList();
     } else {
@@ -86,16 +90,16 @@ export default function AdminBlogManagePage() {
 
   const handleEdit = async (data: ArticleFormData) => {
     if (!editingId) return;
-    const res = await fetch(`/api/admin/articles/${editingId}`, {
-      method: "PATCH",
-      headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify({
-        ...data,
-        type: "blog",
-        publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : null
-      })
-    });
-    if (res.ok) {
+    const payload = {
+      ...data,
+      type: "blog" as const,
+      publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString() : undefined
+    };
+    const token = await getCsrfToken();
+    const headers = { "x-csrf-token": token || "" };
+    const { error } = await api.admin.articles({ id: editingId }).patch(payload, { headers });
+
+    if (!error) {
       newSuccessToast(t("updated"));
       goList();
     } else {
@@ -104,11 +108,10 @@ export default function AdminBlogManagePage() {
   };
 
   const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/admin/articles/${id}`, {
-      method: "DELETE",
-      headers: await withCsrfHeaders()
-    });
-    if (res.ok) {
+    const token = await getCsrfToken();
+    const headers = { "x-csrf-token": token || "" };
+    const { error } = await api.admin.articles({ id }).delete(null, { headers });
+    if (!error) {
       newSuccessToast(t("deleted"));
       goList();
     } else {

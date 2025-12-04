@@ -3,10 +3,10 @@ import { t } from "elysia";
 export const AdminArticleItem = t.Object({
   _id: t.Any(), // ObjectId
   type: t.Union([t.Literal("newsletter"), t.Literal("blog")]),
-  title: t.Record(t.String(), t.String()),
+  title: t.String(),
   slug: t.String(),
-  excerpt: t.Optional(t.Record(t.String(), t.String())),
-  content: t.Record(t.String(), t.String()),
+  excerpt: t.Optional(t.String()),
+  content: t.String(),
   coverImage: t.Optional(t.String()),
   status: t.Union([t.Literal("draft"), t.Literal("published")]),
   authors: t.Array(t.String()),

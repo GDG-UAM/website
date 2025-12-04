@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useState } from "react";
 import { TextField, Chip, CircularProgress, Autocomplete } from "@mui/material";
@@ -39,14 +40,13 @@ export default function UserSelect({
     async function run() {
       setLoading(true);
       try {
-        const params = new URLSearchParams();
-        if (query) params.set("q", query);
-        params.set("pageSize", "20");
-        const res = await fetch(`/api/admin/users?${params.toString()}`, {
-          credentials: "include"
+        const { data, error } = await api.admin.users.get({
+          query: {
+            q: query || undefined,
+            pageSize: 20
+          }
         });
-        if (!res.ok) return;
-        const data = (await res.json()) as { items: UserLite[] };
+        if (error) return;
         if (!ignore) setOptions(data.items || []);
       } finally {
         if (!ignore) setLoading(false);

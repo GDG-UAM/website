@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 // Minimal telemetry client with consent gating, batching, and beacon flush.
 
@@ -65,12 +66,9 @@ async function flush() {
     const blob = new Blob([JSON.stringify(batch)], { type: "application/json" });
     const sent = navigator.sendBeacon?.("/api/telemetry", blob);
     if (!sent) {
-      await fetch("/api/telemetry", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(batch),
-        keepalive: true
-      });
+      if (!sent) {
+        await api.telemetry.post(batch);
+      }
     }
   } catch {
     // requeue on failure (bounded)

@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 import React, { useEffect, useMemo, useState } from "react";
 import { Box, Checkbox, Stack, Typography } from "@mui/material";
 import type { ExperimentalSettings } from "@/lib/validation/settingsSchemas";
@@ -40,12 +41,12 @@ const ExperimentalSection: React.FC<{
   useEffect(() => {
     let aborted = false;
     setLoading(true);
-    fetch("/api/feature-flags")
-      .then((r) => r.json())
-      .then((j) => {
-        if (!aborted && Array.isArray(j.items))
+    api["feature-flags"]
+      .get()
+      .then(({ data }) => {
+        if (!aborted && data && Array.isArray(data.items))
           setFlags(
-            (j.items as Array<Record<string, unknown>>).map((f) => ({
+            (data.items as Array<Record<string, unknown>>).map((f) => ({
               key: String(f.key),
               environment: (f.environment as FlagListItem["environment"]) || "development",
               name: typeof f.name === "string" ? f.name : undefined,

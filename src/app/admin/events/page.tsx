@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { useRef, useState } from "react";
 import styled from "styled-components";
@@ -8,8 +9,8 @@ import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/Toast";
 import AdminEventsCalendar from "@/components/pages/admin/events/AdminEventsCalendar";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
 import { useTranslations } from "next-intl";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 const Container = styled.div`
   padding: 20px;
@@ -68,9 +69,8 @@ export default function AdminEventsManagePage() {
 
   const handleEdit = async (id: string) => {
     setEditingId(id);
-    const res = await fetch(`/api/admin/events/${id}`);
-    if (res.ok) {
-      const data = await res.json();
+    const { data, error } = await api.admin.events({ id }).get();
+    if (!error && data) {
       // Input datetime-local needs a format (YYYY-MM-DDTHH:mm)
       const toLocalInput = (iso?: string | null) => {
         if (!iso) return "";
@@ -81,7 +81,7 @@ export default function AdminEventsManagePage() {
           d.getHours()
         )}:${pad(d.getMinutes())}`;
       };
-      setInitialData({ ...data, date: toLocalInput(data.date) });
+      setInitialData({ ...data, date: toLocalInput(data.date.toISOString()) });
       setMode("edit");
     } else {
       newErrorToast("Error al cargar los datos del evento.");
@@ -90,34 +90,39 @@ export default function AdminEventsManagePage() {
 
   const handleSubmit = async (data: EventFormData) => {
     setSubmitting(true);
-    // If creator mode -> new event, If editor mode -> update event
-    const url = mode === "create" ? "/api/admin/events" : `/api/admin/events/${editingId}`;
-    const method = mode === "create" ? "POST" : "PATCH";
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({
-          ...data,
-          // data.date is in datetime-local format (local time). Convert safely to ISO.
-          date: (() => {
-            const v = data.date;
-            if (!v) return null;
-            const d = new Date(v);
-            if (isNaN(d.getTime())) return null;
-            return d.toISOString();
-          })()
-        })
-      });
-      if (res.ok) {
+      const payload = {
+        ...data,
+        // data.date is in datetime-local format (local time). Convert safely to ISO.
+        date: (() => {
+          const v = data.date;
+          if (!v) return "";
+          const d = new Date(v);
+          if (isNaN(d.getTime())) return "";
+          return d.toISOString();
+        })()
+      };
+
+      let error;
+      const token = await getCsrfToken();
+      const headers = { "x-csrf-token": token || "" };
+      if (mode === "create") {
+        const res = await api.admin.events.post(payload, { headers });
+        error = res.error;
+      } else {
+        const res = await api.admin.events({ id: editingId! }).patch(payload, { headers });
+        error = res.error;
+      }
+
+      if (!error) {
         newSuccessToast(
           mode === "create" ? "Evento creado con éxito" : "Evento actualizado con éxito"
         );
         goToList();
       } else {
-        const errorData = await res.json();
-        newErrorToast(errorData.error || "Ocurrió un error.");
+        const errorMsg = typeof error === "string" ? error : error?.value?.error;
+        newErrorToast(errorMsg || "Ocurrió un error.");
       }
     } catch {
       newErrorToast("No se pudo conectar con el servidor.");
@@ -127,11 +132,11 @@ export default function AdminEventsManagePage() {
   };
 
   const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/admin/events/${id}`, {
-      method: "DELETE",
-      headers: await withCsrfHeaders()
-    });
-    if (res.ok) {
+    const csrfToken = await getCsrfToken();
+    const { error } = await api.admin
+      .events({ id })
+      .delete(null, { headers: { "x-csrf-token": csrfToken || "" } });
+    if (!error) {
       newSuccessToast("Evento eliminado con éxito.");
       goToList();
     } else {

@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useState, useMemo } from "react";
 import styled from "styled-components";
@@ -204,26 +205,25 @@ export default function BlurHashTestPage() {
     setResult(null);
 
     try {
-      const res = await fetch("/api/admin/tests/blurhash", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() })
-      });
+      const { data, error } = await api.admin.tests.blurhash.post({ url: url.trim() });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to generate BlurHash");
+      if (error) {
+        setError(
+          // @ts-expect-error value.error may not exist
+          typeof error === "string" ? error : error?.value?.error || "Failed to generate BlurHash"
+        );
         return;
       }
 
-      setResult({
-        originalUrl: url.trim(),
-        blurHash: data.blurHash,
-        width: data.width,
-        height: data.height,
-        processingTime: data.processingTime
-      });
+      if (data) {
+        setResult({
+          originalUrl: url.trim(),
+          blurHash: data.blurHash,
+          width: data.width,
+          height: data.height,
+          processingTime: data.processingTime
+        });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "An error occurred");
     } finally {

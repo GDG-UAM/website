@@ -54,7 +54,11 @@ export default function UserGiveawaysPage() {
                 description={g.description}
                 joinedAtNode={t.rich("joinedAt", {
                   date: () => (
-                    <LocalTime iso={p.entry.createdAt} dateOnly={false} options={dateTimeOptions} />
+                    <LocalTime
+                      iso={p.entry.createdAt.toISOString()}
+                      dateOnly={false}
+                      options={dateTimeOptions}
+                    />
                   )
                 })}
                 statusLabel={statusLabel}

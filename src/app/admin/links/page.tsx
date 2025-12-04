@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useState } from "react";
 import styled from "styled-components";
@@ -7,8 +8,8 @@ import { LinkForm, LinkFormData } from "@/app/admin/links/LinkForm";
 import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/Toast";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
 import { useTranslations } from "next-intl";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 const Container = styled.div`
   padding: 20px;
@@ -54,9 +55,8 @@ export default function AdminLinksManagePage() {
 
   const handleEdit = async (id: string) => {
     setEditingId(id);
-    const res = await fetch(`/api/admin/links/${id}`);
-    if (res.ok) {
-      const data = await res.json();
+    const { data, error } = await api.admin.links({ id }).get();
+    if (!error && data) {
       setInitialData(data);
       setMode("edit");
     } else {
@@ -66,23 +66,27 @@ export default function AdminLinksManagePage() {
 
   const handleSubmit = async (data: LinkFormData) => {
     setSubmitting(true);
-    const url = mode === "create" ? "/api/admin/links" : `/api/admin/links/${editingId}`;
-    const method = mode === "create" ? "POST" : "PATCH";
 
     try {
-      const res = await fetch(url, {
-        method,
-        headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(data)
-      });
+      const token = await getCsrfToken();
+      const headers = { "x-csrf-token": token || "" };
 
-      if (res.ok) {
+      let error;
+      if (mode === "create") {
+        const res = await api.admin.links.post(data, { headers });
+        error = res.error;
+      } else {
+        const res = await api.admin.links({ id: editingId! }).patch(data, { headers });
+        error = res.error;
+      }
+
+      if (!error) {
         newSuccessToast(mode === "create" ? tToasts("created") : tToasts("updated"));
         goToList();
       } else {
-        const errorData = await res.json();
+        const errorMsg = typeof error === "string" ? error : error?.value?.error;
         newErrorToast(
-          errorData.error || (mode === "create" ? tToasts("createError") : tToasts("updateError"))
+          errorMsg || (mode === "create" ? tToasts("createError") : tToasts("updateError"))
         );
       }
     } catch (error) {

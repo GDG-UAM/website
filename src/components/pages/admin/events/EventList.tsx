@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
@@ -16,7 +17,7 @@ import { Chip, TextField, MenuItem } from "@mui/material";
 import { useTranslations } from "next-intl";
 import LocalTime from "@/components/LocalTime";
 import { newErrorToast, newInfoToast, newSuccessToast } from "@/components/Toast";
-import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 const Wrapper = styled.div`
   display: grid;
@@ -145,17 +146,20 @@ export function EventList({
       setLoading(true);
       // Fetch both published and draft to show everything in admin without changing the API
       const [pubRes, draftRes] = await Promise.all([
-        fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=100`, {
-          cache: "no-store"
+        api.admin.events.get({
+          query: { status: "published", sort: "newest", page: 1, pageSize: 100 }
         }),
-        fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=100`, {
-          cache: "no-store"
+        api.admin.events.get({
+          query: { status: "draft", sort: "newest", page: 1, pageSize: 100 }
         })
       ]);
 
-      const [pubData, draftData] = await Promise.all([pubRes.json(), draftRes.json()]);
+      if (pubRes.error || draftRes.error) throw new Error("Failed to load events");
 
-      const items = [...(pubData.items || []), ...(draftData.items || [])] as EventRow[];
+      const pubItems = pubRes.data?.items || [];
+      const draftItems = draftRes.data?.items || [];
+
+      const items = [...pubItems, ...draftItems] as unknown as EventRow[];
       setRows(items);
       if (notify) {
         newInfoToast("List reloaded");
@@ -221,17 +225,17 @@ export function EventList({
 
   const toggleStatus = useCallback(
     async (id: string, next: "draft" | "published") => {
-      const res = await fetch(`/api/admin/events/${id}`, {
-        method: "PATCH",
-        headers: await withCsrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ status: next })
-      });
-      if (!res.ok) {
-        console.error("Failed to toggle status", res.status);
+      const csrfToken = await getCsrfToken();
+      const { error } = await api.admin
+        .events({ id })
+        .patch({ status: next }, { headers: { "x-csrf-token": csrfToken || "" } });
+
+      if (error) {
+        console.error("Failed to toggle status", error);
         newErrorToast(t("toasts.toggleError", { defaultValue: "Couldn't update status" }));
       }
       await load();
-      if (res.ok) {
+      if (!error) {
         if (next === "published") {
           newSuccessToast(t("toasts.publishSuccess", { defaultValue: "Event published" }));
         } else {

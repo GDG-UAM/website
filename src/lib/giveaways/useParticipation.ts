@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import useSWR, { SWRConfiguration } from "swr";
 
@@ -8,14 +9,14 @@ type ParticipationItem = {
     title: string;
     description?: string;
     status: "draft" | "active" | "paused" | "closed" | "cancelled";
-    startAt?: string | null;
-    endAt?: string | null;
+    startAt?: Date | null;
+    endAt?: Date | null;
     durationS?: number | null;
     remainingS?: number | null;
   };
   entry: {
     _id: string;
-    createdAt: string;
+    createdAt: Date;
   };
 };
 
@@ -26,15 +27,15 @@ type ParticipationResponse = {
   participations?: ParticipationItem[];
 };
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error(await res.text().catch(() => res.statusText));
-  return (await res.json()) as ParticipationResponse;
+const fetcher = async () => {
+  const { data, error } = await api.giveaways.participating.get();
+  if (error) throw error;
+  return data as ParticipationResponse;
 };
 
 export function useGiveawaysParticipation(config?: SWRConfiguration) {
   const { data, error, isValidating, mutate } = useSWR<ParticipationResponse>(
-    "/api/giveaways/participating",
+    "giveaways-participation",
     fetcher,
     {
       revalidateOnFocus: true,

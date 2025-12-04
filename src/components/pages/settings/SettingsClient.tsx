@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styled from "styled-components";
@@ -156,9 +157,8 @@ const SettingsClient: React.FC<SettingsClientProps> = ({ categories }) => {
 
   const refetchPreviews = useCallback(async () => {
     try {
-      const res = await fetch("/api/settings?previews=1", { credentials: "include" });
-      if (!res.ok) return;
-      const data = await res.json();
+      const { data, error } = await api.settings.get({ query: { previews: "1" } });
+      if (error) return;
       await mutate(async () => data, { revalidate: false });
     } catch {}
   }, [mutate]);

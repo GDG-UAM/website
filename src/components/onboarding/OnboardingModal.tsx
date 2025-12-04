@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 import React, { useState } from "react";
 import styled from "styled-components";
 import Modal from "@/components/Modal";
@@ -111,7 +112,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ open, onComplete }) =
 
   const finish = async () => {
     try {
-      await fetch("/api/settings/activate", { method: "POST" });
+      await api.settings.activate.post();
     } catch {}
     try {
       await updateSession();

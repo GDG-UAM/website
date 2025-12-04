@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { ArticleCard } from "@/components/cards/ArticleCard";
@@ -125,15 +126,18 @@ export function PublicArticleGrid({ type }: { type: ArticleType }) {
     async (q?: string) => {
       try {
         setError(null);
-        const base = canSeeAll ? `/api/admin/articles?type=${type}` : `/api/articles?type=${type}`;
-        const url = q ? `${base}${base.includes("?") ? "&" : "?"}q=${encodeURIComponent(q)}` : base;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to load articles");
-        const data = await res.json();
-        let list: unknown = Array.isArray(data)
-          ? data
-          : (data?.articles as unknown) || (data?.items as unknown) || [];
-        if (!Array.isArray(list)) list = [];
+        const queryParams = {
+          type,
+          q: q ? encodeURIComponent(q) : undefined
+        };
+
+        const { data, error } = canSeeAll
+          ? await api.admin.articles.get({ query: queryParams })
+          : await api.articles.get({ query: queryParams });
+
+        if (error) throw new Error("Failed to load articles");
+
+        const list = Array.isArray(data) ? data : data.items;
         setArticles(list as ArticleWithStatus[]);
         // reflect query in URL without navigating
         try {

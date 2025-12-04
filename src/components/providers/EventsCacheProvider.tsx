@@ -1,4 +1,5 @@
 "use client";
+import { api } from "@/lib/eden";
 
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 
@@ -25,14 +26,16 @@ type EventsCacheContextValue = {
 const EventsCacheContext = createContext<EventsCacheContextValue | undefined>(undefined);
 
 async function fetchEvents(dateStatus: "upcoming" | "past", pageSize = 100) {
-  const res = await fetch(
-    `/api/events?dateStatus=${dateStatus}&status=published&pageSize=${pageSize}&sort=newest`,
-    { cache: "no-store" }
-  );
-  if (!res.ok) {
+  const { data, error } = await api.events.get({
+    query: {
+      dateStatus,
+      pageSize: pageSize,
+      sort: "newest"
+    }
+  });
+  if (error) {
     throw new Error(`Failed to fetch ${dateStatus} events`);
   }
-  const data = await res.json();
   return data.items as PublicEvent[];
 }
 

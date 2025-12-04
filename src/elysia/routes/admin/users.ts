@@ -3,13 +3,19 @@ import { getToken } from "next-auth/jwt";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import config from "@/lib/config";
-import { listUsers, updateUserRole, getPublicUserProfile } from "@/lib/controllers/userController";
+import {
+  listUsers,
+  updateUserRole,
+  getPublicUserProfile,
+  getUserMentionData
+} from "@/lib/controllers/userController";
 import { verifyCsrf } from "@/lib/controllers/csrfController";
 import {
   AdminUsersListResponse,
   AdminUpdateUserRoleBody,
   AdminUserItem
 } from "../../models/admin/users";
+import { UserMentionData } from "../../models/users";
 import { NextRequest } from "next/server";
 
 const NEXTAUTH_SECRET = process.env.SESSION_SECRET;
@@ -136,6 +142,26 @@ export const adminUsersRoutes = new Elysia({ prefix: "/users" })
       response: {
         200: AdminUserItem,
         404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() })
+      }
+    }
+  )
+  .get(
+    "/mentions/:id",
+    async ({ params: { id }, status }) => {
+      try {
+        const result = await getUserMentionData(id, true);
+        return status(200, result);
+      } catch {
+        return status(500, { error: "Internal Server Error" });
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String()
+      }),
+      response: {
+        200: UserMentionData,
         500: t.Object({ error: t.String() })
       }
     }
