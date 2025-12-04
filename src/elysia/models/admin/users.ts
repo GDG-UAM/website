@@ -6,6 +6,7 @@ export const AdminUserItem = t.Object({
   name: t.String(),
   email: t.Optional(t.String()),
   image: t.Optional(t.String()),
+  bio: t.Optional(t.String()),
   role: t.Union([t.Literal("user"), t.Literal("team"), t.Literal("admin")]),
   customTags: t.Optional(
     t.Array(
