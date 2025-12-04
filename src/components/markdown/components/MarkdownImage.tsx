@@ -14,42 +14,42 @@ type MarkdownImageProps = {
   height?: number;
 };
 
-const ImageContainer = styled.span<{ $aspectRatio?: string }>`
+const Container = styled.span<{ $aspectRatio?: string }>`
   display: block;
   position: relative;
   width: 100%;
   margin: 1em 0;
-  ${({ $aspectRatio }) => $aspectRatio && `aspect-ratio: ${$aspectRatio};`}
+  border-radius: 6px;
+  overflow: hidden;
 
-  /* Maintain aspect ratio container */
-  &[data-loaded="false"] {
-    min-height: 200px;
-    background: var(--markdown-code-bg, #f3f4f6);
-    border-radius: 6px;
-  }
+  ${({ $aspectRatio }) =>
+    $aspectRatio &&
+    `
+    aspect-ratio: ${$aspectRatio};
+  `}
 `;
 
-const StyledImage = styled(Image)`
-  border-radius: 6px;
-  object-fit: contain;
+const BlurLayer = styled.div`
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  border-radius: inherit;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+`;
+
+const ImgLayer = styled(Image)`
+  position: absolute !important;
+  inset: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  transition: opacity 0.4s ease;
+  z-index: 1;
 `;
 
-const FallbackImage = styled.img`
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  display: block;
-  margin: 1em 0;
-`;
-
-/**
- * MarkdownImage component - renders images from markdown with BlurHash placeholder
- *
- * Uses Next/Image for optimized loading with blur placeholder when available.
- * Falls back to regular img tag if Next/Image fails or for incompatible sources.
- */
 export default function MarkdownImage({
   src,
   alt,
@@ -61,45 +61,53 @@ export default function MarkdownImage({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  // Use provided dimensions or defaults
   const imgWidth = width || 800;
   const imgHeight = height || 600;
 
-  // Decode BlurHash to data URL on the client, passing dimensions for correct aspect ratio
   const blurDataURL = useMemo(() => {
     if (!isValidBlurHash(blur)) return undefined;
     return blurHashToDataURL(blur, imgWidth, imgHeight);
   }, [blur, imgWidth, imgHeight]);
 
-  // If we had an error with Next/Image, fall back to regular img
   if (error) {
-    return <FallbackImage src={src} alt={alt} title={title} loading="lazy" />;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        title={title}
+        style={{ maxWidth: "100%", borderRadius: 6 }}
+        loading="lazy"
+      />
+    );
   }
 
-  // Check if we have a valid blur data URL
   const hasBlur = !!blurDataURL;
-
-  // Calculate aspect ratio for the container to prevent layout shift
   const aspectRatio = width && height ? `${width} / ${height}` : undefined;
 
   return (
-    <ImageContainer data-loaded={loaded} $aspectRatio={aspectRatio}>
-      <StyledImage
+    <Container $aspectRatio={aspectRatio}>
+      {hasBlur && (
+        <BlurLayer
+          style={{
+            backgroundImage: `url(${blurDataURL})`,
+            opacity: loaded ? 0 : 1
+          }}
+        />
+      )}
+
+      <ImgLayer
         src={src}
         alt={alt}
         title={title}
         width={imgWidth}
         height={imgHeight}
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 800px"
-        placeholder={hasBlur ? "blur" : "empty"}
-        blurDataURL={blurDataURL}
-        onLoad={() => setLoaded(true)}
+        placeholder="empty"
+        onLoadingComplete={() => setLoaded(true)}
         onError={() => setError(true)}
         style={{
-          width: "100%",
-          height: "auto"
+          opacity: loaded ? 1 : 0
         }}
       />
-    </ImageContainer>
+    </Container>
   );
 }

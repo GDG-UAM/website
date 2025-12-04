@@ -1,19 +1,5 @@
 import { decode } from "blurhash";
 
-/**
- * Client-side BlurHash decoder
- * Converts a compact BlurHash string to a data URL for use as a placeholder
- */
-
-/**
- * Converts a BlurHash string to a base64 SVG data URL.
- * This runs on the client to decode the compact BlurHash into a visual placeholder.
- *
- * @param blurHash - The BlurHash string (typically ~20-30 characters)
- * @param imageWidth - Actual image width (used for aspect ratio)
- * @param imageHeight - Actual image height (used for aspect ratio)
- * @returns A base64 SVG data URL string
- */
 export function blurHashToDataURL(
   blurHash: string,
   imageWidth?: number,
@@ -41,10 +27,6 @@ export function blurHashToDataURL(
   }
 }
 
-/**
- * Creates an SVG from RGBA pixel data with blur filter.
- * Uses actual aspect ratio to prevent layout shifts.
- */
 function createSVGFromPixels(
   pixels: Uint8ClampedArray,
   decodeWidth: number,
@@ -88,15 +70,26 @@ function createSVGFromPixels(
 
   // Add Gaussian blur filter to smooth out the pixels
   // edgeMode="duplicate" extends edge pixels outward instead of fading to transparent
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${sampleWidth} ${sampleHeight}" preserveAspectRatio="none"><defs><filter id="b" x="0" y="0" width="100%" height="100%"><feGaussianBlur stdDeviation="0.5" edgeMode="duplicate"/></filter></defs><g filter="url(#b)">${svgPixels.join("")}</g></svg>`;
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 ${sampleWidth} ${sampleHeight}"
+      preserveAspectRatio="none">
+      <defs>
+        <filter id="b" x="0" y="0" width="100%" height="100%">
+          <feGaussianBlur stdDeviation="0.5" edgeMode="duplicate"/>
+        </filter>
+      </defs>
+
+      <rect width="100%" height="100%" fill="rgb(${pixels[0]},${pixels[1]},${pixels[2]})"/>
+
+      <g filter="url(#b)">
+        ${svgPixels.join("")}
+      </g>
+    </svg>`;
 
   return svg;
 }
 
-/**
- * Validates if a string is a valid BlurHash
- * BlurHash strings are typically 20-30 characters of base83 encoding
- */
 export function isValidBlurHash(hash: string | undefined | null): hash is string {
   if (!hash || typeof hash !== "string") return false;
   // BlurHash uses base83 encoding and is typically 20-30 chars
