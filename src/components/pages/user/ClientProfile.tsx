@@ -203,7 +203,7 @@ export default function UserProfileClient(context: { params: Promise<{ id: strin
   const canSeePrivate = Boolean(
     (session as SessionWithFlags)?.user?.flags?.["profile-see-private-profiles"]
   );
-  const fetcher = async ([userId, privateAccess]: [string, boolean]) => {
+  const fetcher = async ([userId, privateAccess]: [string, boolean]): Promise<UserProfileDTO> => {
     const { data, error } = privateAccess
       ? await api.admin.users({ id: userId }).get()
       : await api.users({ id: userId }).get();
@@ -213,7 +213,8 @@ export default function UserProfileClient(context: { params: Promise<{ id: strin
       err.status = error.status;
       throw err;
     }
-    return data;
+
+    return data as UserProfileDTO;
   };
 
   const { data, error, isLoading } = useSWR<UserProfileDTO>(

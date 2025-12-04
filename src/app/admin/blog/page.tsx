@@ -10,7 +10,7 @@ import { BackButton } from "@/components/Buttons";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { newErrorToast, newSuccessToast } from "@/components/_toasts/toastEmitter";
 import { useTranslations } from "next-intl";
-import { getCsrfToken } from "next-auth/react";
+import { getCsrfToken } from "@/lib/security/csrfClient";
 
 export default function AdminBlogManagePage() {
   const t = useTranslations("admin.articles.toasts");

@@ -2,9 +2,9 @@ import { t } from "elysia";
 
 export const AdminUserItem = t.Object({
   _id: t.Any(), // ObjectId
-  id: t.String(),
+  id: t.Optional(t.String()),
   name: t.String(),
-  email: t.String(),
+  email: t.Optional(t.String()),
   image: t.Optional(t.String()),
   role: t.Union([t.Literal("user"), t.Literal("team"), t.Literal("admin")]),
   customTags: t.Optional(
@@ -18,13 +18,15 @@ export const AdminUserItem = t.Object({
       ])
     )
   ),
-  socials: t.Object({
-    instagram: t.Optional(t.String()),
-    linkedin: t.Optional(t.String()),
-    github: t.Optional(t.String()),
-    x: t.Optional(t.String()),
-    website: t.Optional(t.String())
-  })
+  socials: t.Optional(
+    t.Object({
+      instagram: t.Optional(t.String()),
+      linkedin: t.Optional(t.String()),
+      github: t.Optional(t.String()),
+      x: t.Optional(t.String()),
+      website: t.Optional(t.String())
+    })
+  )
 });
 
 export const AdminUsersListResponse = t.Object({

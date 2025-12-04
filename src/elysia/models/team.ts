@@ -1,6 +1,7 @@
 import { t } from "elysia";
 
 export const TeamMember = t.Object({
+  _id: t.Any(),
   name: t.String(),
   image: t.Optional(t.String()),
   role: t.Optional(t.Union([t.Literal("user"), t.Literal("team"), t.Literal("admin")])),

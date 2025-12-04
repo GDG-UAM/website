@@ -78,7 +78,7 @@ const Email = styled.div`
 export type UserRowType = {
   _id: string;
   name?: string;
-  email: string;
+  email?: string;
   image?: string;
   role: "user" | "team" | "admin";
 };

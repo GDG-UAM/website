@@ -63,10 +63,10 @@ export const adminArticlesRoutes = new Elysia({ prefix: "/articles" })
           return httpStatus(200, data as unknown as typeof AdminArticlesListResponse.static);
 
         const locale = NEXT_LANG?.value || "";
-        return httpStatus(
-          200,
-          data.items.map((item) => selectArticleLocale(item, locale, false))
-        );
+        return httpStatus(200, {
+          ...data,
+          items: data.items.map((item) => selectArticleLocale(item, locale, false))
+        });
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Failed to list articles";
         return httpStatus(500, { error: msg });
@@ -185,7 +185,10 @@ export const adminArticlesRoutes = new Elysia({ prefix: "/articles" })
 
         const updated = await updateArticle(id, body as Partial<ArticleInput>);
         if (!updated) return status(404, { error: "Not found" });
-        return status(200, updated as unknown as typeof AdminArticleDetailResponse.static);
+        return status(
+          200,
+          updated.toObject() as unknown as typeof AdminArticleDetailResponse.static
+        );
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Failed to update";
         return status(400, { error: msg });
