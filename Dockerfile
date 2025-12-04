@@ -1,27 +1,24 @@
-# Stage 1: Dependencies
-FROM oven/bun:1-alpine AS deps
-
-WORKDIR /app
-
-COPY package.json bun.lockb* ./
-
-RUN bun install --frozen-lockfile
-
-# Stage 2: Builder
-FROM oven/bun:1-alpine AS builder
+# Stage 1
+FROM node:alpine AS builder
 
 WORKDIR /app
 
 ARG SESSION_SECRET
 ENV SESSION_SECRET=${SESSION_SECRET}
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json yarn.lock* package-lock.json* ./
+
+RUN \
+    if [ -f package-lock.json ]; then npm ci --force; \
+    else echo "No lock file found. Installing dependencies normally."; npm install --force; \
+    fi
+
 COPY . .
 
-RUN bun run build
+RUN npm run build
 
-# Stage 3: Runner
-FROM oven/bun:1-alpine AS runner
+# Stage 2
+FROM node:alpine AS runner
 
 WORKDIR /app
 
@@ -33,4 +30,4 @@ COPY --from=builder /app/public ./public
 
 EXPOSE $PORT
 
-CMD ["bun", "run", "server.js"]
+CMD ["node", "server.js"]

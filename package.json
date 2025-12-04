@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "bun run scripts/sync-feature-flags.ts",
+    "predev": "npm run scripts/sync-feature-flags.ts",
     "dev": "next dev --turbopack",
     "dev:classic": "next dev",
-    "flags:sync": "bun run scripts/sync-feature-flags.ts",
+    "flags:sync": "npm run scripts/sync-feature-flags.ts",
     "next-build": "next build",
-    "build": "bun run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build",
+    "build": "npm run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "cross-env NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "next lint",
-    "sitemap": "bun run scripts/sitemap.ts",
+    "sitemap": "npm run scripts/sitemap.ts",
     "prepare": "husky"
   },
   "lint-staged": {
