@@ -7,8 +7,9 @@ import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
 import styled, { keyframes } from "styled-components";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter, notFound } from "next/navigation";
-import { useTranslations } from "use-intl";
-import type { ArticleType } from "@/lib/models/Article";
+import { useTranslations } from "next-intl";
+import type { ArticleType } from "@/lib/types/article";
+import CoverImage from "@/components/CoverImage";
 // import ReadingProgress from "./ReadingProgress";
 
 function isValidSlug(slug: string) {
@@ -21,6 +22,9 @@ type Article = {
   authors: (string | { toString(): string })[];
   publishedAt?: string | Date;
   coverImage?: string;
+  coverImageBlurHash?: string;
+  coverImageWidth?: number;
+  coverImageHeight?: number;
 };
 
 export default function ArticlePage({ type }: { type: ArticleType }) {
@@ -41,6 +45,7 @@ export default function ArticlePage({ type }: { type: ArticleType }) {
   useEffect(() => {
     let active = true;
     async function fetchArticle() {
+      console.log("Fetching article...");
       setLoading(true);
       const slug = decodeURIComponent(params?.slug as string)
         .trim()
@@ -113,16 +118,25 @@ export default function ArticlePage({ type }: { type: ArticleType }) {
           </p>
         </Meta>
         {article!.coverImage ? (
-          <ImageWrap>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+          <ImageWrap
+            style={{
+              aspectRatio:
+                article.coverImageWidth && article.coverImageHeight
+                  ? `${article.coverImageWidth} / ${article.coverImageHeight}`
+                  : "16 / 9"
+            }}
+          >
+            <CoverImage
               src={article!.coverImage}
               alt={article!.title}
+              blurHash={article.coverImageBlurHash}
+              width={article.coverImageWidth || 1200}
+              height={article.coverImageHeight || 675}
               style={{
                 objectFit: "cover",
                 width: "100%",
-                borderRadius: 12,
-                aspectRatio: "16/9"
+                height: "100%",
+                borderRadius: 12
               }}
             />
           </ImageWrap>

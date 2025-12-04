@@ -533,10 +533,10 @@ const AdminEventsCalendar = forwardRef<AdminEventsCalendarRef, AdminEventsCalend
       setLoading(true);
       try {
         const [pubRes, draftRes] = await Promise.all([
-          fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=500`, {
+          fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=100`, {
             cache: "no-store"
           }),
-          fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=500`, {
+          fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=100`, {
             cache: "no-store"
           })
         ]);

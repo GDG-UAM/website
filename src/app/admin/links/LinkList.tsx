@@ -159,7 +159,7 @@ export function LinkList({
     async (notify?: boolean) => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/admin/links?pageSize=200`, {
+        const res = await fetch(`/api/admin/links?pageSize=100`, {
           cache: "no-store"
         });
 

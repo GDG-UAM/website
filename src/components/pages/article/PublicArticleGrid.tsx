@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { ArticleCard } from "@/components/cards/ArticleCard";
 import styled from "styled-components";
-import { LocalizedArticle } from "@/lib/controllers/articleController";
-import { ArticleType } from "@/lib/models/Article";
+import { LocalizedArticle, ArticleType } from "@/lib/types/article";
 import { useSession } from "next-auth/react";
 import { GridViewButton, ListViewButton, SearchButton } from "@/components/Buttons";
 import TextField from "@mui/material/TextField";

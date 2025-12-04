@@ -1,11 +1,13 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import Link from "next/link";
-import { LocalizedArticle } from "@/lib/controllers/articleController";
+import Image from "next/image";
+import { LocalizedArticle } from "@/lib/types/article";
 import styled, { css, keyframes } from "styled-components";
 import { ArticleType } from "@/lib/models/Article";
 import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
+import { blurHashToDataURL, isValidBlurHash } from "@/lib/utils/blurhashClient";
 type ArticleStatus = "published" | "draft" | "url_only";
 
 // Card layout styled similar to EventCard with skeleton states
@@ -270,6 +272,16 @@ type ArticleCardProps = {
 };
 
 function ArticleCardImpl({ type, article, skeleton, status }: ArticleCardProps) {
+  // Decode BlurHash to data URL on the client
+  // Use stored dimensions if available, otherwise use card dimensions
+  const blurDataURL = useMemo(() => {
+    if (!article?.coverImageBlurHash || !isValidBlurHash(article.coverImageBlurHash))
+      return undefined;
+    const width = article.coverImageWidth || 350;
+    const height = article.coverImageHeight || 150;
+    return blurHashToDataURL(article.coverImageBlurHash, width, height);
+  }, [article?.coverImageBlurHash, article?.coverImageWidth, article?.coverImageHeight]);
+
   if (!article && !skeleton) return null;
   const href = !skeleton && article ? `/${type}/${article.slug}` : "#";
   const description = article?.excerpt || "";
@@ -283,11 +295,14 @@ function ArticleCardImpl({ type, article, skeleton, status }: ArticleCardProps) 
             aria-label={article.title}
             style={{ display: "block", width: "100%", height: "100%" }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={article.coverImage || "/logo/196x196.webp"}
               alt={article.title}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 350px"
+              style={{ objectFit: "cover" }}
+              placeholder={blurDataURL ? "blur" : "empty"}
+              blurDataURL={blurDataURL}
             />
           </Link>
         ) : null}

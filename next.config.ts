@@ -11,12 +11,16 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
+    // Allow images from any remote source
+    // Security is handled by sanitizing markdown content
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        port: "",
-        pathname: "/**"
+        hostname: "**"
+      },
+      {
+        protocol: "http",
+        hostname: "**"
       }
     ]
   },

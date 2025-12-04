@@ -145,10 +145,10 @@ export function EventList({
       setLoading(true);
       // Fetch both published and draft to show everything in admin without changing the API
       const [pubRes, draftRes] = await Promise.all([
-        fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=200`, {
+        fetch(`/api/admin/events?status=published&sort=newest&page=1&pageSize=100`, {
           cache: "no-store"
         }),
-        fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=200`, {
+        fetch(`/api/admin/events?status=draft&sort=newest&page=1&pageSize=100`, {
           cache: "no-store"
         })
       ]);

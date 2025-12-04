@@ -22,6 +22,8 @@ const PUBLIC_ROUTES = [
   "/newsletter",
   "/privacy",
   "/api/auth",
+  "/api/articles",
+  "/api/events",
   "/api/giveaways",
   "/api/socket",
   "/api/feature-flags/export",

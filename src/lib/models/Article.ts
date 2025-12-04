@@ -13,6 +13,9 @@ export interface IArticle extends Document {
   excerpt?: LocalizedStringMap;
   content: LocalizedStringMap;
   coverImage?: string;
+  coverImageBlurHash?: string; // BlurHash placeholder for the cover image
+  coverImageWidth?: number; // Original cover image width in pixels
+  coverImageHeight?: number; // Original cover image height in pixels
   status: ArticleStatus;
   authors: mongoose.Types.ObjectId[];
   views: number;
@@ -29,6 +32,9 @@ const ArticleSchema: Schema<IArticle> = new Schema(
     excerpt: { type: Map, of: String, default: {} },
     content: { type: Map, of: String, required: true },
     coverImage: { type: String },
+    coverImageBlurHash: { type: String },
+    coverImageWidth: { type: Number },
+    coverImageHeight: { type: Number },
     status: {
       type: String,
       enum: ["draft", "published", "url_only"],

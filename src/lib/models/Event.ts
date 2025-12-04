@@ -13,6 +13,9 @@ export interface IEvent extends Document {
   date: Date;
   location: string;
   image?: string;
+  imageBlurHash?: string; // BlurHash placeholder for the image
+  imageWidth?: number; // Original image width in pixels
+  imageHeight?: number; // Original image height in pixels
   status: EventStatus;
   url?: string; // External link (e.g. Meetup, Google Meet)
   blogUrl?: string; // Blog post link
@@ -31,6 +34,9 @@ const EventSchema: Schema<IEvent> = new Schema(
     date: { type: Date, required: true },
     location: { type: String, required: true },
     image: { type: String },
+    imageBlurHash: { type: String },
+    imageWidth: { type: Number },
+    imageHeight: { type: Number },
     status: {
       type: String,
       enum: ["draft", "published"],

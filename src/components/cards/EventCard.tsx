@@ -1,11 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import styled, { css, keyframes } from "styled-components";
 import Link from "next/link";
+import Image from "next/image";
 import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
 import { PublicEvent } from "@/lib/types/events";
 import { isUpcoming } from "@/lib/utils/dates";
 import { ShareButton } from "@/components/Buttons";
+import { blurHashToDataURL, isValidBlurHash } from "@/lib/utils/blurhashClient";
 
 const Card = styled.div<{ $skeleton?: boolean }>`
   background-color: var(--color-white);
@@ -173,6 +176,13 @@ export function EventCard({ event, skeleton, onShare }: EventCardProps) {
   const href = !skeleton && event ? event.blogUrl || `/events/${event.slug}` : "#";
   const validBlogUrl = !event?.blogUrl || !event?.blogUrl.startsWith("#");
 
+  // Decode BlurHash to data URL on the client
+  // Use card dimensions (350x150) since events don't store image dimensions
+  const blurDataURL = useMemo(() => {
+    if (!event?.imageBlurHash || !isValidBlurHash(event.imageBlurHash)) return undefined;
+    return blurHashToDataURL(event.imageBlurHash, 350, 150);
+  }, [event?.imageBlurHash]);
+
   return (
     <Card $skeleton={skeleton}>
       <ImageWrapper $skeleton={skeleton}>
@@ -182,11 +192,14 @@ export function EventCard({ event, skeleton, onShare }: EventCardProps) {
             aria-label={event.title}
             style={{ display: "block", width: "100%", height: "100%" }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={event.image || "/logo/196x196.webp"}
               alt={event.title}
-              style={{ objectFit: "cover", width: "100%" }}
+              fill
+              sizes="(max-width: 768px) 100vw, 350px"
+              style={{ objectFit: "cover" }}
+              placeholder={blurDataURL ? "blur" : "empty"}
+              blurDataURL={blurDataURL}
             />
           </Link>
         ) : null}

@@ -24,7 +24,7 @@ type EventsCacheContextValue = {
 
 const EventsCacheContext = createContext<EventsCacheContextValue | undefined>(undefined);
 
-async function fetchEvents(dateStatus: "upcoming" | "past", pageSize = 200) {
+async function fetchEvents(dateStatus: "upcoming" | "past", pageSize = 100) {
   const res = await fetch(
     `/api/events?dateStatus=${dateStatus}&status=published&pageSize=${pageSize}&sort=newest`,
     { cache: "no-store" }

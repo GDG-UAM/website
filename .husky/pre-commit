@@ -1,5 +1,5 @@
 echo "Running lint-staged (Prettier + ESLint)..."
-npx lint-staged || {
+bunx lint-staged || {
   echo "❌ Lint or formatting failed. Commit aborted."
   exit 1
 }

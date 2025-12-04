@@ -6,6 +6,7 @@ import { renderMarkdown } from "@/lib/markdown";
 import UserMention from "@/components/markdown/components/UserMention";
 import AudioVisualizer from "@/components/audio/AudioPlayerVisualizer";
 import IframeEmbed from "@/components/markdown/components/IframeEmbed";
+import MarkdownImage from "@/components/markdown/components/MarkdownImage";
 import { OpenLinkButton } from "@/components/Buttons";
 import parse, { type DOMNode, type Element } from "html-react-parser";
 import { useTranslations } from "next-intl";
@@ -246,6 +247,12 @@ const Wrapper = styled.div`
     display: block;
     margin: 1em 0;
   }
+
+  /* Markdown image with BlurHash */
+  mdimage {
+    display: block;
+    margin: 1em 0;
+  }
 `;
 
 export function RenderMarkdown({ markdown, html, className, style }: RenderMarkdownProps) {
@@ -323,6 +330,26 @@ export function RenderMarkdown({ markdown, html, className, style }: RenderMarkd
           const showTitleBar = showTitleBarStr !== "false";
           return (
             <IframeEmbed url={url} height={height} title={title} showTitleBar={showTitleBar} />
+          );
+        }
+        if (isTag(node) && node.name === "mdimage") {
+          const src = (node.attribs && node.attribs["data-src"]) || "";
+          const alt = (node.attribs && node.attribs["data-alt"]) || "";
+          const title = (node.attribs && node.attribs["data-title"]) || undefined;
+          const blur = (node.attribs && node.attribs["data-blur"]) || undefined;
+          const widthStr = (node.attribs && node.attribs["data-width"]) || undefined;
+          const heightStr = (node.attribs && node.attribs["data-height"]) || undefined;
+          const width = widthStr ? parseInt(widthStr, 10) : undefined;
+          const height = heightStr ? parseInt(heightStr, 10) : undefined;
+          return (
+            <MarkdownImage
+              src={src}
+              alt={alt}
+              title={title}
+              blur={blur}
+              width={width}
+              height={height}
+            />
           );
         }
         return undefined;

@@ -1,5 +1,5 @@
 echo "Running build check before push..."
-npm run next-build || {
+bun run next-build || {
   echo "❌ Build failed. Push aborted."
   exit 1
 }

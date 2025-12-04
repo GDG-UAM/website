@@ -2,6 +2,7 @@ import { getEventBySlug } from "@/lib/controllers/eventController";
 import { buildSectionMetadata } from "@/lib/metadata";
 import EventDateTime from "@/components/EventDateTime";
 import Link from "next/link";
+import CoverImage from "@/components/CoverImage";
 import RenderMarkdown from "@/components/markdown/RenderMarkdown";
 import { redirect, notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -75,16 +76,23 @@ export default async function EventPublicPage(context: { params: Promise<{ slug:
               maxHeight: 360,
               marginBottom: 16,
               borderRadius: 12,
-              overflow: "hidden"
+              overflow: "hidden",
+              aspectRatio:
+                event.imageWidth && event.imageHeight
+                  ? `${event.imageWidth} / ${event.imageHeight}`
+                  : "16 / 9"
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <CoverImage
               src={event.image}
               alt={event.title}
+              width={event.imageWidth}
+              height={event.imageHeight}
+              blurHash={event.imageBlurHash}
               style={{
                 objectFit: "cover",
                 width: "100%",
+                height: "100%",
                 borderRadius: 12
               }}
             />

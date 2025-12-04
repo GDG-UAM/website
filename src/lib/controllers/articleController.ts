@@ -6,6 +6,8 @@ import Article, {
   LocalizedStringMap
 } from "@/lib/models/Article";
 import { toSlug } from "@/lib/utils";
+import { generateBlurHash } from "@/lib/utils/blurhash";
+import { processMarkdownSave, processMarkdownForEdit } from "@/lib/utils/markdownImages";
 import routing from "@/i18n/routing";
 import type { FilterQuery, SortOrder } from "mongoose";
 
@@ -23,6 +25,67 @@ export type ArticleInput = {
 
 export type SortTypes = "newest" | "oldest" | "views";
 
+/**
+ * Helper to get entries from either a Map or a plain object
+ */
+function getMapEntries(mapOrObj: LocalizedStringMap | Record<string, string>): [string, string][] {
+  if (mapOrObj instanceof Map) {
+    return Array.from(mapOrObj.entries());
+  }
+  // Plain object
+  return Object.entries(mapOrObj);
+}
+
+/**
+ * Helper to get a value from either a Map or a plain object
+ */
+function getMapValue(
+  mapOrObj: LocalizedStringMap | Record<string, string> | undefined,
+  key: string
+): string | undefined {
+  if (!mapOrObj) return undefined;
+  if (mapOrObj instanceof Map) {
+    return mapOrObj.get(key);
+  }
+  // Plain object
+  return (mapOrObj as Record<string, string>)[key];
+}
+
+/**
+ * Process a LocalizedStringMap to add BlurHash to embedded images in each locale
+ */
+async function processLocalizedContent(
+  content: LocalizedStringMap | Record<string, string>
+): Promise<Record<string, string>> {
+  const processed: Record<string, string> = {};
+  const entries = getMapEntries(content);
+
+  await Promise.all(
+    entries.map(async ([locale, text]) => {
+      if (text) {
+        processed[locale] = await processMarkdownSave(text);
+      }
+    })
+  );
+
+  return processed;
+}
+
+/**
+ * Convert LocalizedStringMap content back to markdown syntax for editing
+ */
+function processLocalizedContentForEdit(
+  content: LocalizedStringMap | Record<string, string>
+): Record<string, string> {
+  const processed: Record<string, string> = {};
+  for (const [locale, text] of getMapEntries(content)) {
+    if (text) {
+      processed[locale] = processMarkdownForEdit(text);
+    }
+  }
+  return processed;
+}
+
 export async function createArticle(input: ArticleInput): Promise<IArticle> {
   await db.connect();
   const titleMap = input.title || {};
@@ -31,10 +94,33 @@ export async function createArticle(input: ArticleInput): Promise<IArticle> {
     Object.values(titleMap).find((v) => !!v) ||
     "";
   const slug = (input.slug && toSlug(input.slug)) || toSlug(sourceTitle);
+
+  // Generate BlurHash and get dimensions if coverImage is provided
+  let coverImageBlurHash: string | null = null;
+  let coverImageWidth: number | undefined;
+  let coverImageHeight: number | undefined;
+  if (input.coverImage) {
+    const blurResult = await generateBlurHash(input.coverImage);
+    if (blurResult) {
+      coverImageBlurHash = blurResult.blurHash;
+      coverImageWidth = blurResult.width;
+      coverImageHeight = blurResult.height;
+    }
+  }
+
+  // Process content for each locale to add BlurHash to embedded images
+  const processedContent = await processLocalizedContent(
+    input.content as unknown as LocalizedStringMap
+  );
+
   const article = await Article.create({
     ...input,
+    content: processedContent,
     slug,
-    status: input.status || "draft"
+    status: input.status || "draft",
+    coverImageBlurHash,
+    coverImageWidth,
+    coverImageHeight
   });
   return article;
 }
@@ -44,7 +130,16 @@ export async function updateArticle(
   input: Partial<ArticleInput>
 ): Promise<IArticle | null> {
   await db.connect();
-  const update: Partial<ArticleInput & { slug: string }> = { ...input };
+  const update: Partial<
+    ArticleInput & {
+      slug: string;
+      coverImageBlurHash?: string | null;
+      coverImageWidth?: number;
+      coverImageHeight?: number;
+    }
+  > = {
+    ...input
+  };
   if (input.slug) update.slug = toSlug(input.slug);
   if (input.title && !input.slug) {
     const map = input.title;
@@ -54,6 +149,35 @@ export async function updateArticle(
       "";
     update.slug = toSlug(source);
   }
+
+  // Regenerate BlurHash and dimensions if coverImage changed
+  if (input.coverImage !== undefined) {
+    if (input.coverImage) {
+      const blurResult = await generateBlurHash(input.coverImage);
+      if (blurResult) {
+        update.coverImageBlurHash = blurResult.blurHash;
+        update.coverImageWidth = blurResult.width;
+        update.coverImageHeight = blurResult.height;
+      } else {
+        update.coverImageBlurHash = null;
+        update.coverImageWidth = undefined;
+        update.coverImageHeight = undefined;
+      }
+    } else {
+      update.coverImageBlurHash = null;
+      update.coverImageWidth = undefined;
+      update.coverImageHeight = undefined;
+    }
+  }
+
+  // Process content for each locale to add BlurHash to embedded images
+  if (input.content) {
+    const processedContent = await processLocalizedContent(
+      input.content as unknown as LocalizedStringMap
+    );
+    update.content = processedContent as unknown as LocalizedStringMap;
+  }
+
   const article = await Article.findByIdAndUpdate(id, update, { new: true, runValidators: true });
   return article;
 }
@@ -71,6 +195,26 @@ export async function getArticleById(id: string, incrementView = false): Promise
     await Article.updateOne({ _id: doc._id }, { $inc: { views: 1 } });
   }
   return doc;
+}
+
+/**
+ * Get an article by its ID for editing (converts mdimg back to markdown syntax).
+ */
+export async function getArticleByIdForEdit(id: string): Promise<IArticle | null> {
+  await db.connect();
+  const doc = await Article.findById(id);
+  if (!doc) return null;
+
+  // Convert mdimg tags back to markdown syntax for editing in all locales
+  const articleObj = doc.toObject();
+  if (articleObj.content) {
+    // After toObject(), content is a plain object, not a Map
+    articleObj.content = processLocalizedContentForEdit(
+      articleObj.content as unknown as Record<string, string>
+    ) as unknown as LocalizedStringMap;
+  }
+
+  return articleObj as IArticle;
 }
 
 export async function getArticleBySlug(
@@ -178,8 +322,11 @@ export type LocalizedArticle = Omit<
   updatedAt?: Date;
 };
 
-function selectLocalizedField(map: LocalizedStringMap, locale: string): string {
-  return map.get(locale) || map.get(routing.defaultLocale) || "";
+function selectLocalizedField(
+  map: LocalizedStringMap | Record<string, string>,
+  locale: string
+): string {
+  return getMapValue(map, locale) || getMapValue(map, routing.defaultLocale) || "";
 }
 
 export function selectArticleLocale(
@@ -187,7 +334,7 @@ export function selectArticleLocale(
   locale: string,
   trim: boolean = false
 ): LocalizedArticle {
-  const localizedArticle = article.toObject();
+  const localizedArticle = article.toObject ? article.toObject() : { ...article };
   localizedArticle.title = selectLocalizedField(article.title, locale);
   localizedArticle.excerpt = article.excerpt ? selectLocalizedField(article.excerpt, locale) : "";
   localizedArticle.content = selectLocalizedField(article.content, locale);

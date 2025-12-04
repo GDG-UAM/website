@@ -5,5 +5,6 @@ export type PublicEvent = {
   date: string; // ISO string
   location: string;
   image?: string;
+  imageBlurHash?: string; // BlurHash placeholder for the image
   blogUrl?: string;
 };

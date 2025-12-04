@@ -28,6 +28,12 @@ function getRoutes(dir: string, baseRoute = ""): string[] {
       routes.push(baseRoute === "" ? "/" : baseRoute);
     }
   }
+  routes = routes.concat([
+    "/link/hector-tablero",
+    "/link/jose-arbelaez",
+    "/link/adam-maltoni",
+    "/link/lorena-mohanu"
+  ]);
   return routes;
 }
 

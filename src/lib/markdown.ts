@@ -106,6 +106,34 @@ function renderIframeEmbed(
   return ret;
 }
 
+// Helper to render markdown image with BlurHash HTML
+function renderMarkdownImage(
+  src: string,
+  alt: string,
+  title?: string,
+  blur?: string,
+  width?: string,
+  height?: string
+): string {
+  const safeSrc = escapeHtml(src);
+  const safeAlt = escapeHtml(alt);
+  let ret = `<mdimage data-src="${safeSrc}" data-alt="${safeAlt}"`;
+  if (title && title.trim()) {
+    ret += ` data-title="${escapeHtml(title.trim())}"`;
+  }
+  if (blur && blur.trim()) {
+    ret += ` data-blur="${escapeHtml(blur.trim())}"`;
+  }
+  if (width && width.trim()) {
+    ret += ` data-width="${escapeHtml(width.trim())}"`;
+  }
+  if (height && height.trim()) {
+    ret += ` data-height="${escapeHtml(height.trim())}"`;
+  }
+  ret += `></mdimage>`;
+  return ret;
+}
+
 marked.use({
   extensions: [
     // inline user mention: <user data-id="..." />
@@ -256,6 +284,116 @@ marked.use({
         token: Token & { url?: string; height?: string; title?: string; showTitleBar?: string }
       ) {
         return renderIframeEmbed(token.url || "", token.height, token.title, token.showTitleBar);
+      }
+    },
+    // block mdimg (markdown image with BlurHash): <mdimg src="..." alt="..." blur="..." width="..." height="..." />
+    {
+      name: "mdimg_block",
+      level: "block",
+      start(src: string) {
+        return src.indexOf("<mdimg");
+      },
+      tokenizer(src: string) {
+        const cap = /^<mdimg\b([^>]*?)(?:\s*\/>|>(?:\s*<\/mdimg\s*>)?)(?:\s*\n)?/.exec(src);
+        if (!cap) return undefined;
+        const attrs = cap[1] || "";
+        const imgSrc = extractAttr(attrs, "src");
+        const alt = extractAttr(attrs, "alt");
+        const title = extractAttr(attrs, "title");
+        const blur = extractAttr(attrs, "blur");
+        const width = extractAttr(attrs, "width");
+        const height = extractAttr(attrs, "height");
+        return {
+          type: "mdimg_block",
+          raw: cap[0],
+          imgSrc,
+          alt,
+          title,
+          blur,
+          width,
+          height
+        } as Token & {
+          imgSrc: string;
+          alt: string;
+          title?: string;
+          blur?: string;
+          width?: string;
+          height?: string;
+        };
+      },
+      renderer(
+        token: Token & {
+          imgSrc?: string;
+          alt?: string;
+          title?: string;
+          blur?: string;
+          width?: string;
+          height?: string;
+        }
+      ) {
+        return renderMarkdownImage(
+          token.imgSrc || "",
+          token.alt || "",
+          token.title,
+          token.blur,
+          token.width,
+          token.height
+        );
+      }
+    },
+    // inline mdimg (markdown image with BlurHash)
+    {
+      name: "mdimg_inline",
+      level: "inline",
+      start(src: string) {
+        return src.indexOf("<mdimg");
+      },
+      tokenizer(src: string) {
+        const cap = /^<mdimg\b([^>]*?)(?:\s*\/>|>(?:\s*<\/mdimg\s*>)?)/.exec(src);
+        if (!cap) return undefined;
+        const attrs = cap[1] || "";
+        const imgSrc = extractAttr(attrs, "src");
+        const alt = extractAttr(attrs, "alt");
+        const title = extractAttr(attrs, "title");
+        const blur = extractAttr(attrs, "blur");
+        const width = extractAttr(attrs, "width");
+        const height = extractAttr(attrs, "height");
+        return {
+          type: "mdimg_inline",
+          raw: cap[0],
+          imgSrc,
+          alt,
+          title,
+          blur,
+          width,
+          height
+        } as InlineToken & {
+          imgSrc: string;
+          alt: string;
+          title?: string;
+          blur?: string;
+          width?: string;
+          height?: string;
+        };
+      },
+      renderer(
+        token: InlineToken & {
+          imgSrc?: string;
+          alt?: string;
+          title?: string;
+          blur?: string;
+          width?: string;
+          height?: string;
+        }
+      ) {
+        return renderMarkdownImage(
+          token.imgSrc || "",
+          token.alt || "",
+          token.title,
+          token.blur,
+          token.width,
+          token.height
+        );
       }
     },
     // subscript: ~text~ (avoid ~~ which is strikethrough)
@@ -462,7 +600,9 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
     // custom see more button tag
     "seemorebutton",
     // custom iframe embed tag
-    "embedweb"
+    "embedweb",
+    // custom markdown image with BlurHash tag
+    "mdimage"
   ]),
   allowedAttributes: {
     a: ["href", "name", "target", "rel"],
@@ -488,7 +628,13 @@ const sanitizeOptions: sanitizeHtml.IOptions = {
       // allow data-url, data-height, data-title and data-show-title-bar for <embedweb />
       "data-height",
       "data-title",
-      "data-show-title-bar"
+      "data-show-title-bar",
+      // allow data-src, data-alt, data-blur, data-width, data-height for <mdimage />
+      "data-src",
+      "data-alt",
+      "data-blur",
+      "data-width",
+      "data-height"
     ]
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],
