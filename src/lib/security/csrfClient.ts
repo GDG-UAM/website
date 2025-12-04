@@ -9,7 +9,7 @@ async function fetchToken(type: "user" | "public"): Promise<{ token: string; exp
 
     if (error || !data) return null;
 
-    const exp = data.expiresAt ? Date.parse(data.expiresAt) : Date.now() + 4 * 60 * 1000; // default ~4m
+    const exp = data.expiresAt ? data.expiresAt.getTime() : Date.now() + 4 * 60 * 1000; // default ~4m
     return { token: data.token, exp };
   } catch {
     return null;
