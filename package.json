@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "tsx run scripts/sync-feature-flags.ts",
+    "predev": "tsx scripts/sync-feature-flags.ts",
     "dev": "next dev --turbopack",
     "dev:classic": "next dev",
-    "flags:sync": "tsx run scripts/sync-feature-flags.ts",
+    "flags:sync": "tsx scripts/sync-feature-flags.ts",
     "next-build": "next build",
     "build": "npm run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build",
     "start": "cross-env NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "next lint",
-    "sitemap": "tsx run scripts/sitemap.ts",
+    "sitemap": "tsx scripts/sitemap.ts",
     "prepare": "husky"
   },
   "lint-staged": {
