@@ -1,17 +1,19 @@
 "use client";
 
-import styled from "styled-components";
+import { useEffect, useRef, useState } from "react";
 import Certificate, { CertificateData } from "@/components/Certificate";
 import { PrintButton, ShareButton } from "@/components/Buttons";
 import { useTranslations } from "next-intl";
 import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
+import styled from "styled-components";
 
 const ViewWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 800px;
+  max-width: min(1280px, calc(100vw - 80px));
   margin: 0 auto;
+  box-sizing: border-box;
 `;
 
 const CertificateContainer = styled.div`
@@ -19,6 +21,14 @@ const CertificateContainer = styled.div`
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    padding: 8px;
+    border-radius: 8px;
+  }
 `;
 
 const StatusBanner = styled.div<{ $revoked?: boolean }>`
@@ -100,15 +110,41 @@ export default function CertificateView({
   createdAt,
   showStatus,
   showActions = true,
-  showVerification = true
+  showVerification = false
 }: CertificateViewProps) {
   const t = useTranslations("certificates");
 
   if (showStatus === undefined) showStatus = isRevoked;
 
-  const handlePrint = () => {
-    // TODO: Implement print functionality
-  };
+  const certRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [wrapperHeight, setWrapperHeight] = useState<number>(0);
+
+  useEffect(() => {
+    const resize = () => {
+      if (!wrapperRef.current || !certRef.current) return;
+      const containerWidth = wrapperRef.current.offsetWidth;
+      const certificateWidth = certRef.current.offsetWidth;
+      const certificateHeight = certRef.current.offsetHeight;
+      const s = Math.min(containerWidth / certificateWidth, 1);
+      setScale(s);
+      setWrapperHeight(Math.ceil(certificateHeight * s));
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    const ro = new ResizeObserver(resize);
+    if (certRef.current) ro.observe(certRef.current);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      ro.disconnect();
+    };
+  }, []);
+
+  const handlePrint = () => {};
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -119,11 +155,8 @@ export default function CertificateView({
           text: `${t("pageTitle")}: ${data.title} - ${data.recipient.name}`,
           url
         });
-      } catch {
-        // User cancelled or share failed
-      }
+      } catch {}
     } else {
-      // Fallback: copy to clipboard
       await navigator.clipboard.writeText(url);
     }
   };
@@ -163,7 +196,29 @@ export default function CertificateView({
       )}
 
       <CertificateContainer>
-        <Certificate data={data} />
+        <div
+          ref={wrapperRef}
+          style={{
+            width: "100%",
+            height: wrapperHeight || "auto",
+            position: "relative",
+            overflow: "hidden"
+          }}
+        >
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+              position: "absolute",
+              top: 0,
+              left: 0
+            }}
+          >
+            <div ref={certRef} style={{ width: "max-content" }}>
+              <Certificate data={data} />
+            </div>
+          </div>
+        </div>
       </CertificateContainer>
 
       {showActions && (
@@ -177,10 +232,10 @@ export default function CertificateView({
 
       {showVerification && (
         <VerificationInfo>
-          {t("verification.description")}{" "}
+          {/* {t("verification.description")}{" "}
           <strong>
             {typeof window !== "undefined" ? window.location.origin : ""}/cert/{publicId}
-          </strong>
+          </strong> */}
           <CertificateId>
             {t("verification.id")}: {publicId}
           </CertificateId>

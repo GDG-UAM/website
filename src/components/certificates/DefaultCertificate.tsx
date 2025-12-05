@@ -118,7 +118,7 @@ const RecipientName = styled.div`
   font-family: "Georgia", "Times New Roman", serif; /* Normal serif font */
   font-size: 4rem;
   color: #000000;
-  margin: 10px 0 30px 0;
+  margin: 10px 0 20px 0;
   line-height: 1.2;
   border-bottom: 2px solid #e5e7eb;
   padding-bottom: 10px;
@@ -127,10 +127,11 @@ const RecipientName = styled.div`
 
 const Description = styled.p`
   font-size: 1.125rem;
-  color: #374151;
+  color: #4b5563;
   max-width: 700px;
   line-height: 1.8;
   margin-bottom: 40px;
+  font-style: italic;
 `;
 
 // Metadata Grid

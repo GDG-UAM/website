@@ -27,6 +27,7 @@ const PageLayout = styled.div`
   display: flex;
   gap: 24px;
   align-items: flex-start;
+  width: 100%;
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -36,6 +37,7 @@ const PageLayout = styled.div`
 const FormColumn = styled.div`
   flex: 1;
   min-width: 0;
+  width: 100%;
 `;
 
 const PreviewColumn = styled.div`
@@ -67,7 +69,11 @@ const Section = styled.div`
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
+
+  @media (min-width: 640px) {
+    padding: 16px;
+  }
 `;
 
 const SectionTitle = styled.h3`
@@ -124,6 +130,17 @@ const InstructorRow = styled.div`
   margin-bottom: 8px;
 `;
 
+const MobileDivider = styled.hr`
+  display: none;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 12px 0;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
 const MobilePreview = styled.div`
   display: none;
 
@@ -134,8 +151,10 @@ const MobilePreview = styled.div`
 `;
 
 const DesktopPreview = styled.div`
-  @media (max-width: 1024px) {
-    display: none;
+  display: none;
+
+  @media (min-width: 1025px) {
+    display: block;
   }
 `;
 
@@ -169,6 +188,21 @@ const OverlayContent = styled.div`
 const PreviewContainer = styled.div`
   position: relative;
   width: 100%;
+`;
+
+const ResponsivePreviewWrapper = styled.div`
+  width: 100%;
+  position: relative;
+  aspect-ratio: 1050 / 750;
+`;
+
+const ScaledPreview = styled.div<{ $scale: number }>`
+  width: 1050px;
+  transform: scale(${({ $scale }) => $scale});
+  transform-origin: top left;
+  position: absolute;
+  top: 0;
+  left: 0;
 `;
 
 export type CertificateType =
@@ -277,6 +311,40 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Responsive preview scaling
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(0.5);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Track mount state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Calculate preview scale based on container width
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const calculatePreviewScale = () => {
+      if (!previewContainerRef.current) return;
+      const containerWidth = previewContainerRef.current.offsetWidth;
+      if (containerWidth === 0) return; // Container not visible yet
+      const certificateWidth = 1050;
+      const newScale = containerWidth / certificateWidth;
+      setPreviewScale(newScale);
+    };
+
+    // Calculate immediately and also after a short delay for layout to settle
+    calculatePreviewScale();
+    const timer = setTimeout(calculatePreviewScale, 100);
+
+    window.addEventListener("resize", calculatePreviewScale);
+    return () => {
+      window.removeEventListener("resize", calculatePreviewScale);
+      clearTimeout(timer);
+    };
+  }, [isMounted]);
 
   useEffect(() => {
     if (!isPreviewOpen) return;
@@ -497,58 +565,65 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
                 {t("instructors")}
               </div>
               {(data.metadata.instructors || []).map((inst, idx) => (
-                <InstructorRow key={idx}>
-                  <Autocomplete
-                    freeSolo
-                    fullWidth
-                    options={instructorOptions}
-                    open={instructorOpen === idx}
-                    onOpen={() => setInstructorOpen(idx)}
-                    onClose={() => setInstructorOpen(null)}
-                    getOptionLabel={(option) =>
-                      typeof option === "string"
-                        ? option
-                        : option.displayName || option.name || option._id
-                    }
-                    inputValue={instructorQueries[idx] ?? inst.name ?? ""}
-                    onInputChange={(_e, newValue) => {
-                      setInstructorQueries((prev) => ({ ...prev, [idx]: newValue }));
-                      // Update instructor name as user types (allow manual entry)
-                      updateInstructor(idx, newValue, undefined);
-                    }}
-                    onChange={(_e, newValue) => {
-                      if (typeof newValue === "string") {
-                        updateInstructor(idx, newValue, undefined);
-                      } else if (newValue) {
-                        updateInstructor(idx, newValue.displayName || newValue.name, newValue._id);
-                        setInstructorQueries((prev) => ({
-                          ...prev,
-                          [idx]: newValue.displayName || newValue.name
-                        }));
+                <React.Fragment key={idx}>
+                  {idx > 0 && <MobileDivider />}
+                  <InstructorRow>
+                    <Autocomplete
+                      freeSolo
+                      fullWidth
+                      options={instructorOptions}
+                      open={instructorOpen === idx}
+                      onOpen={() => setInstructorOpen(idx)}
+                      onClose={() => setInstructorOpen(null)}
+                      getOptionLabel={(option) =>
+                        typeof option === "string"
+                          ? option
+                          : option.displayName || option.name || option._id
                       }
-                    }}
-                    loading={instructorLoading && instructorOpen === idx}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        size="small"
-                        label={`${t("instructorName")} ${idx + 1}`}
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {instructorLoading && instructorOpen === idx ? (
-                                <CircularProgress color="inherit" size={16} />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          )
-                        }}
-                      />
-                    )}
-                  />
-                  <DeleteButton iconSize={20} onClick={() => removeInstructor(idx)} />
-                </InstructorRow>
+                      inputValue={instructorQueries[idx] ?? inst.name ?? ""}
+                      onInputChange={(_e, newValue) => {
+                        setInstructorQueries((prev) => ({ ...prev, [idx]: newValue }));
+                        // Update instructor name as user types (allow manual entry)
+                        updateInstructor(idx, newValue, undefined);
+                      }}
+                      onChange={(_e, newValue) => {
+                        if (typeof newValue === "string") {
+                          updateInstructor(idx, newValue, undefined);
+                        } else if (newValue) {
+                          updateInstructor(
+                            idx,
+                            newValue.displayName || newValue.name,
+                            newValue._id
+                          );
+                          setInstructorQueries((prev) => ({
+                            ...prev,
+                            [idx]: newValue.displayName || newValue.name
+                          }));
+                        }
+                      }}
+                      loading={instructorLoading && instructorOpen === idx}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          size="small"
+                          label={`${t("instructorName")} ${idx + 1}`}
+                          InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                              <>
+                                {instructorLoading && instructorOpen === idx ? (
+                                  <CircularProgress color="inherit" size={16} />
+                                ) : null}
+                                {params.InputProps.endAdornment}
+                              </>
+                            )
+                          }}
+                        />
+                      )}
+                    />
+                    <DeleteButton iconSize={20} onClick={() => removeInstructor(idx)} />
+                  </InstructorRow>
+                </React.Fragment>
               ))}
               <AddButton iconSize={20} onClick={addInstructor}>
                 {t("addInstructor")}
@@ -630,23 +705,12 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
         <div style={{ position: "absolute", top: 10, right: 10, zIndex: 10 }}>
           <ViewButton onClick={() => setIsPreviewOpen(true)} color="default" />
         </div>
-        <ScrollablePreview>
-          <div style={{ width: "525px", height: "375px", position: "relative" }}>
-            {" "}
-            {/* Wrapper for layout flow */}
-            <div
-              style={{
-                width: "1050px", // Render width
-                transform: "scale(0.5)",
-                transformOrigin: "top left",
-                position: "absolute",
-                top: 0,
-                left: 0
-              }}
-            >
+        <ScrollablePreview ref={previewContainerRef}>
+          <ResponsivePreviewWrapper>
+            <ScaledPreview $scale={previewScale}>
               <Certificate data={previewData} />
-            </div>
-          </div>
+            </ScaledPreview>
+          </ResponsivePreviewWrapper>
         </ScrollablePreview>
       </PreviewContainer>
 
@@ -828,30 +892,33 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
           <Section>
             <SectionTitle>{t("signatures")}</SectionTitle>
             {data.signatures.map((sig, idx) => (
-              <SignatureRow key={idx}>
-                <SignatureFields>
-                  <TextField
-                    size="small"
-                    label={t("signatureName")}
-                    value={sig.name || ""}
-                    onChange={(e) => updateSignature(idx, "name", e.target.value)}
-                  />
-                  <TextField
-                    size="small"
-                    label={t("signatureRole")}
-                    value={sig.role || ""}
-                    onChange={(e) => updateSignature(idx, "role", e.target.value)}
-                  />
-                  <TextField
-                    size="small"
-                    label={t("signatureImageUrl")}
-                    value={sig.imageUrl || ""}
-                    onChange={(e) => updateSignature(idx, "imageUrl", e.target.value)}
-                    placeholder="https://..."
-                  />
-                </SignatureFields>
-                <DeleteButton iconSize={20} onClick={() => removeSignature(idx)} />
-              </SignatureRow>
+              <React.Fragment key={idx}>
+                {idx > 0 && <MobileDivider />}
+                <SignatureRow>
+                  <SignatureFields>
+                    <TextField
+                      size="small"
+                      label={t("signatureName")}
+                      value={sig.name || ""}
+                      onChange={(e) => updateSignature(idx, "name", e.target.value)}
+                    />
+                    <TextField
+                      size="small"
+                      label={t("signatureRole")}
+                      value={sig.role || ""}
+                      onChange={(e) => updateSignature(idx, "role", e.target.value)}
+                    />
+                    <TextField
+                      size="small"
+                      label={t("signatureImageUrl")}
+                      value={sig.imageUrl || ""}
+                      onChange={(e) => updateSignature(idx, "imageUrl", e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </SignatureFields>
+                  <DeleteButton iconSize={20} onClick={() => removeSignature(idx)} />
+                </SignatureRow>
+              </React.Fragment>
             ))}
             <AddButton iconSize={20} onClick={addSignature}>
               {t("addSignature")}
