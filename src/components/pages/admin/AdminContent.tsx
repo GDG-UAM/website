@@ -112,6 +112,12 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
                 >
                   {t("giveaways")}
                 </AdminNavigationButton>
+                <AdminNavigationButton
+                  type="certificates"
+                  onClick={() => handleNavigation("/admin/certificates")}
+                >
+                  {t("certificates")}
+                </AdminNavigationButton>
                 <AdminNavigationButton type="games" disabled>
                   {t("games")}
                 </AdminNavigationButton>

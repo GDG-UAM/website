@@ -4,6 +4,7 @@ import { cors } from "@elysiajs/cors";
 import { articlesRoutes } from "./routes/articles";
 import { usersRoutes } from "./routes/users";
 import { adminRoutes } from "./routes/admin";
+import { certificatesRoutes } from "./routes/certificates";
 import { contactRoutes } from "./routes/contact";
 import { csrfRoutes } from "./routes/csrf";
 import { eventsRoutes } from "./routes/events";
@@ -69,6 +70,7 @@ export const app = new Elysia({ prefix: "/api" })
   .use(articlesRoutes)
   .use(usersRoutes)
   .use(adminRoutes)
+  .use(certificatesRoutes)
   .use(contactRoutes)
   .use(csrfRoutes)
   .use(eventsRoutes)

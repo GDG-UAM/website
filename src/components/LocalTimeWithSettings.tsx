@@ -1,12 +1,13 @@
 "use client";
 
 import { useSettings } from "@/lib/settings/SettingsContext";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type Props = {
   iso: string;
   dateOnly?: boolean;
   compact?: boolean;
+  fullMonth?: boolean;
   locale?: string;
   timeZone?: string;
 };
@@ -15,11 +16,13 @@ export default function LocalTimeWithSettings({
   iso,
   dateOnly = true,
   compact = false,
+  fullMonth = false,
   locale: propLocale,
   timeZone: propTimeZone
 }: Props) {
   const { settings } = useSettings();
   const currentLocale = useLocale();
+  const t = useTranslations("dateFormats");
   const hour12 = (settings?.general.timeFormat ?? "24h") === "12h";
 
   if (compact) {
@@ -53,9 +56,9 @@ export default function LocalTimeWithSettings({
   // Get day (without leading zero)
   const day = d.toLocaleDateString(locale, { day: "numeric", timeZone });
 
-  // Get month (short format, lowercase)
+  // Get month (short or long format, lowercase)
   const month = d
-    .toLocaleDateString(locale, { month: "short", timeZone })
+    .toLocaleDateString(locale, { month: fullMonth ? "long" : "short", timeZone })
     .replace(/\./g, "")
     .toLowerCase();
 
@@ -71,8 +74,14 @@ export default function LocalTimeWithSettings({
   });
 
   if (dateOnly) {
-    return <time dateTime={iso}>{`${day} ${month} ${year}`}</time>;
+    if (fullMonth) {
+      return <time dateTime={iso}>{t("fullDate", { day, month, year })}</time>;
+    }
+    return <time dateTime={iso}>{t("shortDate", { day, month, year })}</time>;
   }
 
-  return <time dateTime={iso}>{`${day} ${month} ${year}, ${time}`}</time>;
+  if (fullMonth) {
+    return <time dateTime={iso}>{t("fullDateTime", { day, month, year, time })}</time>;
+  }
+  return <time dateTime={iso}>{t("shortDateTime", { day, month, year, time })}</time>;
 }

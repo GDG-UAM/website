@@ -1,0 +1,313 @@
+import { Elysia, t } from "elysia";
+import { getSession } from "../../utils/auth";
+import { verifyCsrf } from "@/lib/controllers/csrfController";
+import {
+  createCertificate,
+  updateCertificate,
+  deleteCertificate,
+  getCertificateById,
+  listCertificates,
+  revokeCertificate,
+  reinstateCertificate,
+  type CertificateInput,
+  type CertificateUpdateInput,
+  type SortTypes
+} from "@/lib/controllers/certificateController";
+import type { CertificateType } from "@/lib/models/Certificate";
+import {
+  CertificatesListResponse,
+  CertificateItem,
+  CertificateInputBody,
+  CertificateUpdateBody
+} from "../../models/admin/certificates";
+
+export const adminCertificatesRoutes = new Elysia({ prefix: "/certificates" })
+  .derive(async () => {
+    const session = await getSession();
+    return {
+      user: session?.user ?? null,
+      session
+    };
+  })
+  .derive(({ set }) => ({
+    status: (code: 200 | 400 | 401 | 403 | 404 | 500, response) => {
+      set.status = code;
+      return response;
+    }
+  }))
+  // List certificates with pagination and filters
+  .get(
+    "/",
+    async ({
+      query: { type, recipientUserId, includeRevoked, page, pageSize, sort, search },
+      status
+    }) => {
+      try {
+        const data = await listCertificates({
+          type: type as CertificateType | undefined,
+          recipientUserId,
+          includeRevoked: includeRevoked === "true",
+          page,
+          pageSize,
+          sort: sort as SortTypes,
+          search
+        });
+        return status(200, data as typeof CertificatesListResponse.static);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to list certificates";
+        console.log(msg);
+        return status(500, { error: msg });
+      }
+    },
+    {
+      query: t.Object({
+        type: t.Optional(
+          t.Union([
+            t.Literal("COURSE_COMPLETION"),
+            t.Literal("EVENT_ACHIEVEMENT"),
+            t.Literal("PARTICIPATION"),
+            t.Literal("VOLUNTEER")
+          ])
+        ),
+        recipientUserId: t.Optional(t.String()),
+        includeRevoked: t.Optional(t.String()),
+        page: t.Optional(t.Number({ default: 1, minimum: 1 })),
+        pageSize: t.Optional(t.Number({ default: 10, minimum: 1, maximum: 100 })),
+        sort: t.Optional(
+          t.Union([t.Literal("newest"), t.Literal("oldest")], { default: "newest" })
+        ),
+        search: t.Optional(t.String())
+      }),
+      response: {
+        200: CertificatesListResponse,
+        500: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Create a new certificate
+  .post(
+    "/",
+    async ({ headers, body, user, status }) => {
+      try {
+        const userId = user?.id;
+        const token = headers["x-csrf-token"];
+
+        if (!userId || !token || !(await verifyCsrf(token, userId)))
+          return status(403, { error: "Invalid CSRF" });
+
+        // Transform period dates if provided
+        const input: CertificateInput = {
+          ...body,
+          recipient: {
+            ...body.recipient,
+            userId: body.recipient.userId ? body.recipient.userId : undefined
+          },
+          period: body.period
+            ? {
+                startDate: new Date(body.period.startDate),
+                endDate: body.period.endDate ? new Date(body.period.endDate) : undefined
+              }
+            : undefined
+        };
+
+        const created = await createCertificate(input);
+        return status(200, created as unknown as typeof CertificateItem.static);
+      } catch (e) {
+        console.error(e);
+        const msg = e instanceof Error ? e.message : "Failed to create certificate";
+        return status(400, { error: msg });
+      }
+    },
+    {
+      headers: t.Object({
+        "x-csrf-token": t.String()
+      }),
+      body: CertificateInputBody,
+      response: {
+        200: CertificateItem,
+        400: t.Object({ error: t.String() }),
+        403: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Get a certificate by ID
+  .get(
+    "/:id",
+    async ({ params: { id }, status }) => {
+      try {
+        const certificate = await getCertificateById(id);
+        if (!certificate) return status(404, { error: "Certificate not found" });
+        return status(200, certificate as unknown as typeof CertificateItem.static);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to get certificate";
+        return status(500, { error: msg });
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String()
+      }),
+      response: {
+        200: CertificateItem,
+        404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Update a certificate
+  .patch(
+    "/:id",
+    async ({ headers, params: { id }, body, user, status }) => {
+      try {
+        const userId = user?.id;
+        const token = headers["x-csrf-token"];
+
+        if (!userId || !token || !(await verifyCsrf(token, userId)))
+          return status(403, { error: "Invalid CSRF" });
+
+        const input: CertificateUpdateInput = {
+          ...body,
+          recipient:
+            body.recipient && body.recipient.name
+              ? {
+                  name: body.recipient.name,
+                  userId: body.recipient.userId || undefined
+                }
+              : undefined,
+          period: body.period
+            ? {
+                startDate: body.period.startDate ? new Date(body.period.startDate) : new Date(),
+                endDate: body.period.endDate ? new Date(body.period.endDate) : undefined
+              }
+            : undefined
+        };
+
+        const updated = await updateCertificate(id, input);
+        if (!updated) return status(404, { error: "Certificate not found" });
+        return status(200, updated as unknown as typeof CertificateItem.static);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to update certificate";
+        return status(400, { error: msg });
+      }
+    },
+    {
+      headers: t.Object({
+        "x-csrf-token": t.String()
+      }),
+      params: t.Object({
+        id: t.String()
+      }),
+      body: CertificateUpdateBody,
+      response: {
+        200: CertificateItem,
+        400: t.Object({ error: t.String() }),
+        403: t.Object({ error: t.String() }),
+        404: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Delete a certificate
+  .delete(
+    "/:id",
+    async ({ headers, params: { id }, user, status }) => {
+      try {
+        const userId = user?.id;
+        const token = headers["x-csrf-token"];
+
+        if (!userId || !token || !(await verifyCsrf(token, userId)))
+          return status(403, { error: "Invalid CSRF" });
+
+        const deleted = await deleteCertificate(id);
+        if (!deleted) return status(404, { error: "Certificate not found" });
+        return status(200, { success: true });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to delete certificate";
+        return status(500, { error: msg });
+      }
+    },
+    {
+      headers: t.Object({
+        "x-csrf-token": t.String()
+      }),
+      params: t.Object({
+        id: t.String()
+      }),
+      response: {
+        200: t.Object({ success: t.Boolean() }),
+        403: t.Object({ error: t.String() }),
+        404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Revoke a certificate
+  .post(
+    "/:id/revoke",
+    async ({ headers, params: { id }, body, user, status }) => {
+      try {
+        const userId = user?.id;
+        const token = headers["x-csrf-token"];
+
+        if (!userId || !token || !(await verifyCsrf(token, userId)))
+          return status(403, { error: "Invalid CSRF" });
+
+        const revoked = await revokeCertificate(id, body.reason);
+        if (!revoked) return status(404, { error: "Certificate not found" });
+        return status(200, revoked as unknown as typeof CertificateItem.static);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to revoke certificate";
+        return status(500, { error: msg });
+      }
+    },
+    {
+      headers: t.Object({
+        "x-csrf-token": t.String()
+      }),
+      params: t.Object({
+        id: t.String()
+      }),
+      body: t.Object({
+        reason: t.Optional(t.String())
+      }),
+      response: {
+        200: CertificateItem,
+        403: t.Object({ error: t.String() }),
+        404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() })
+      }
+    }
+  )
+  // Reinstate a revoked certificate
+  .post(
+    "/:id/reinstate",
+    async ({ headers, params: { id }, user, status }) => {
+      try {
+        const userId = user?.id;
+        const token = headers["x-csrf-token"];
+
+        if (!userId || !token || !(await verifyCsrf(token, userId)))
+          return status(403, { error: "Invalid CSRF" });
+
+        const reinstated = await reinstateCertificate(id);
+        if (!reinstated) return status(404, { error: "Certificate not found" });
+        return status(200, reinstated as unknown as typeof CertificateItem.static);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to reinstate certificate";
+        return status(500, { error: msg });
+      }
+    },
+    {
+      headers: t.Object({
+        "x-csrf-token": t.String()
+      }),
+      params: t.Object({
+        id: t.String()
+      }),
+      response: {
+        200: CertificateItem,
+        403: t.Object({ error: t.String() }),
+        404: t.Object({ error: t.String() }),
+        500: t.Object({ error: t.String() })
+      }
+    }
+  );

@@ -1,4 +1,10 @@
 {
+  "dateFormats": {
+    "shortDate": "{day} {month} {year}",
+    "fullDate": "{day} {month} {year}",
+    "shortDateTime": "{day} {month} {year}, {time}",
+    "fullDateTime": "{day} {month} {year}, {time}"
+  },
   "contact": {
     "pageTitle": "Contact Us",
     "pageDescription": "Use this form to reach out to the GDG on Campus UAM team. Choose 'Personal' for general questions or meetup feedback, or 'Sponsor' if your organization wants to support or collaborate with us.",
@@ -53,6 +59,7 @@
     "add": "New",
     "back": "Back",
     "cancel": "Cancel",
+    "duplicate": "Duplicate",
     "copy": {
       "copy": "Copy",
       "copied": "Copied"
@@ -69,6 +76,7 @@
     "menu": "Menu",
     "reload": "Reload",
     "share": "Share",
+    "print": "Print",
     "login": "Login",
     "download": "Download",
     "play": "Play",
@@ -313,6 +321,28 @@
       "linkLabel": "Copy event link"
     }
   },
+  "certificates": {
+    "pageTitle": "Certificate",
+    "pageDescription": "View and verify certificates issued by GDG on Campus UAM.",
+    "status": {
+      "valid": "Valid Certificate",
+      "revoked": "This certificate has been revoked",
+      "issuedOn": "Issued on <date></date>",
+      "revokedOn": "Revoked on <date></date>"
+    },
+    "actions": {
+      "print": "Print",
+      "share": "Share",
+      "download": "Download"
+    },
+    "verification": {
+      "title": "Verify this certificate",
+      "description": "Verify this certificate at",
+      "id": "Certificate ID"
+    },
+    "notFound": "Certificate not found",
+    "notFoundDescription": "The certificate you are looking for does not exist or has been removed."
+  },
   "footer": {
     "quickLinks": "Quick Links",
     "connectWithUs": "Connect with Us",
@@ -425,7 +455,8 @@
       "events": "Events",
       "giveaways": "Giveaways",
       "links": "Links",
-      "permissions": "Permissions"
+      "permissions": "Permissions",
+      "certificates": "Certificates"
     },
     "navigation": {
       "blog": "Blog",
@@ -436,6 +467,7 @@
       "links": "Links",
       "permissions": "Permissions",
       "featureFlags": "Feature Flags",
+      "certificates": "Certificates",
       "test-dev": "",
       "test-prod": "",
       "categories": {
@@ -766,6 +798,122 @@
         },
         "backToList": "Back to List",
         "saveConfiguration": "Save Configuration"
+      }
+    },
+    "certificates": {
+      "breadcrumbs": {
+        "admin": "Admin",
+        "certificates": "Certificates"
+      },
+      "page": {
+        "title": "Certificate Management",
+        "createTitle": "Create New Certificate",
+        "editTitle": "Edit Certificate",
+        "previewTitle": "Certificate Preview",
+        "backToList": "Back to List"
+      },
+      "list": {
+        "create": "Create Certificate",
+        "reload": "Reload",
+        "reloaded": "List reloaded",
+        "loadError": "Couldn't load certificates",
+        "loading": "Loading...",
+        "showing": "Showing {count} certificates",
+        "noCertificates": "No certificates to show.",
+        "noResults": "No results found.",
+        "filterType": "Type",
+        "allTypes": "All Types",
+        "showRevoked": "Revoked",
+        "hideRevoked": "Hide Revoked",
+        "showRevokedYes": "Show All",
+        "searchPlaceholder": "Search by title or recipient...",
+        "duplicate": "Duplicate",
+        "revoke": "Revoke",
+        "reinstate": "Reinstate",
+        "columns": {
+          "title": "Title",
+          "recipient": "Recipient",
+          "type": "Type",
+          "status": "Status",
+          "created": "Created"
+        },
+        "types": {
+          "course_completion": "Course",
+          "event_achievement": "Achievement",
+          "participation": "Participation",
+          "volunteer": "Volunteer",
+          "courseCompletion": "Course Completion",
+          "eventAchievement": "Event Achievement"
+        },
+        "status": {
+          "active": "Active",
+          "revoked": "Revoked"
+        }
+      },
+      "form": {
+        "preview": "Preview",
+        "basicInfo": "Basic Information",
+        "certificateType": "Certificate Type",
+        "types": {
+          "courseCompletion": "Course Completion",
+          "eventAchievement": "Event Achievement",
+          "participation": "Participation",
+          "volunteer": "Volunteer Service"
+        },
+        "title": "Certificate Title",
+        "designId": "Design ID",
+        "designs": {
+          "default": "Default"
+        },
+        "description": "Description",
+        "recipient": "Recipient",
+        "recipientName": "Recipient Name",
+        "linkToUser": "Link to User (optional)",
+        "searchUser": "Search user...",
+        "printedName": "Name as printed on certificate",
+        "linkedToUser": "Linked to user",
+        "period": "Period",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "signatures": "Signatures",
+        "signatureName": "Name",
+        "signatureRole": "Role",
+        "signatureImageUrl": "Signature Image URL",
+        "addSignature": "Add Signature",
+        "courseMetadata": "Course Details",
+        "hours": "Hours",
+        "grade": "Grade",
+        "instructors": "Instructors",
+        "instructorName": "Instructor Name",
+        "addInstructor": "Add Instructor",
+        "achievementMetadata": "Achievement Details",
+        "rank": "Rank / Position",
+        "group": "Group / Team",
+        "participationMetadata": "Participation Details",
+        "participationRole": "Role",
+        "roles": {
+          "attendee": "Attendee",
+          "participant": "Participant",
+          "speaker": "Speaker",
+          "organizer": "Organizer"
+        },
+        "volunteerMetadata": "Volunteer Details",
+        "volunteerHours": "Volunteer Hours",
+        "save": "Save Certificate",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "created": "Certificate created",
+        "updated": "Certificate updated",
+        "deleted": "Certificate deleted",
+        "revoked": "Certificate revoked",
+        "reinstated": "Certificate reinstated",
+        "createError": "Couldn't create certificate",
+        "updateError": "Couldn't update certificate",
+        "deleteError": "Couldn't delete certificate",
+        "revokeError": "Couldn't revoke certificate",
+        "reinstateError": "Couldn't reinstate certificate",
+        "loadError": "Couldn't load certificate"
       }
     },
     "links": {

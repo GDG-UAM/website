@@ -1,4 +1,10 @@
 {
+  "dateFormats": {
+    "shortDate": "{day} {month} {year}",
+    "fullDate": "{day} de {month} de {year}",
+    "shortDateTime": "{day} {month} {year}, {time}",
+    "fullDateTime": "{day} de {month} de {year}, {time}"
+  },
   "contact": {
     "pageTitle": "Contacta con Nosotros",
     "pageDescription": "Usa este formulario para contactar con el equipo GDG on Campus UAM. Elige 'Personal' para dudas generales o feedback de los meetups, o 'Sponsor' si tu organización quiere colaborar o apoyar.",
@@ -53,6 +59,7 @@
     "add": "Nuevo",
     "back": "Atrás",
     "cancel": "Cancelar",
+    "duplicate": "Duplicar",
     "copy": {
       "copy": "Copiar",
       "copied": "Copiado"
@@ -69,6 +76,7 @@
     "menu": "Menú",
     "reload": "Recargar",
     "share": "Compartir",
+    "print": "Imprimir",
     "login": "Iniciar sesión",
     "download": "Descargar",
     "play": "Reproducir",
@@ -313,6 +321,28 @@
       "linkLabel": "Copiar enlace del evento"
     }
   },
+  "certificates": {
+    "pageTitle": "Certificado",
+    "pageDescription": "Ver y verificar certificados emitidos por GDG on Campus UAM.",
+    "status": {
+      "valid": "Certificado Válido",
+      "revoked": "Este certificado ha sido revocado",
+      "issuedOn": "Emitido el <date></date>",
+      "revokedOn": "Revocado el <date></date>"
+    },
+    "actions": {
+      "print": "Imprimir",
+      "share": "Compartir",
+      "download": "Descargar"
+    },
+    "verification": {
+      "title": "Verificar este certificado",
+      "description": "Verifica este certificado en",
+      "id": "ID del certificado"
+    },
+    "notFound": "Certificado no encontrado",
+    "notFoundDescription": "El certificado que buscas no existe o ha sido eliminado."
+  },
   "footer": {
     "quickLinks": "Enlaces rápidos",
     "connectWithUs": "Conéctate con nosotros",
@@ -425,7 +455,8 @@
       "events": "Eventos",
       "giveaways": "Sorteos",
       "links": "Enlaces",
-      "permissions": "Permisos"
+      "permissions": "Permisos",
+      "certificates": "Certificados"
     },
     "navigation": {
       "blog": "Blog",
@@ -436,6 +467,7 @@
       "links": "Enlaces",
       "permissions": "Permisos",
       "featureFlags": "Feature Flags",
+      "certificates": "Certificados",
       "test-dev": "",
       "test-prod": "",
       "categories": {
@@ -766,6 +798,122 @@
         },
         "backToList": "Volver a la lista",
         "saveConfiguration": "Guardar configuración"
+      }
+    },
+    "certificates": {
+      "breadcrumbs": {
+        "admin": "Admin",
+        "certificates": "Certificados"
+      },
+      "page": {
+        "title": "Gestión de Certificados",
+        "createTitle": "Crear Nuevo Certificado",
+        "editTitle": "Editar Certificado",
+        "previewTitle": "Vista Previa del Certificado",
+        "backToList": "Volver a la lista"
+      },
+      "list": {
+        "create": "Crear Certificado",
+        "reload": "Recargar",
+        "reloaded": "Lista recargada",
+        "loadError": "No se pudieron cargar los certificados",
+        "loading": "Cargando...",
+        "showing": "Mostrando {count} certificados",
+        "noCertificates": "No hay certificados para mostrar.",
+        "noResults": "No se encontraron resultados.",
+        "filterType": "Tipo",
+        "allTypes": "Todos los Tipos",
+        "showRevoked": "Revocados",
+        "hideRevoked": "Ocultar Revocados",
+        "showRevokedYes": "Mostrar Todos",
+        "searchPlaceholder": "Buscar por título o destinatario...",
+        "duplicate": "Duplicar",
+        "revoke": "Revocar",
+        "reinstate": "Reactivar",
+        "columns": {
+          "title": "Título",
+          "recipient": "Destinatario",
+          "type": "Tipo",
+          "status": "Estado",
+          "created": "Creado"
+        },
+        "types": {
+          "course_completion": "Curso",
+          "event_achievement": "Logro",
+          "participation": "Participación",
+          "volunteer": "Voluntariado",
+          "courseCompletion": "Finalización de Curso",
+          "eventAchievement": "Logro de Evento"
+        },
+        "status": {
+          "active": "Activo",
+          "revoked": "Revocado"
+        }
+      },
+      "form": {
+        "preview": "Vista Previa",
+        "basicInfo": "Información Básica",
+        "certificateType": "Tipo de Certificado",
+        "types": {
+          "courseCompletion": "Finalización de Curso",
+          "eventAchievement": "Logro de Evento",
+          "participation": "Participación",
+          "volunteer": "Servicio de Voluntariado"
+        },
+        "title": "Título del Certificado",
+        "designId": "ID de Diseño",
+        "designs": {
+          "default": "Predeterminado"
+        },
+        "description": "Descripción",
+        "recipient": "Destinatario",
+        "recipientName": "Nombre del Destinatario",
+        "linkToUser": "Vincular a Usuario (opcional)",
+        "searchUser": "Buscar usuario...",
+        "printedName": "Nombre como aparece en el certificado",
+        "linkedToUser": "Vinculado al usuario",
+        "period": "Período",
+        "startDate": "Fecha de Inicio",
+        "endDate": "Fecha de Fin",
+        "signatures": "Firmas",
+        "signatureName": "Nombre",
+        "signatureRole": "Cargo",
+        "signatureImageUrl": "URL de Imagen de Firma",
+        "addSignature": "Añadir Firma",
+        "courseMetadata": "Detalles del Curso",
+        "hours": "Horas",
+        "grade": "Calificación",
+        "instructors": "Instructores",
+        "instructorName": "Nombre del Instructor",
+        "addInstructor": "Añadir Instructor",
+        "achievementMetadata": "Detalles del Logro",
+        "rank": "Puesto / Posición",
+        "group": "Grupo / Equipo",
+        "participationMetadata": "Detalles de Participación",
+        "participationRole": "Rol",
+        "roles": {
+          "attendee": "Asistente",
+          "participant": "Participante",
+          "speaker": "Ponente",
+          "organizer": "Organizador"
+        },
+        "volunteerMetadata": "Detalles de Voluntariado",
+        "volunteerHours": "Horas de Voluntariado",
+        "save": "Guardar Certificado",
+        "cancel": "Cancelar"
+      },
+      "toasts": {
+        "created": "Certificado creado",
+        "updated": "Certificado actualizado",
+        "deleted": "Certificado eliminado",
+        "revoked": "Certificado revocado",
+        "reinstated": "Certificado reactivado",
+        "createError": "No se pudo crear el certificado",
+        "updateError": "No se pudo actualizar el certificado",
+        "deleteError": "No se pudo eliminar el certificado",
+        "revokeError": "No se pudo revocar el certificado",
+        "reinstateError": "No se pudo reactivar el certificado",
+        "loadError": "No se pudo cargar el certificado"
       }
     },
     "links": {

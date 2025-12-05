@@ -110,6 +110,7 @@ export default function ArticlePage({ type }: { type: ArticleType }) {
                   <LocalTimeWithSettings
                     iso={new Date(article.publishedAt).toISOString()}
                     dateOnly={false}
+                    fullMonth
                   />
                 ) : (
                   ""
