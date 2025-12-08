@@ -25,6 +25,6 @@ export type CertificateData = {
     rank?: string;
     group?: string;
     // Participation
-    role?: string;
+    role?: "ATTENDEE" | "PARTICIPANT" | "SPEAKER" | "ORGANIZER";
   };
 };

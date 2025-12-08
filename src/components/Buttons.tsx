@@ -566,6 +566,25 @@ export const ShareButton: React.FC<Omit<CustomButtonProps, PropsToOmit>> = ({
   );
 };
 
+export const LinkedInShareButton: React.FC<Omit<CustomButtonProps, PropsToOmit>> = ({
+  ariaLabel,
+  color = "primary",
+  ...props
+}) => {
+  const t = useTranslations("buttons");
+
+  return (
+    <CustomButton
+      path={SocialMedia.linkedin.iconPath}
+      viewBox={SocialMedia.linkedin.viewBox}
+      isPathElement={SocialMedia.linkedin.isPathElement}
+      color={color}
+      ariaLabel={ariaLabel ?? t("linkedinShare")}
+      {...props}
+    />
+  );
+};
+
 export const PrintButton: React.FC<Omit<CustomButtonProps, PropsToOmit>> = ({
   ariaLabel,
   color = "primary",

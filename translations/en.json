@@ -76,6 +76,7 @@
     "menu": "Menu",
     "reload": "Reload",
     "share": "Share",
+    "linkedinShare": "Share on LinkedIn",
     "print": "Print",
     "login": "Login",
     "download": "Download",
@@ -333,6 +334,7 @@
     "actions": {
       "print": "Print",
       "share": "Share",
+      "addToLinkedIn": "Add to LinkedIn",
       "download": "Download"
     },
     "verification": {

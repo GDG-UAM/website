@@ -57,6 +57,7 @@ export default async function CertificatePublicPage(context: { params: Promise<{
   const isRevoked = certificate.revoked?.isRevoked || false;
   const revokedAt = certificate.revoked?.revokedAt;
   const createdAt = certificate.createdAt;
+  const recipientUserId = certificate.recipient.userId?.toString();
 
   return (
     <main
@@ -73,6 +74,7 @@ export default async function CertificatePublicPage(context: { params: Promise<{
         isRevoked={isRevoked}
         revokedAt={revokedAt}
         createdAt={createdAt}
+        recipientUserId={recipientUserId}
       />
     </main>
   );

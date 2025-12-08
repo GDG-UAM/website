@@ -300,6 +300,7 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
   const [recipientOptions, setRecipientOptions] = useState<UserLite[]>([]);
   const [recipientLoading, setRecipientLoading] = useState(false);
   const [recipientOpen, setRecipientOpen] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<UserLite | null>(null);
 
   // User search state for instructors
   const [instructorQueries, setInstructorQueries] = useState<Record<number, string>>({});
@@ -387,6 +388,58 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
       document.body.style.overflow = "";
     };
   }, [isPreviewOpen]);
+
+  // Load initial recipient user if userId is set
+  useEffect(() => {
+    if (data.recipient.userId && !selectedRecipient) {
+      // Fetch the user by ID to populate the Autocomplete
+      let ignore = false;
+      async function fetchUser() {
+        try {
+          const { data: result, error } = await api.admin.users.get({
+            query: { q: data.recipient.userId, pageSize: 1 }
+          });
+          if (error || ignore) return;
+          if (result.items && result.items.length > 0) {
+            const user = result.items[0];
+            setSelectedRecipient(user);
+            setRecipientQuery(user.name);
+            // Add the user to options so Autocomplete can display it
+            setRecipientOptions((prev) => {
+              const exists = prev.some((u) => u._id === user._id);
+              return exists ? prev : [user, ...prev];
+            });
+          }
+        } catch {}
+      }
+      fetchUser();
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [data.recipient.userId, selectedRecipient]);
+
+  // Load initial recipient user if userId is set
+  useEffect(() => {
+    if (data.recipient.userId && !selectedRecipient) {
+      // Fetch the user by ID to populate the Autocomplete
+      let ignore = false;
+      async function fetchUser() {
+        try {
+          const { data: user, error } = await api.admin
+            .users({ id: data.recipient.userId as string })
+            .get();
+          if (error || ignore) return;
+          setSelectedRecipient(user);
+          setRecipientQuery(user.name);
+        } catch {}
+      }
+      fetchUser();
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [data.recipient.userId, selectedRecipient]);
 
   // Fetch users for recipient search
   useEffect(() => {
@@ -803,6 +856,7 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
                 freeSolo
                 fullWidth
                 options={recipientOptions}
+                value={selectedRecipient}
                 open={recipientOpen}
                 onOpen={() => setRecipientOpen(true)}
                 onClose={() => setRecipientOpen(false)}
@@ -816,14 +870,21 @@ export default function CertificateForm({ initial, onCancel, onSubmit }: Props) 
                   setRecipientQuery(newValue);
                 }}
                 onChange={(_e, newValue) => {
-                  if (typeof newValue === "string") {
+                  if (newValue === null) {
+                    // Field was cleared - remove userId
+                    setSelectedRecipient(null);
+                    updateRecipient("userId", "");
+                    setRecipientQuery("");
+                  } else if (typeof newValue === "string") {
                     // Manual text entry - set as name if name is empty
                     if (!data.recipient.name) {
                       updateRecipient("name", newValue);
                     }
+                    setSelectedRecipient(null);
                     updateRecipient("userId", "");
                   } else if (newValue) {
                     // Selected a user - auto-fill name if empty, set userId
+                    setSelectedRecipient(newValue);
                     if (!data.recipient.name) {
                       updateRecipient("name", newValue.displayName || newValue.name);
                     }

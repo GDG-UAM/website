@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Certificate, { CertificateData } from "@/components/Certificate";
-import { PrintButton, ShareButton } from "@/components/Buttons";
+import { PrintButton, ShareButton, LinkedInShareButton } from "@/components/Buttons";
 import { useTranslations } from "next-intl";
 import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
 import styled from "styled-components";
+import { useSession } from "next-auth/react";
 
 const ViewWrapper = styled.div`
   display: flex;
@@ -100,6 +101,7 @@ export interface CertificateViewProps {
   showStatus?: boolean;
   showActions?: boolean;
   showVerification?: boolean;
+  recipientUserId?: string;
 }
 
 export default function CertificateView({
@@ -110,11 +112,21 @@ export default function CertificateView({
   createdAt,
   showStatus,
   showActions = true,
-  showVerification = false
+  showVerification = false,
+  recipientUserId
 }: CertificateViewProps) {
   const t = useTranslations("certificates");
+  const { data: session } = useSession();
 
   if (showStatus === undefined) showStatus = isRevoked;
+
+  type SessionWithFlags = { user?: { id?: string; flags?: Record<string, boolean> } } | null;
+  const currentUserId = (session as SessionWithFlags)?.user?.id;
+  const hasLinkedInFlag = Boolean(
+    (session as SessionWithFlags)?.user?.flags?.["certificate-show-linkedin-add-button"]
+  );
+  const showLinkedInButton =
+    Boolean(recipientUserId && currentUserId === recipientUserId) || hasLinkedInFlag;
 
   const certRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -159,6 +171,39 @@ export default function CertificateView({
     } else {
       await navigator.clipboard.writeText(url);
     }
+  };
+
+  const handleLinkedInShare = () => {
+    let title = data.title;
+    switch (data.type) {
+      case "COURSE_COMPLETION":
+        break;
+      case "EVENT_ACHIEVEMENT":
+        if (data.metadata?.rank) title = `${data.metadata.rank} - ${data.title}`;
+        break;
+      case "PARTICIPATION":
+        switch (data.metadata?.role) {
+          case "ATTENDEE":
+            title = `${data.title} Attendee`;
+            break;
+          case "PARTICIPANT":
+            title = `${data.title} Participant`;
+            break;
+          case "SPEAKER":
+            title = `Speaker at ${data.title}`;
+            break;
+          case "ORGANIZER":
+            title = `${data.title} Organizer`;
+            break;
+        }
+        break;
+      case "VOLUNTEER":
+        const hours = data.metadata?.hours ? ` (${data.metadata.hours} hours)` : "";
+        title = `${data.title} Volunteer${hours}`;
+        break;
+    }
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(title)}&organizationName=GDG%20on%20Campus%20-%20Universidad%20Aut%C3%B3noma%20de%20Madrid&issueMonth=${createdAt?.getUTCMonth()}&issueYear=${createdAt?.getUTCFullYear()}&expirationMonth=&expirationYear=&certUrl=https%3A%2F%2Fgdguam.es%2Fcert%2F${publicId}&certId=${publicId}`;
+    window.open(linkedInUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -227,6 +272,11 @@ export default function CertificateView({
             {t("actions.print")}
           </PrintButton>
           <ShareButton onClick={handleShare}>{t("actions.share")}</ShareButton>
+          {showLinkedInButton && (
+            <LinkedInShareButton onClick={handleLinkedInShare}>
+              {t("actions.addToLinkedIn")}
+            </LinkedInShareButton>
+          )}
         </ActionsContainer>
       )}
 
