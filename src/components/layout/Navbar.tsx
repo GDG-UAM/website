@@ -107,7 +107,8 @@ export default function Navbar() {
             data-no-ai-translate
           >
             <Image src="/logo/32x32.webp" alt="GDG" width={36} height={36} priority />
-            <span>{t("brand")}</span>
+            <span className="brand-desktop">{t("brand.desktop")}</span>
+            <span className="brand-mobile">{t("brand.mobile")}</span>
           </Brand>
           {/* Desktop Nav */}
           <DesktopNav role="menubar" aria-label={t("mainNav")}>

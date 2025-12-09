@@ -42,6 +42,20 @@ export const Brand = styled(Link)`
   &:focus {
     color: inherit !important;
   }
+
+  .brand-desktop {
+    display: block;
+    @media (max-width: 450px) {
+      display: none;
+    }
+  }
+
+  .brand-mobile {
+    display: none;
+    @media (max-width: 450px) {
+      display: block;
+    }
+  }
 `;
 
 export const DesktopNav = styled.ul`

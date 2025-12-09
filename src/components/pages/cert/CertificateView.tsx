@@ -126,7 +126,8 @@ export default function CertificateView({
     (session as SessionWithFlags)?.user?.flags?.["certificate-show-linkedin-add-button"]
   );
   const showLinkedInButton =
-    Boolean(recipientUserId && currentUserId === recipientUserId) || hasLinkedInFlag;
+    (Boolean(recipientUserId && currentUserId === recipientUserId) || hasLinkedInFlag) &&
+    !isRevoked;
 
   const certRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
