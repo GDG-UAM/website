@@ -11,7 +11,9 @@ import {
   DeleteButton,
   DuplicateButton,
   CancelButton,
-  AcceptButton
+  AcceptButton,
+  NextButton,
+  BackButton
 } from "@/components/Buttons";
 import { TextField, Chip, MenuItem } from "@mui/material";
 import { useTranslations } from "next-intl";
@@ -158,6 +160,9 @@ export default function CertificateList({
   const [typeFilter, setTypeFilter] = useState<CertificateType | "">("");
   const [includeRevoked, setIncludeRevoked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const PAGE_SIZE = 50;
 
   const load = useCallback(
     async (notify?: boolean) => {
@@ -168,11 +173,12 @@ export default function CertificateList({
             search: search || undefined,
             type: typeFilter || undefined,
             includeRevoked: includeRevoked.toString(),
-            page: 1,
-            pageSize: 50
+            page: page,
+            pageSize: PAGE_SIZE
           }
         });
         if (error) throw error;
+        setTotal(data.total);
         setRows(
           data.items.map((x) => ({
             _id: x._id as string,
@@ -195,7 +201,7 @@ export default function CertificateList({
         setLoading(false);
       }
     },
-    [search, typeFilter, includeRevoked, t]
+    [search, typeFilter, includeRevoked, page, t]
   );
 
   useEffect(() => {
@@ -331,8 +337,26 @@ export default function CertificateList({
       </Card>
 
       {!loading && rows.length > 0 && (
-        <div style={{ fontSize: "0.875rem", color: "#666" }}>
-          {t("showing", { count: rows.length })}
+        <div
+          style={{
+            fontSize: "0.875rem",
+            color: "#666",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between"
+          }}
+        >
+          <div>{t("showing", { count: rows.length })}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <BackButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} />
+            <span>
+              {page} / {Math.ceil(total / PAGE_SIZE) || 1}
+            </span>
+            <NextButton
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= Math.ceil(total / PAGE_SIZE)}
+            />
+          </div>
         </div>
       )}
     </Wrapper>

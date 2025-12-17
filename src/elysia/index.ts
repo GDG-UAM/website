@@ -15,6 +15,7 @@ import { settingsRoutes } from "./routes/settings";
 import { teamRoutes } from "./routes/team";
 import { telemetryRoutes } from "./routes/telemetry";
 import { otherRoutes } from "./routes/other";
+import { openBadgeRoutes } from "./routes/openbadge";
 
 export const app = new Elysia({ prefix: "/api" })
   .use(cors())
@@ -80,6 +81,7 @@ export const app = new Elysia({ prefix: "/api" })
   .use(settingsRoutes)
   .use(teamRoutes)
   .use(telemetryRoutes)
+  .use(openBadgeRoutes)
   .use(otherRoutes);
 
 export type App = typeof app;

@@ -585,6 +585,23 @@ export const LinkedInShareButton: React.FC<Omit<CustomButtonProps, PropsToOmit>>
   );
 };
 
+export const OpenBadgeButton: React.FC<Omit<CustomButtonProps, PropsToOmit>> = ({
+  ariaLabel,
+  color = "primary",
+  ...props
+}) => {
+  const t = useTranslations("buttons");
+
+  return (
+    <CustomButton
+      path="M240-40v-329L110-580l185-300h370l185 300-130 211v329l-240-80-240 80Zm80-111 160-53 160 53v-129H320v129Zm20-649L204-580l136 220h280l136-220-136-220H340Zm98 383L296-558l57-57 85 85 169-170 57 56-226 227ZM320-280h320-320Z"
+      color={color}
+      ariaLabel={ariaLabel ?? t("addOpenBadge")}
+      {...props}
+    />
+  );
+};
+
 export const PrintButton: React.FC<Omit<CustomButtonProps, PropsToOmit>> = ({
   ariaLabel,
   color = "primary",

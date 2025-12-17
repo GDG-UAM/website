@@ -98,7 +98,8 @@
     "openWebsite": "Abrir Web",
     "openX": "Abrir X",
     "openGithub": "Abrir Github",
-    "openGdgCommunity": "Abrir GDG Community"
+    "openGdgCommunity": "Abrir GDG Community",
+    "addOpenBadge": "Añadir OpenBadge"
   },
   "globalError": {
     "title": "Algo salió mal",
@@ -338,6 +339,7 @@
       "print": "Imprimir",
       "share": "Compartir",
       "addToLinkedIn": "Añadir a LinkedIn",
+      "addOpenBadge": "Añadir OpenBadge",
       "download": "Descargar"
     },
     "verification": {
@@ -346,7 +348,15 @@
       "id": "ID del certificado"
     },
     "notFound": "Certificado no encontrado",
-    "notFoundDescription": "El certificado que buscas no existe o ha sido eliminado."
+    "notFoundDescription": "El certificado que buscas no existe o ha sido eliminado.",
+    "exportModal": {
+      "title": "Añadir a tu perfil",
+      "openBadgePassport": "OpenBadge Passport",
+      "credly": "Credly",
+      "badgr": "Badgr",
+      "parchment": "Parchment",
+      "validate": "Validar Insignia"
+    }
   },
   "footer": {
     "quickLinks": "Enlaces rápidos",

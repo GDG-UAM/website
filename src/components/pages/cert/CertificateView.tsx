@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Certificate, { CertificateData } from "@/components/Certificate";
-import { PrintButton, ShareButton, LinkedInShareButton } from "@/components/Buttons";
+import {
+  PrintButton,
+  ShareButton,
+  LinkedInShareButton,
+  OpenBadgeButton,
+  OpenLinkButton
+} from "@/components/Buttons";
+import Modal from "@/components/Modal";
 import { useTranslations } from "next-intl";
 import LocalTimeWithSettings from "@/components/LocalTimeWithSettings";
 import styled from "styled-components";
@@ -128,11 +135,14 @@ export default function CertificateView({
   const showLinkedInButton =
     (Boolean(recipientUserId && currentUserId === recipientUserId) || hasLinkedInFlag) &&
     !isRevoked;
+  const showOpenBadgeButton =
+    Boolean(recipientUserId && currentUserId === recipientUserId) && !isRevoked;
 
   const certRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [wrapperHeight, setWrapperHeight] = useState<number>(0);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
 
   useEffect(() => {
     const resize = () => {
@@ -207,6 +217,26 @@ export default function CertificateView({
     window.open(linkedInUrl, "_blank", "noopener,noreferrer");
   };
 
+  const handleOpenBadge = () => {
+    setShowBadgeModal(true);
+  };
+
+  const handleExport = (service: "obp" | "credly" | "badgr" | "parchment") => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://gdguam.es";
+    const assertionUrl = `${origin}/api/openbadge/assertion/${publicId}`;
+
+    let url = "";
+    switch (service) {
+      case "obp":
+        url = `https://openbadgepassport.com/app/badge/import?url=${encodeURIComponent(assertionUrl)}`;
+        break;
+      case "badgr":
+        url = `https://badgr.com/backpack/import?url=${encodeURIComponent(assertionUrl)}`;
+        break;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <ViewWrapper>
       {showStatus && (
@@ -278,6 +308,9 @@ export default function CertificateView({
               {t("actions.addToLinkedIn")}
             </LinkedInShareButton>
           )}
+          {showOpenBadgeButton && (
+            <OpenBadgeButton onClick={handleOpenBadge}>{t("actions.addOpenBadge")}</OpenBadgeButton>
+          )}
         </ActionsContainer>
       )}
 
@@ -292,6 +325,51 @@ export default function CertificateView({
           </CertificateId>
         </VerificationInfo>
       )}
+
+      <Modal
+        isOpen={showBadgeModal}
+        onClose={() => setShowBadgeModal(false)}
+        title={t("exportModal.title")}
+        width="xs"
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <OpenBadgeButton onClick={() => handleExport("obp")} fullWidth justify="flex-start">
+            {t("exportModal.openBadgePassport")}
+          </OpenBadgeButton>
+          <OpenBadgeButton onClick={() => handleExport("badgr")} fullWidth justify="flex-start">
+            {t("exportModal.badgr")}
+          </OpenBadgeButton>
+          <OpenLinkButton
+            color="primary"
+            href="https://www.credly.com/"
+            fullWidth
+            justify="flex-start"
+          >
+            {t("exportModal.credly")}
+          </OpenLinkButton>
+          <OpenLinkButton
+            color="primary"
+            href="https://www.parchment.com/"
+            fullWidth
+            justify="flex-start"
+          >
+            {t("exportModal.parchment")}
+          </OpenLinkButton>
+          <hr style={{ margin: "12px 0" }} />
+          <OpenLinkButton
+            color="secondary"
+            href={`https://badgecheck.io/?url=${encodeURIComponent(
+              (typeof window !== "undefined" ? window.location.origin : "https://gdguam.es") +
+                "/api/openbadge/assertion/" +
+                publicId
+            )}`}
+            fullWidth
+            justify="flex-start"
+          >
+            {t("exportModal.validate")}
+          </OpenLinkButton>
+        </div>
+      </Modal>
     </ViewWrapper>
   );
 }
