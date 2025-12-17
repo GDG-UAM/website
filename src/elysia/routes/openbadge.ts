@@ -15,7 +15,7 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
       name: "Google Developer Group on Campus - Universidad Autónoma de Madrid",
       url: BASE_URL,
       email: "info@gdguam.es",
-      image: `${BASE_URL}/logo/196x196.webp`
+      image: `${BASE_URL}/logo/logo.svg`
     };
   })
 
@@ -34,7 +34,7 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
         id: `${BASE_URL}/api/openbadge/class/${publicId}`,
         name: certificate.title,
         description: certificate.description || certificate.title,
-        image: `${BASE_URL}/logo/openbadge.webp`,
+        image: `${BASE_URL}/logo/logo.svg`,
         criteria: {
           narrative: `Certificate awarded to ${certificate.recipient.name} for ${certificate.title}.`
         },
