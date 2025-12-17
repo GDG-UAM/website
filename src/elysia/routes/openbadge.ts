@@ -6,7 +6,6 @@ import crypto from "node:crypto";
 const BASE_URL = "https://gdguam.es";
 
 export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
-  // Issuer Route
   .get("/issuer", () => {
     return {
       "@context": "https://w3id.org/openbadges/v2",
@@ -14,12 +13,11 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
       id: `${BASE_URL}/api/openbadge/issuer`,
       name: "Google Developer Group on Campus - Universidad Autónoma de Madrid",
       url: BASE_URL,
-      email: "info@gdguam.es",
-      image: `${BASE_URL}/logo/logo.svg`
+      image: `${BASE_URL}/logo/logo.svg`,
+      email: "gdguam@gmail.com"
     };
   })
 
-  // Badge Class Route
   .get("/class/:publicId", async ({ params: { publicId }, set }) => {
     try {
       const certificate = await getCertificateByPublicId(publicId);
@@ -34,11 +32,11 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
         id: `${BASE_URL}/api/openbadge/class/${publicId}`,
         name: certificate.title,
         description: certificate.description || certificate.title,
-        image: `${BASE_URL}/logo/logo.svg`,
         criteria: {
           narrative: `Certificate awarded to ${certificate.recipient.name} for ${certificate.title}.`
         },
-        issuer: `${BASE_URL}/api/openbadge/issuer`
+        issuer: `${BASE_URL}/api/openbadge/issuer`,
+        image: `${BASE_URL}/logo/logo.svg`
       };
     } catch {
       set.status = 500;
@@ -46,7 +44,6 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
     }
   })
 
-  // Badge Assertion Route
   .get("/assertion/:publicId", async ({ params: { publicId }, set }) => {
     try {
       const certificate = await getCertificateByPublicId(publicId);
