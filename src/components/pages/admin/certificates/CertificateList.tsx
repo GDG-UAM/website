@@ -348,11 +348,16 @@ export default function CertificateList({
         >
           <div>{t("showing", { count: rows.length })}</div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <BackButton onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} />
+            <BackButton
+              color="primary"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            />
             <span>
               {page} / {Math.ceil(total / PAGE_SIZE) || 1}
             </span>
             <NextButton
+              color="primary"
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= Math.ceil(total / PAGE_SIZE)}
             />
