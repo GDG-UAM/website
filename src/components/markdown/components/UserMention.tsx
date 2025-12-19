@@ -136,8 +136,8 @@ export default React.memo(function UserMention({
   const canSeePrivate = Boolean(
     (session as SessionWithFlags)?.user?.flags?.["profile-see-private-profiles"]
   );
-  const canShowMentionAvatars = Boolean(
-    (session as SessionWithFlags)?.user?.flags?.["markdown-see-mention-avatars"]
+  const canShowMentionAvatars = !Boolean(
+    (session as SessionWithFlags)?.user?.flags?.["markdown-hide-mention-avatars"]
   );
 
   // Loading placeholder using i18n
