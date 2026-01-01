@@ -223,7 +223,7 @@ export default function CertificateView({
 
   const handleExport = (service: "obp" | "credly" | "badgr" | "parchment") => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://gdguam.es";
-    const assertionUrl = `${origin}/api/openbadge/assertion/${publicId}`;
+    const assertionUrl = `${origin}/api/badges/assertion/${publicId}`;
 
     let url = "";
     switch (service) {
@@ -360,7 +360,7 @@ export default function CertificateView({
             color="secondary"
             href={`https://badgecheck.io/?url=${encodeURIComponent(
               (typeof window !== "undefined" ? window.location.origin : "https://gdguam.es") +
-                "/api/openbadge/assertion/" +
+                "/api/badges/assertion/" +
                 publicId
             )}`}
             fullWidth
