@@ -2,109 +2,21 @@
 import { api } from "@/lib/eden";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import styled from "styled-components";
 import {
   AddButton,
   EditButton,
   ViewButton,
-  ReloadButton,
   DeleteButton,
   AcceptButton,
   HideButton
 } from "@/components/Buttons";
 import { useRouter } from "next/navigation";
-import { Chip, TextField, MenuItem } from "@mui/material";
 import { useTranslations } from "next-intl";
 import LocalTime from "@/components/LocalTime";
 import { newErrorToast, newInfoToast, newSuccessToast } from "@/components/Toast";
 import { getCsrfToken } from "@/lib/security/csrfClient";
-
-const Wrapper = styled.div`
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-`;
-
-// Contenedor con bordes redondeados para la tabla (vista Lista)
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px; /* más redondeado para apariencia armoniosa */
-  overflow: hidden; /* recorta los bordes de la tabla para respetar el radio */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    /* Show scrollbar hint on mobile */
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-`;
-
-const Controls = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 0;
-
-  @media (max-width: 900px) {
-    /* Allow search field to take full width on smaller screens */
-    & > div:last-child {
-      flex: 1 1 100%;
-      margin-left: 0 !important;
-    }
-  }
-
-  @media (max-width: 640px) {
-    /* Stack all controls vertically on mobile */
-    & > * {
-      flex: 1 1 100%;
-      width: 100%;
-      min-width: 100% !important;
-      margin-left: 0 !important;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 6px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  th {
-    text-align: left;
-    border-bottom-width: 2px;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 768px) {
-    min-width: 700px; /* Ensure table doesn't collapse on mobile */
-
-    td {
-      white-space: nowrap;
-    }
-  }
-`;
+import { AdminTable } from "@/components/admin/AdminTable";
+import { textColumn, chipColumn, customColumn } from "@/components/admin/AdminTableFactories";
 
 type EventRow = {
   _id: string;
@@ -139,6 +51,8 @@ export function EventList({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("date-newest");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   // Load events from the API, just one render
   const load = useCallback(async (notify?: boolean) => {
@@ -178,7 +92,7 @@ export function EventList({
   }, [load, refreshToken]);
 
   // Client-side filtering and sorting for flexible UI
-  const filteredRows = useMemo(() => {
+  const allFilteredRows = useMemo(() => {
     const now = Date.now();
     let list = rows;
 
@@ -223,6 +137,15 @@ export function EventList({
     return sorted;
   }, [rows, statusFilter, dateFilter, search, sort]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [statusFilter, dateFilter, search, sort]);
+
+  const pagedRows = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return allFilteredRows.slice(start, start + PAGE_SIZE);
+  }, [allFilteredRows, page]);
+
   const toggleStatus = useCallback(
     async (id: string, next: "draft" | "published") => {
       const csrfToken = await getCsrfToken();
@@ -246,152 +169,115 @@ export function EventList({
     [load, t]
   );
 
+  const columns = useMemo(
+    () => [
+      textColumn<EventRow>("title", t("columns.title"), (r) => r.title, {
+        bold: true,
+        subValue: (r) => `/${r.slug}`
+      }),
+      customColumn<EventRow>("date", t("columns.date"), (r) => (
+        <LocalTime iso={r.date} dateOnly={false} />
+      )),
+      chipColumn<EventRow, "published" | "draft">(
+        "status",
+        t("columns.status"),
+        (r) => r.status,
+        (status) => t(`status.${status}`),
+        (status) => (status === "published" ? "success" : "warning")
+      )
+    ],
+    [t]
+  );
+
   return (
-    <Wrapper>
-      <Controls>
-        <AddButton onClick={() => onCreate()}>{t("create")}</AddButton>
-        <ReloadButton onClick={() => load(true)}>{t("reload")}</ReloadButton>
-        <TextField
-          size="small"
-          select
-          label={t("filters.status", { defaultValue: "Status" })}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-          style={{ minWidth: 120 }}
-        >
-          <MenuItem value="all">{t("filters.all", { defaultValue: "All" })}</MenuItem>
-          <MenuItem value="published">
-            {t("status.published", { defaultValue: "Published" })}
-          </MenuItem>
-          <MenuItem value="draft">{t("status.draft", { defaultValue: "Draft" })}</MenuItem>
-        </TextField>
-        <TextField
-          size="small"
-          select
-          label={t("filters.date", { defaultValue: "Date" })}
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value as DateFilter)}
-          style={{ minWidth: 120 }}
-        >
-          <MenuItem value="all">{t("filters.all", { defaultValue: "All" })}</MenuItem>
-          <MenuItem value="upcoming">
-            {t("filters.upcoming", { defaultValue: "Upcoming" })}
-          </MenuItem>
-          <MenuItem value="past">{t("filters.past", { defaultValue: "Past" })}</MenuItem>
-        </TextField>
-        <TextField
-          size="small"
-          select
-          label={t("filters.sort", { defaultValue: "Sort" })}
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortOption)}
-          style={{ minWidth: 160 }}
-        >
-          <MenuItem value="date-newest">
-            {t("filters.dateNewest", { defaultValue: "Date: Newest" })}
-          </MenuItem>
-          <MenuItem value="date-oldest">
-            {t("filters.dateOldest", { defaultValue: "Date: Oldest" })}
-          </MenuItem>
-          <MenuItem value="title-az">
-            {t("filters.titleAZ", { defaultValue: "Title A-Z" })}
-          </MenuItem>
-          <MenuItem value="title-za">
-            {t("filters.titleZA", { defaultValue: "Title Z-A" })}
-          </MenuItem>
-        </TextField>
-        <TextField
-          size="small"
-          placeholder={t("search")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ marginLeft: "auto", minWidth: "250px" }}
-        />
-      </Controls>
-
-      <Card>
-        {loading ? (
-          <div style={{ padding: "20px", textAlign: "center" }}>{t("loading")}</div>
-        ) : filteredRows.length === 0 ? (
-          <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            {search || statusFilter !== "all" || dateFilter !== "all"
-              ? t("noResults")
-              : t("noEvents")}
-          </div>
-        ) : (
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <th>{t("columns.title")}</th>
-                  <th>{t("columns.date")}</th>
-                  <th>{t("columns.status")}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRows.map((r) => (
-                  <tr key={r._id}>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{r.title}</div>
-                      <div style={{ color: "#6b7280", fontSize: 12 }}>/{r.slug}</div>
-                    </td>
-                    <td>
-                      <LocalTime iso={r.date} dateOnly={false} />
-                    </td>
-                    <td>
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        color={r.status === "published" ? "success" : "warning"}
-                        label={t(`status.${r.status}`)}
-                      />
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                        {/* View action (public or admin detail) */}
-                        <ViewButton
-                          onClick={() =>
-                            onView ? onView(r.slug) : router.push(`/admin/events/${r.slug}`)
-                          }
-                          iconSize={20}
-                        />
-                        {r.status === "draft" ? (
-                          <AcceptButton
-                            ariaLabel={t("actions.publish", { defaultValue: "Publicar" })}
-                            onClick={() => toggleStatus(r._id, "published")}
-                            iconSize={20}
-                            confirmationDuration={1000}
-                          />
-                        ) : (
-                          <HideButton
-                            ariaLabel={t("actions.unpublish", { defaultValue: "Despublicar" })}
-                            onClick={() => toggleStatus(r._id, "draft")}
-                            iconSize={20}
-                            confirmationDuration={1000}
-                          />
-                        )}
-                        <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
-                        <DeleteButton
-                          onClick={() => onDelete(r._id)}
-                          confirmationDuration={3000}
-                          iconSize={20}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
-        )}
-      </Card>
-
-      {!loading && filteredRows.length > 0 && (
-        <div style={{ fontSize: "0.875rem", color: "#666" }}>
-          {t("showing", { count: filteredRows.length })}
-        </div>
+    <AdminTable
+      columns={columns}
+      data={pagedRows}
+      loading={loading}
+      onReload={() => load(true)}
+      reloadLabel={t("reload")}
+      headerActions={<AddButton onClick={() => onCreate()}>{t("create")}</AddButton>}
+      rowActions={(r) => (
+        <>
+          <ViewButton
+            onClick={() => (onView ? onView(r.slug) : router.push(`/admin/events/${r.slug}`))}
+            iconSize={20}
+          />
+          {r.status === "draft" ? (
+            <AcceptButton
+              ariaLabel={t("actions.publish", { defaultValue: "Publicar" })}
+              onClick={() => toggleStatus(r._id, "published")}
+              iconSize={20}
+              confirmationDuration={1000}
+            />
+          ) : (
+            <HideButton
+              ariaLabel={t("actions.unpublish", { defaultValue: "Despublicar" })}
+              onClick={() => toggleStatus(r._id, "draft")}
+              iconSize={20}
+              confirmationDuration={1000}
+            />
+          )}
+          <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
+          <DeleteButton onClick={() => onDelete(r._id)} confirmationDuration={3000} iconSize={20} />
+        </>
       )}
-    </Wrapper>
+      search={{
+        value: search,
+        onChange: setSearch,
+        placeholder: t("search")
+      }}
+      filters={[
+        {
+          key: "status",
+          label: t("filters.status", { defaultValue: "Status" }),
+          value: statusFilter,
+          onChange: (v) => setStatusFilter(v as StatusFilter),
+          options: [
+            { label: t("filters.all", { defaultValue: "All" }), value: "all" },
+            { label: t("status.published", { defaultValue: "Published" }), value: "published" },
+            { label: t("status.draft", { defaultValue: "Draft" }), value: "draft" }
+          ]
+        },
+        {
+          key: "date",
+          label: t("filters.date", { defaultValue: "Date" }),
+          value: dateFilter,
+          onChange: (v) => setDateFilter(v as DateFilter),
+          options: [
+            { label: t("filters.all", { defaultValue: "All" }), value: "all" },
+            { label: t("filters.upcoming", { defaultValue: "Upcoming" }), value: "upcoming" },
+            { label: t("filters.past", { defaultValue: "Past" }), value: "past" }
+          ]
+        },
+        {
+          key: "sort",
+          label: t("filters.sort", { defaultValue: "Sort" }),
+          value: sort,
+          onChange: (v) => setSort(v as SortOption),
+          options: [
+            {
+              label: t("filters.dateNewest", { defaultValue: "Date: Newest" }),
+              value: "date-newest"
+            },
+            {
+              label: t("filters.dateOldest", { defaultValue: "Date: Oldest" }),
+              value: "date-oldest"
+            },
+            { label: t("filters.titleAZ", { defaultValue: "Title A-Z" }), value: "title-az" },
+            { label: t("filters.titleZA", { defaultValue: "Title Z-A" }), value: "title-za" }
+          ],
+          minWidth: "160px"
+        }
+      ]}
+      emptyMessage={t("noEvents")}
+      noResultsMessage={t("noResults")}
+      pagination={{
+        page,
+        pageSize: PAGE_SIZE,
+        total: allFilteredRows.length,
+        onPageChange: setPage
+      }}
+    />
   );
 }

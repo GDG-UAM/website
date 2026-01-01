@@ -1,125 +1,21 @@
 "use client";
 import { api } from "@/lib/eden";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
-import {
-  AddButton,
-  EditButton,
-  ViewButton,
-  ReloadButton,
-  DeleteButton
-} from "@/components/Buttons";
-import { TextField, Checkbox, Chip } from "@mui/material";
+import { AddButton, EditButton, ViewButton, DeleteButton } from "@/components/Buttons";
+import { Checkbox } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { ArticleStatus } from "@/lib/models/Article";
 import { newErrorToast, newInfoToast } from "@/components/Toast";
-
-const Wrapper = styled.div`
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    /* Show scrollbar hint on mobile */
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-`;
-
-const Controls = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 0;
-
-  @media (max-width: 900px) {
-    /* Allow search field to take full width on smaller screens */
-    & > div:last-child {
-      flex: 1 1 100%;
-      margin-left: 0 !important;
-    }
-  }
-
-  @media (max-width: 640px) {
-    /* Stack all controls vertically on mobile */
-    & > * {
-      flex: 1 1 100%;
-      width: 100%;
-      min-width: 100% !important;
-      margin-left: 0 !important;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 6px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  th {
-    text-align: left;
-    border-bottom-width: 2px;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 768px) {
-    min-width: 700px; /* Ensure table doesn't collapse on mobile */
-
-    td {
-      white-space: nowrap;
-    }
-  }
-`;
+import { AdminTable } from "@/components/admin/AdminTable";
+import { textColumn, chipColumn, dateColumn } from "@/components/admin/AdminTableFactories";
 
 const CheckboxWrapper = styled.label`
   display: flex;
   align-items: center;
   gap: 0;
   font-size: 16px;
-`;
-
-const TitleCell = styled.div`
-  font-weight: 600;
-`;
-
-const SlugCell = styled.div`
-  color: #6b7280;
-  font-size: 12px;
-`;
-
-const RowActions = styled.div`
-  display: flex;
-  gap: 6px;
 `;
 
 interface ArticleInterface {
@@ -153,6 +49,9 @@ function ArticleList({
   const [search, setSearch] = useState("");
   const [includeContentInSearch, setIncludeContentInSearch] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const PAGE_SIZE = 50;
 
   const load = useCallback(
     async (notify?: boolean) => {
@@ -161,13 +60,14 @@ function ArticleList({
         const { data, error } = await api.admin.articles.get({
           query: {
             q: encodeURIComponent(search),
-            page: 1,
-            pageSize: 50,
+            page,
+            pageSize: PAGE_SIZE,
             type,
             includeContentInSearch: includeContentInSearch.toString()
           }
         });
         if (error) throw error;
+        setTotal(data.total);
         setRows(
           data.items.map((x) => ({
             _id: x._id,
@@ -191,113 +91,94 @@ function ArticleList({
         setLoading(false);
       }
     },
-    [search, type, includeContentInSearch]
+    [search, type, includeContentInSearch, page]
   );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, type, includeContentInSearch]);
 
   useEffect(() => {
     load();
   }, [load, refreshToken]);
 
+  const columns = useMemo(
+    () => [
+      textColumn<ArticleInterface>("title", t("columns.title"), (r) => r.title || "", {
+        bold: true,
+        subValue: (r) => r.slug
+      }),
+      chipColumn<ArticleInterface, ArticleStatus>(
+        "status",
+        t("columns.status"),
+        (r) => {
+          if (r.status === "draft" || r.status === "published" || r.status === "url_only") {
+            return r.status as ArticleStatus;
+          }
+          return "draft";
+        },
+        (status) => t(`status.${status}`),
+        (status) => {
+          const colors = {
+            draft: "warning",
+            published: "success",
+            url_only: "secondary"
+          } as const;
+          return colors[status];
+        }
+      ),
+      textColumn<ArticleInterface>("views", t("columns.views"), (r) => r.views),
+      dateColumn<ArticleInterface>("publishedAt", t("columns.published"), (r) => r.publishedAt, {
+        includeTime: true
+      })
+    ],
+    [t]
+  );
+
   return (
-    <Wrapper>
-      <Controls>
-        <AddButton onClick={onCreate}>{t("create")}</AddButton>
-        <ReloadButton onClick={() => load(true)}>{t("reload")}</ReloadButton>
-        <CheckboxWrapper>
-          <Checkbox
-            checked={includeContentInSearch}
-            onChange={(e) => setIncludeContentInSearch(e.target.checked)}
+    <AdminTable
+      columns={columns}
+      data={rows}
+      loading={loading}
+      onReload={() => load(true)}
+      reloadLabel={t("reload")}
+      headerActions={
+        <>
+          <AddButton onClick={onCreate}>{t("create")}</AddButton>
+          <CheckboxWrapper>
+            <Checkbox
+              checked={includeContentInSearch}
+              onChange={(e) => setIncludeContentInSearch(e.target.checked)}
+            />
+            {t("includeContent")}
+          </CheckboxWrapper>
+        </>
+      }
+      rowActions={(r) => (
+        <>
+          <ViewButton onClick={() => onView(r._id.toString(), r.type)} iconSize={20} />
+          <EditButton onClick={() => onEdit(r._id.toString())} iconSize={20} />
+          <DeleteButton
+            onClick={() => onDelete(r._id.toString())}
+            confirmationDuration={3000}
+            iconSize={20}
           />
-          {t("includeContent")}
-        </CheckboxWrapper>
-        <TextField
-          size="small"
-          placeholder={t("search", { type })}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ marginLeft: "auto", minWidth: "250px" }}
-        />
-      </Controls>
-
-      <Card>
-        {loading ? (
-          <div style={{ padding: "20px", textAlign: "center" }}>{t("loading")}</div>
-        ) : rows.length === 0 ? (
-          <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            {search ? t("noResults") : t("noArticles")}
-          </div>
-        ) : (
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <th>{t("columns.title")}</th>
-                  <th>{t("columns.status")}</th>
-                  <th>{t("columns.views")}</th>
-                  <th>{t("columns.published")}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r._id.toString()}>
-                    <td>
-                      <TitleCell>{r.title || ""}</TitleCell>
-                      <SlugCell>{r.slug}</SlugCell>
-                    </td>
-                    <td>
-                      {(() => {
-                        const key: ArticleStatus =
-                          r.status === "draft" ||
-                          r.status === "published" ||
-                          r.status === "url_only"
-                            ? (r.status as ArticleStatus)
-                            : "draft";
-                        const colors = {
-                          draft: "warning",
-                          published: "success",
-                          url_only: "secondary"
-                        } as const;
-                        return (
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            color={colors[key]}
-                            label={t(`status.${key}`)}
-                          />
-                        );
-                      })()}
-                    </td>
-                    <td>{r.views}</td>
-                    <td>{r.publishedAt ? new Date(r.publishedAt).toLocaleString() : "—"}</td>
-                    <td>
-                      <RowActions>
-                        <ViewButton
-                          onClick={() => onView(r._id.toString(), r.type)}
-                          iconSize={20}
-                        />
-                        <EditButton onClick={() => onEdit(r._id.toString())} iconSize={20} />
-                        <DeleteButton
-                          onClick={() => onDelete(r._id.toString())}
-                          confirmationDuration={3000}
-                          iconSize={20}
-                        />
-                      </RowActions>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
-        )}
-      </Card>
-
-      {!loading && rows.length > 0 && (
-        <div style={{ fontSize: "0.875rem", color: "#666" }}>
-          {t("showing", { count: rows.length })}
-        </div>
+        </>
       )}
-    </Wrapper>
+      search={{
+        value: search,
+        onChange: setSearch,
+        placeholder: t("search", { type })
+      }}
+      emptyMessage={t("noArticles")}
+      noResultsMessage={t("noResults")}
+      pagination={{
+        page,
+        pageSize: PAGE_SIZE,
+        total,
+        onPageChange: setPage
+      }}
+    />
   );
 }
 

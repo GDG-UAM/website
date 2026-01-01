@@ -1,118 +1,20 @@
 "use client";
 
 import { api } from "@/lib/eden";
-import { useEffect, useState, useCallback } from "react";
-import styled from "styled-components";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   AddButton,
   EditButton,
   ViewButton,
-  ReloadButton,
   DeleteButton,
   DuplicateButton,
   CancelButton,
-  AcceptButton,
-  NextButton,
-  BackButton
+  AcceptButton
 } from "@/components/Buttons";
-import { TextField, Chip, MenuItem } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { newErrorToast, newInfoToast } from "@/components/Toast";
-
-const Wrapper = styled.div`
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
-  }
-`;
-
-const Controls = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 0;
-
-  @media (max-width: 900px) {
-    & > div:last-child {
-      flex: 1 1 100%;
-      margin-left: 0 !important;
-    }
-  }
-
-  @media (max-width: 640px) {
-    & > * {
-      flex: 1 1 100%;
-      width: 100%;
-      min-width: 100% !important;
-      margin-left: 0 !important;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 6px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  th {
-    text-align: left;
-    border-bottom-width: 2px;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 768px) {
-    min-width: 800px;
-
-    td {
-      white-space: nowrap;
-    }
-  }
-`;
-
-const TitleCell = styled.div`
-  font-weight: 600;
-`;
-
-const SubCell = styled.div`
-  color: #6b7280;
-  font-size: 12px;
-`;
-
-const RowActions = styled.div`
-  display: flex;
-  gap: 6px;
-  align-items: center;
-`;
+import { AdminTable } from "@/components/admin/AdminTable";
+import { textColumn, chipColumn, dateColumn } from "@/components/admin/AdminTableFactories";
 
 type CertificateType = "COURSE_COMPLETION" | "EVENT_ACHIEVEMENT" | "PARTICIPATION" | "VOLUNTEER";
 
@@ -208,162 +110,113 @@ export default function CertificateList({
     load();
   }, [load, refreshToken]);
 
+  const columns = useMemo(
+    () => [
+      textColumn<CertificateInterface>("title", t("columns.title"), (r) => r.title, {
+        bold: true,
+        subValue: (r) => r.publicId
+      }),
+      textColumn<CertificateInterface>("recipient", t("columns.recipient"), (r) => r.recipientName),
+      chipColumn<CertificateInterface, CertificateType>(
+        "type",
+        t("columns.type"),
+        (r) => r.type,
+        (type) => t(`types.${type.toLowerCase()}`),
+        (type) => typeColors[type]
+      ),
+      chipColumn<CertificateInterface, "active" | "revoked">(
+        "status",
+        t("columns.status"),
+        (r) => (r.revoked ? "revoked" : "active"),
+        (status) => t(`status.${status}`),
+        (status) => (status === "active" ? "success" : "error"),
+        "filled"
+      ),
+      dateColumn<CertificateInterface>("createdAt", t("columns.created"), (r) => r.createdAt)
+    ],
+    [t]
+  );
+
   return (
-    <Wrapper>
-      <Controls>
-        <AddButton onClick={onCreate}>{t("create")}</AddButton>
-        <ReloadButton onClick={() => load(true)}>{t("reload")}</ReloadButton>
-        <TextField
-          select
-          size="small"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as CertificateType | "")}
-          style={{ minWidth: "150px" }}
-          label={t("filterType")}
-        >
-          <MenuItem value="">{t("allTypes")}</MenuItem>
-          <MenuItem value="COURSE_COMPLETION">{t("types.courseCompletion")}</MenuItem>
-          <MenuItem value="EVENT_ACHIEVEMENT">{t("types.eventAchievement")}</MenuItem>
-          <MenuItem value="PARTICIPATION">{t("types.participation")}</MenuItem>
-          <MenuItem value="VOLUNTEER">{t("types.volunteer")}</MenuItem>
-        </TextField>
-        <TextField
-          select
-          size="small"
-          value={includeRevoked ? "yes" : "no"}
-          onChange={(e) => setIncludeRevoked(e.target.value === "yes")}
-          style={{ minWidth: "140px" }}
-          label={t("showRevoked")}
-        >
-          <MenuItem value="no">{t("hideRevoked")}</MenuItem>
-          <MenuItem value="yes">{t("showRevokedYes")}</MenuItem>
-        </TextField>
-        <TextField
-          size="small"
-          placeholder={t("searchPlaceholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ marginLeft: "auto", minWidth: "250px" }}
-        />
-      </Controls>
-
-      <Card>
-        {loading ? (
-          <div style={{ padding: "20px", textAlign: "center" }}>{t("loading")}</div>
-        ) : rows.length === 0 ? (
-          <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-            {search || typeFilter ? t("noResults") : t("noCertificates")}
-          </div>
-        ) : (
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <th>{t("columns.title")}</th>
-                  <th>{t("columns.recipient")}</th>
-                  <th>{t("columns.type")}</th>
-                  <th>{t("columns.status")}</th>
-                  <th>{t("columns.created")}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r._id}>
-                    <td>
-                      <TitleCell>{r.title}</TitleCell>
-                      <SubCell>{r.publicId}</SubCell>
-                    </td>
-                    <td>{r.recipientName}</td>
-                    <td>
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        color={typeColors[r.type]}
-                        label={t(`types.${r.type.toLowerCase()}`)}
-                      />
-                    </td>
-                    <td>
-                      <Chip
-                        size="small"
-                        variant="filled"
-                        color={r.revoked ? "error" : "success"}
-                        label={r.revoked ? t("status.revoked") : t("status.active")}
-                      />
-                    </td>
-                    <td>{r.createdAt.toLocaleDateString()}</td>
-                    <td>
-                      <RowActions>
-                        <ViewButton onClick={() => onView(r._id)} iconSize={20} />
-                        <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
-                        <DuplicateButton
-                          onClick={() => onDuplicate(r._id)}
-                          iconSize={20}
-                          ariaLabel={t("duplicate")}
-                          tooltip={t("duplicate")}
-                          confirmationDuration={1000}
-                        />
-                        {r.revoked ? (
-                          <AcceptButton
-                            onClick={() => onReinstate(r._id)}
-                            color="success"
-                            iconSize={20}
-                            ariaLabel={t("reinstate")}
-                            tooltip={t("reinstate")}
-                            confirmationDuration={2000}
-                          />
-                        ) : (
-                          <CancelButton
-                            onClick={() => onRevoke(r._id)}
-                            iconSize={20}
-                            ariaLabel={t("revoke")}
-                            tooltip={t("revoke")}
-                            confirmationDuration={2000}
-                          />
-                        )}
-                        <DeleteButton
-                          onClick={() => onDelete(r._id)}
-                          confirmationDuration={3000}
-                          iconSize={20}
-                        />
-                      </RowActions>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
-        )}
-      </Card>
-
-      {!loading && rows.length > 0 && (
-        <div
-          style={{
-            fontSize: "0.875rem",
-            color: "#666",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between"
-          }}
-        >
-          <div>{t("showing", { count: rows.length })}</div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <BackButton
-              color="primary"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
+    <AdminTable
+      columns={columns}
+      data={rows}
+      loading={loading}
+      onReload={() => load(true)}
+      reloadLabel={t("reload")}
+      headerActions={<AddButton onClick={onCreate}>{t("create")}</AddButton>}
+      rowActions={(r) => (
+        <>
+          <ViewButton onClick={() => onView(r._id)} iconSize={20} />
+          <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
+          <DuplicateButton
+            onClick={() => onDuplicate(r._id)}
+            iconSize={20}
+            ariaLabel={t("duplicate")}
+            tooltip={t("duplicate")}
+            confirmationDuration={1000}
+          />
+          {r.revoked ? (
+            <AcceptButton
+              onClick={() => onReinstate(r._id)}
+              color="success"
+              iconSize={20}
+              ariaLabel={t("reinstate")}
+              tooltip={t("reinstate")}
+              confirmationDuration={2000}
             />
-            <span>
-              {page} / {Math.ceil(total / PAGE_SIZE) || 1}
-            </span>
-            <NextButton
-              color="primary"
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= Math.ceil(total / PAGE_SIZE)}
+          ) : (
+            <CancelButton
+              onClick={() => onRevoke(r._id)}
+              iconSize={20}
+              ariaLabel={t("revoke")}
+              tooltip={t("revoke")}
+              confirmationDuration={2000}
             />
-          </div>
-        </div>
+          )}
+          <DeleteButton onClick={() => onDelete(r._id)} confirmationDuration={3000} iconSize={20} />
+        </>
       )}
-    </Wrapper>
+      search={{
+        value: search,
+        onChange: setSearch,
+        placeholder: t("searchPlaceholder")
+      }}
+      filters={[
+        {
+          key: "type",
+          label: t("filterType"),
+          value: typeFilter,
+          onChange: (v) => setTypeFilter(v as CertificateType | ""),
+          options: [
+            { label: t("allTypes"), value: "" },
+            { label: t("types.courseCompletion"), value: "COURSE_COMPLETION" },
+            { label: t("types.eventAchievement"), value: "EVENT_ACHIEVEMENT" },
+            { label: t("types.participation"), value: "PARTICIPATION" },
+            { label: t("types.volunteer"), value: "VOLUNTEER" }
+          ],
+          minWidth: "150px"
+        },
+        {
+          key: "revoked",
+          label: t("showRevoked"),
+          value: includeRevoked ? "yes" : "no",
+          onChange: (v) => setIncludeRevoked(v === "yes"),
+          options: [
+            { label: t("hideRevoked"), value: "no" },
+            { label: t("showRevokedYes"), value: "yes" }
+          ],
+          minWidth: "140px"
+        }
+      ]}
+      pagination={{
+        page,
+        pageSize: PAGE_SIZE,
+        total,
+        onPageChange: setPage
+      }}
+      emptyMessage={t("noCertificates")}
+      noResultsMessage={t("noResults")}
+    />
   );
 }

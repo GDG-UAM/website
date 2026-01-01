@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import styled from "styled-components";
 import {
@@ -12,110 +12,20 @@ import {
   AcceptButton,
   HideButton,
   SaveButton,
-  CancelButton,
-  ReloadButton
+  CancelButton
 } from "@/components/Buttons";
 import { useRouter } from "next/navigation";
 import { newErrorToast, newSuccessToast } from "@/components/_toasts/toastEmitter";
 import { useTranslations } from "next-intl";
-import { TextField, Checkbox, FormControlLabel, Chip } from "@mui/material";
+import { TextField, Checkbox, FormControlLabel } from "@mui/material";
 import { withCsrfHeaders } from "@/lib/security/csrfClient";
+import { AdminTable } from "@/components/admin/AdminTable";
+import { textColumn, chipColumn, dateColumn } from "@/components/admin/AdminTableFactories";
 
 const Container = styled.div`
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
-`;
-
-const Wrapper = styled.div`
-  display: grid;
-  gap: 12px;
-  padding: 12px;
-  overflow-x: hidden;
-  box-sizing: border-box;
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-  max-width: 100%;
-  box-sizing: border-box;
-`;
-
-const TableWrapper = styled.div`
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-
-  @media (max-width: 768px) {
-    /* Show scrollbar hint on mobile */
-    &::-webkit-scrollbar {
-      height: 8px;
-    }
-    &::-webkit-scrollbar-track {
-      background: #f1f1f1;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 4px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
-  }
-`;
-
-const Controls = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 8px 0;
-  max-width: 100%;
-
-  @media (max-width: 900px) {
-    /* Allow search field to take full width on smaller screens */
-    & > div:last-child {
-      flex: 1 1 100%;
-      margin-left: 0 !important;
-    }
-  }
-
-  @media (max-width: 640px) {
-    /* Stack all controls vertically on mobile */
-    & > * {
-      flex: 1 1 100%;
-      width: 100%;
-      min-width: 100% !important;
-      margin-left: 0 !important;
-    }
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 10px 6px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-  th {
-    text-align: left;
-    border-bottom-width: 2px;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 768px) {
-    min-width: 800px; /* Ensure table doesn't collapse on mobile */
-
-    td {
-      white-space: nowrap;
-    }
-  }
 `;
 
 const Header = styled.div`
@@ -165,6 +75,8 @@ export default function AdminGiveawaysPage() {
   const [items, setItems] = useState<GiveawayListItem[]>([]);
   const [initial, setInitial] = useState<Partial<GiveawayFormData>>();
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   const fetchList = useCallback(
     async (notify?: boolean) => {
@@ -199,6 +111,7 @@ export default function AdminGiveawaysPage() {
     setEditingId(null);
     setInitial(undefined);
     setRefreshToken((x) => x + 1);
+    setPage(1);
   };
 
   const onCreate = () => setMode("create");
@@ -206,6 +119,11 @@ export default function AdminGiveawaysPage() {
     setEditingId(id);
     setMode("edit");
   };
+
+  const pagedItems = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return items.slice(start, start + PAGE_SIZE);
+  }, [items, page]);
 
   useEffect(() => {
     if (mode === "edit" && editingId) {
@@ -335,92 +253,60 @@ export default function AdminGiveawaysPage() {
       )}
 
       {mode === "list" && (
-        <Wrapper>
-          <Controls>
-            <AddButton onClick={onCreate}>{t("list.create")}</AddButton>
-            <ReloadButton onClick={() => fetchList(true)}>{t("list.reload")}</ReloadButton>
-          </Controls>
-
-          <Card>
-            {loading ? (
-              <div style={{ padding: "20px", textAlign: "center" }}>{t("list.loading")}</div>
-            ) : items.length === 0 ? (
-              <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-                {t("list.noGiveaways")}
-              </div>
-            ) : (
-              <TableWrapper>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: "left" }}>{t("list.title")}</th>
-                      <th style={{ width: 120 }}>{t("list.status")}</th>
-                      <th style={{ width: 100 }}>{t("list.start")}</th>
-                      <th style={{ width: 100 }}>{t("list.end")}</th>
-                      <th style={{ width: 180 }}>{t("list.actions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((it) => (
-                      <tr key={it._id}>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{it.title}</div>
-                        </td>
-                        <td>
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            color={
-                              it.status === "active"
-                                ? "success"
-                                : it.status === "draft"
-                                  ? "warning"
-                                  : it.status === "closed" || it.status === "cancelled"
-                                    ? "error"
-                                    : "default"
-                            }
-                            label={t(`status.${it.status}`) || it.status}
-                          />
-                        </td>
-                        <td>{it.startAt ? new Date(it.startAt).toLocaleDateString() : ""}</td>
-                        <td>{it.endAt ? new Date(it.endAt).toLocaleDateString() : ""}</td>
-                        <td>
-                          <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                            <ViewButton
-                              onClick={() => router.push(`/admin/giveaways/${it._id}`)}
-                              iconSize={20}
-                            />
-                            {it.status === "draft" ? (
-                              <AcceptButton
-                                onClick={() => toggleStatus(it._id, "active")}
-                                iconSize={20}
-                                confirmationDuration={1000}
-                              />
-                            ) : (
-                              <HideButton
-                                onClick={() => toggleStatus(it._id, "draft")}
-                                iconSize={20}
-                                confirmationDuration={1000}
-                              />
-                            )}
-                            <EditButton onClick={() => onEdit(it._id)} iconSize={20} />
-                            <DeleteButton onClick={() => handleDelete(it._id)} iconSize={20} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </TableWrapper>
-            )}
-          </Card>
-
-          {!loading && items.length > 0 && (
-            <div style={{ fontSize: "0.875rem", color: "#666" }}>
-              {t("list.showing", { count: items.length })}
-            </div>
+        <AdminTable
+          columns={[
+            textColumn<GiveawayListItem>("title", t("list.title"), (it) => it.title, {
+              bold: true
+            }),
+            chipColumn<GiveawayListItem, string>(
+              "status",
+              t("list.status"),
+              (it) => it.status,
+              (status) => t(`status.${status}`) || status,
+              (status) => {
+                if (status === "active") return "success";
+                if (status === "draft") return "warning";
+                if (status === "closed" || status === "cancelled") return "error";
+                return "default";
+              }
+            ),
+            dateColumn<GiveawayListItem>("startAt", t("list.start"), (it) => it.startAt),
+            dateColumn<GiveawayListItem>("endAt", t("list.end"), (it) => it.endAt)
+          ]}
+          data={pagedItems}
+          loading={loading}
+          onReload={() => fetchList(true)}
+          reloadLabel={t("list.reload")}
+          headerActions={<AddButton onClick={onCreate}>{t("list.create")}</AddButton>}
+          rowActions={(it) => (
+            <>
+              <ViewButton onClick={() => router.push(`/admin/giveaways/${it._id}`)} iconSize={20} />
+              {it.status === "draft" ? (
+                <AcceptButton
+                  onClick={() => toggleStatus(it._id, "active")}
+                  iconSize={20}
+                  confirmationDuration={1000}
+                />
+              ) : (
+                <HideButton
+                  onClick={() => toggleStatus(it._id, "draft")}
+                  iconSize={20}
+                  confirmationDuration={1000}
+                />
+              )}
+              <EditButton onClick={() => onEdit(it._id)} iconSize={20} />
+              <DeleteButton onClick={() => handleDelete(it._id)} iconSize={20} />
+            </>
           )}
-        </Wrapper>
+          emptyMessage={t("list.noGiveaways")}
+          noResultsMessage={t("list.noResults")}
+          pagination={{
+            page,
+            pageSize: PAGE_SIZE,
+            total: items.length,
+            onPageChange: setPage
+          }}
+        />
       )}
 
       {(mode === "create" || mode === "edit") && (
