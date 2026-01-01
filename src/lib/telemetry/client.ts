@@ -1,5 +1,5 @@
 "use client";
-import { api } from "@/lib/eden";
+// import { api } from "@/lib/eden";
 
 // Minimal telemetry client with consent gating, batching, and beacon flush.
 
@@ -67,7 +67,7 @@ async function flush() {
     const sent = navigator.sendBeacon?.("/api/telemetry", blob);
     if (!sent) {
       if (!sent) {
-        await api.telemetry.post(batch);
+        // await api.telemetry.post(batch);
       }
     }
   } catch {

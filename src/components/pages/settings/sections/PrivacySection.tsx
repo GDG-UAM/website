@@ -236,11 +236,11 @@ const PrivacySection: React.FC<{
         )}
 
         {/* Anonymized usage */}
-        <FormControlLabel
+        {/* <FormControlLabel
           control={<Checkbox checked={state.anonUsage} onChange={toggle("anonUsage")} />}
           label={t("privacy.anonUsage")}
           style={{ marginLeft: 0 }}
-        />
+        /> */}
       </Stack>
 
       {/* Info modal */}

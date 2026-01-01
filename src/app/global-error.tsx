@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect, useMemo } from "react";
 import styled from "styled-components";
 
 const ErrorContainer = styled.div`
@@ -22,7 +23,11 @@ const ErrorMessage = styled.p`
   font-size: 1.2rem;
 `;
 
-function GlobalError({ error }: { error?: Error }) {
+export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
   // Fallback i18n without NextIntl context (global error can render outside providers)
   const locale = useMemo(() => {
     if (typeof document === "undefined") return "es";
@@ -41,11 +46,13 @@ function GlobalError({ error }: { error?: Error }) {
   const m = messages[locale === "en" ? "en" : "es"];
 
   return (
-    <ErrorContainer>
-      <ErrorTitle>{m.title}</ErrorTitle>
-      <ErrorMessage>{error?.message || m.unexpected}</ErrorMessage>
-    </ErrorContainer>
+    <html>
+      <body>
+        <ErrorContainer>
+          <ErrorTitle>{m.title}</ErrorTitle>
+          <ErrorMessage>{error?.message || m.unexpected}</ErrorMessage>
+        </ErrorContainer>
+      </body>
+    </html>
   );
 }
-
-export default GlobalError;

@@ -31,6 +31,7 @@
     "@heroui/button": "^2.2.24",
     "@heroui/theme": "^2.4.20",
     "@mui/material": "^7.3.1",
+    "@sentry/nextjs": "^10.32.1",
     "blurhash": "^2.0.5",
     "dotenv": "^17.2.1",
     "elysia": "^1.4.17",

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { treaty } from "@elysiajs/eden";
-import type { App } from "@/elysia";
+// import { treaty } from "@elysiajs/eden";
+// import type { App } from "@/elysia";
 
 const NEXTAUTH_SECRET = process.env.SESSION_SECRET;
 
@@ -191,18 +191,18 @@ export async function proxy(request: NextRequest) {
       pathname !== "/api/telemetry" &&
       pathname !== "/api/socket"
     ) {
-      const start = Date.now();
+      // const start = Date.now();
       const response = NextResponse.next();
       // After response is created, schedule telemetry (status not directly available here; use 200 assumption)
-      try {
-        emitApiTelemetry(request, {
-          route: pathname,
-          method: request.method,
-          status: 200,
-          durationMs: Date.now() - start,
-          ok: true
-        });
-      } catch {}
+      // try {
+      //   emitApiTelemetry(request, {
+      //     route: pathname,
+      //     method: request.method,
+      //     status: 200,
+      //     durationMs: Date.now() - start,
+      //     ok: true
+      //   });
+      // } catch {}
       return addSecurityHeaders(response, request);
     }
     return addSecurityHeaders(NextResponse.next(), request);
@@ -260,104 +260,103 @@ export async function proxy(request: NextRequest) {
     !pathname.startsWith("/api/auth/") &&
     pathname !== "/api/telemetry"
   ) {
-    const start = Date.now();
+    // const start = Date.now();
     const response = NextResponse.next();
     try {
-      const status = 200; // Next middleware cannot introspect downstream status reliably
-      emitApiTelemetry(request, {
-        route: pathname,
-        method: request.method,
-        status,
-        durationMs: Date.now() - start,
-        ok: status >= 200 && status < 400
-      });
+      // const status = 200; // Next middleware cannot introspect downstream status reliably
+      // emitApiTelemetry(request, {
+      //   route: pathname,
+      //   method: request.method,
+      //   status,
+      //   durationMs: Date.now() - start,
+      //   ok: status >= 200 && status < 400
+      // });
     } catch {}
     return addSecurityHeaders(response, request);
   }
-  return addSecurityHeaders(NextResponse.next(), request);
 }
 
 // Edge-safe telemetry emitter that posts to /api/telemetry
-function emitApiTelemetry(
-  request: NextRequest,
-  info: { route: string; method: string; status: number; durationMs: number; ok: boolean }
-) {
-  try {
-    if (info.route === "/api/telemetry") return; // extra safety
-    const h = request.headers;
-    const ua = h.get("user-agent") || "";
-    const browser = /edg\//i.test(ua)
-      ? "Edge"
-      : /chrome|crios|crmo/i.test(ua)
-        ? "Chrome"
-        : /firefox|fxios/i.test(ua)
-          ? "Firefox"
-          : /safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)
-            ? "Safari"
-            : /android/i.test(ua)
-              ? "Android WebView"
-              : /iphone|ipad|ipod/i.test(ua)
-                ? "iOS WebView"
-                : "Unknown";
-    const browserVersionMatch = ua.match(
-      /(chrome|crios|firefox|fxios|edg|version)\/(\d+[\.\d+]*)/i
-    );
-    const browser_version = browserVersionMatch?.[2];
-    const os_version =
-      (/windows nt ([\d\.]+)/i.exec(ua)?.[1] ||
-        /android ([\d\.]+)/i.exec(ua)?.[1] ||
-        /cpu (?:iphone )?os ([\d_]+)/i.exec(ua)?.[1]?.replace(/_/g, ".")) ??
-      undefined;
+// function emitApiTelemetry(
+//   request: NextRequest,
+//   info: { route: string; method: string; status: number; durationMs: number; ok: boolean }
+// ) {
+//   try {
+//     if (info.route === "/api/telemetry") return; // extra safety
+//     const h = request.headers;
+//     const ua = h.get("user-agent") || "";
+//     const browser = /edg\//i.test(ua)
+//       ? "Edge"
+//       : /chrome|crios|crmo/i.test(ua)
+//         ? "Chrome"
+//         : /firefox|fxios/i.test(ua)
+//           ? "Firefox"
+//           : /safari/i.test(ua) && !/chrome|crios|crmo/i.test(ua)
+//             ? "Safari"
+//             : /android/i.test(ua)
+//               ? "Android WebView"
+//               : /iphone|ipad|ipod/i.test(ua)
+//                 ? "iOS WebView"
+//                 : "Unknown";
+//     const browserVersionMatch = ua.match(
+//       /(chrome|crios|firefox|fxios|edg|version)\/(\d+[\.\d+]*)/i
+//     );
+//     const browser_version = browserVersionMatch?.[2];
+//     const os_version =
+//       (/windows nt ([\d\.]+)/i.exec(ua)?.[1] ||
+//         /android ([\d\.]+)/i.exec(ua)?.[1] ||
+//         /cpu (?:iphone )?os ([\d_]+)/i.exec(ua)?.[1]?.replace(/_/g, ".")) ??
+//       undefined;
 
-    // Geo: prefer Cloudflare headers when present, else fall back to Vercel-style or generic
-    const cfCountry = h.get("cf-ipcountry") || undefined;
-    const cfRegion = h.get("cf-region") || h.get("cf-ipregion") || undefined; // may be enterprise-only
-    const cfCity = h.get("cf-ipcity") || undefined; // may be enterprise-only
-    const cfTz = h.get("cf-timezone") || undefined; // may be enterprise-only
-    const ipHeader =
-      h.get("cf-connecting-ip") ||
-      (h.get("x-forwarded-for") || "").split(",")[0] ||
-      h.get("x-real-ip") ||
-      undefined;
-    const geo = {
-      country_code: cfCountry || h.get("x-vercel-ip-country") || undefined,
-      region_code: cfRegion || h.get("x-vercel-ip-country-region") || undefined,
-      region: cfCity || h.get("x-vercel-ip-city") || undefined,
-      time_zone: cfTz || h.get("x-vercel-ip-timezone") || undefined,
-      ip: ipHeader
-    } as Record<string, string | undefined>;
+//     // Geo: prefer Cloudflare headers when present, else fall back to Vercel-style or generic
+//     const cfCountry = h.get("cf-ipcountry") || undefined;
+//     const cfRegion = h.get("cf-region") || h.get("cf-ipregion") || undefined; // may be enterprise-only
+//     const cfCity = h.get("cf-ipcity") || undefined; // may be enterprise-only
+//     const cfTz = h.get("cf-timezone") || undefined; // may be enterprise-only
+//     const ipHeader =
+//       h.get("cf-connecting-ip") ||
+//       (h.get("x-forwarded-for") || "").split(",")[0] ||
+//       h.get("x-real-ip") ||
+//       undefined;
+//     const geo = {
+//       country_code: cfCountry || h.get("x-vercel-ip-country") || undefined,
+//       region_code: cfRegion || h.get("x-vercel-ip-country-region") || undefined,
+//       region: cfCity || h.get("x-vercel-ip-city") || undefined,
+//       time_zone: cfTz || h.get("x-vercel-ip-timezone") || undefined,
+//       ip: ipHeader
+//     } as Record<string, string | undefined>;
 
-    const environment = {
-      commit: process.env.NEXT_PUBLIC_GIT_SHA || undefined,
-      browser,
-      browser_version,
-      os_version
-    } as Record<string, string | undefined>;
+//     const environment = {
+//       commit: process.env.NEXT_PUBLIC_GIT_SHA || undefined,
+//       browser,
+//       browser_version,
+//       os_version
+//     } as Record<string, string | undefined>;
 
-    const event = {
-      event_type: "api_request",
-      event_source: "server",
-      timestamp: new Date().toISOString(),
-      domain: request.nextUrl.hostname,
-      path: info.route,
-      environment,
-      geo,
-      api: {
-        route: info.route,
-        method: info.method,
-        status: info.status,
-        duration_ms: info.durationMs,
-        ok: info.ok
-      }
-    };
+//     const event = {
+//       event_type: "api_request",
+//       event_source: "server",
+//       timestamp: new Date().toISOString(),
+//       domain: request.nextUrl.hostname,
+//       path: info.route,
+//       environment,
+//       geo,
+//       api: {
+//         route: info.route,
+//         method: info.method,
+//         status: info.status,
+//         duration_ms: info.durationMs,
+//         ok: info.ok
+//       }
+//     };
 
-    const origin = request.nextUrl.origin;
-    const api = treaty<App>(origin).api;
-    void api.telemetry.post([event]).catch(() => {});
-  } catch {
-    // ignore
-  }
-}
+//     const origin = request.nextUrl.origin;
+//     const api = treaty<App>(origin).api;
+//     void api.telemetry.post([event]).catch(() => {});
+//   } catch {
+//     // ignore
+//   }
+// }
 
 // Specify which routes to run middleware on
 export const config = {

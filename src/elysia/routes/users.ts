@@ -5,7 +5,7 @@ import {
   getPublicUserProfile,
   getUserMentionData
 } from "@/lib/controllers/userController";
-import { buildUserDataExport } from "@/lib/controllers/dataExportController";
+// import { buildUserDataExport } from "@/lib/controllers/dataExportController";
 import { trackServerEvent } from "@/lib/controllers/telemetryController";
 import { verifyCsrf } from "@/lib/controllers/csrfController";
 import { PublicUserProfile, UserMentionData } from "../models/users";
@@ -98,35 +98,56 @@ export const usersRoutes = new Elysia({ prefix: "/users" })
       }
     }
   )
+  // .get(
+  //   "/export",
+  //   async ({ user, set, status }) => {
+  //     if (!user?.id) return status(401, { error: "Unauthorized" });
+
+  //     try {
+  //       const { arrayBuffer, filename, nextAllowed } = await buildUserDataExport(user.id);
+
+  //       set.headers["Content-Type"] = "application/zip";
+  //       set.headers["Content-Disposition"] = `attachment; filename="${filename}"`;
+  //       set.headers["X-Data-Export-Next-Allowed"] = nextAllowed.toISOString();
+
+  //       return status(200, arrayBuffer);
+  //     } catch (e: unknown) {
+  //       const err = e as { status?: number; nextAvailable?: string; message?: string };
+  //       if (err?.status === 404) {
+  //         return status(404, { error: "Not found" });
+  //       }
+  //       if (err?.status === 429) {
+  //         return status(429, {
+  //           error: "Too Many Requests",
+  //           nextAvailable: err.nextAvailable
+  //         });
+  //       }
+  //       return status(500, { error: "Internal Server Error" });
+  //     }
+  //   },
+  //   {
+  //     response: {
+  //       200: t.ArrayBuffer(), // Blob
+  //       401: t.Object({ error: t.String() }),
+  //       404: t.Object({ error: t.String() }),
+  //       429: t.Object({ error: t.String(), nextAvailable: t.Optional(t.String()) }),
+  //       500: t.Object({ error: t.String() })
+  //     }
+  //   }
+  // )
   .get(
     "/export",
-    async ({ user, set, status }) => {
-      if (!user?.id) return status(401, { error: "Unauthorized" });
-
-      try {
-        const { arrayBuffer, filename, nextAllowed } = await buildUserDataExport(user.id);
-
-        set.headers["Content-Type"] = "application/zip";
-        set.headers["Content-Disposition"] = `attachment; filename="${filename}"`;
-        set.headers["X-Data-Export-Next-Allowed"] = nextAllowed.toISOString();
-
-        return status(200, arrayBuffer);
-      } catch (e: unknown) {
-        const err = e as { status?: number; nextAvailable?: string; message?: string };
-        if (err?.status === 404) {
-          return status(404, { error: "Not found" });
-        }
-        if (err?.status === 429) {
-          return status(429, {
-            error: "Too Many Requests",
-            nextAvailable: err.nextAvailable
-          });
-        }
-        return status(500, { error: "Internal Server Error" });
-      }
+    ({ set }) => {
+      set.status = 410;
+      return {
+        error: "Export disabled"
+      };
     },
     {
       response: {
+        410: t.Object({ error: t.String() }),
+
+        // Responses kept for compatibility with Eden
         200: t.ArrayBuffer(), // Blob
         401: t.Object({ error: t.String() }),
         404: t.Object({ error: t.String() }),

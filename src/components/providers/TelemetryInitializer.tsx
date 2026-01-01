@@ -12,7 +12,8 @@ export default function TelemetryInitializer() {
 
   // Consent gate from session
   useEffect(() => {
-    const allow = !!data?.user?.allowAnonUsage;
+    // const allow = !!data?.user?.allowAnonUsage;
+    const allow = false;
     setConsent(allow);
     if (allow) {
       // Snapshot environment & locales once per session

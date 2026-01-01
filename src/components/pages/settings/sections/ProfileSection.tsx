@@ -545,7 +545,9 @@ const ProfileSection: React.FC<{
               <Section title={t("profile.data.section")}>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
                   <DownloadButton
-                    disabled={downloading || onCooldown}
+                    // disabled={downloading || onCooldown}
+                    disabled={true}
+                    tooltip={t("profile.data.downloadDisabled")}
                     onClick={async () => {
                       if (downloading || onCooldown) return;
                       try {

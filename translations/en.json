@@ -1092,6 +1092,7 @@
         "section": "Data Export & Removal",
         "download": "Download Personal Data",
         "downloadBlockedTimer": "Download blocked for {remaining}",
+        "downloadDisabled": "We no longer collect telemetry data, so no personal data can be downloaded.",
         "delete": "Delete Account Request",
         "deleteConfirm": {
           "title": "Delete account",

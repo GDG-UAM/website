@@ -13,9 +13,9 @@ import { giveawaysRoutes } from "./routes/giveaways";
 import { passportRoutes } from "./routes/passport";
 import { settingsRoutes } from "./routes/settings";
 import { teamRoutes } from "./routes/team";
-import { telemetryRoutes } from "./routes/telemetry";
+// import { telemetryRoutes } from "./routes/telemetry";
 import { otherRoutes } from "./routes/other";
-import { openBadgeRoutes } from "./routes/openbadge";
+import { badgesRoutes } from "./routes/badges";
 
 export const app = new Elysia({ prefix: "/api" })
   .use(cors())
@@ -80,8 +80,8 @@ export const app = new Elysia({ prefix: "/api" })
   .use(passportRoutes)
   .use(settingsRoutes)
   .use(teamRoutes)
-  .use(telemetryRoutes)
-  .use(openBadgeRoutes)
+  // .use(telemetryRoutes)
+  .use(badgesRoutes)
   .use(otherRoutes);
 
 export type App = typeof app;

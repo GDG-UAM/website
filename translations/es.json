@@ -1092,6 +1092,7 @@
         "section": "Exportación y eliminación de datos",
         "download": "Descargar datos personales",
         "downloadBlockedTimer": "Descarga bloqueada durante {remaining}",
+        "downloadDisabled": "Ya no recogemos datos de telemetría, por lo que no se puede descargar ningún dato personal.",
         "delete": "Solicitud de eliminación de cuenta",
         "deleteConfirm": {
           "title": "Eliminar cuenta",

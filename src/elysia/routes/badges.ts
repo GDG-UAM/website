@@ -5,12 +5,12 @@ import crypto from "node:crypto";
 
 const BASE_URL = "https://gdguam.es";
 
-export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
+export const badgesRoutes = new Elysia({ prefix: "/badges" })
   .get("/issuer", () => {
     return {
       "@context": "https://w3id.org/openbadges/v2",
       type: "Issuer",
-      id: `${BASE_URL}/api/openbadge/issuer`,
+      id: `${BASE_URL}/api/badges/issuer`,
       name: "Google Developer Group on Campus - Universidad Autónoma de Madrid",
       url: BASE_URL,
       image: `${BASE_URL}/logo/logo.svg`,
@@ -29,13 +29,13 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
       return {
         "@context": "https://w3id.org/openbadges/v2",
         type: "BadgeClass",
-        id: `${BASE_URL}/api/openbadge/class/${publicId}`,
+        id: `${BASE_URL}/api/badges/class/${publicId}`,
         name: certificate.title,
         description: certificate.description || certificate.title,
         criteria: {
           narrative: `Certificate awarded to ${certificate.recipient.name} for ${certificate.title}.`
         },
-        issuer: `${BASE_URL}/api/openbadge/issuer`,
+        issuer: `${BASE_URL}/api/badges/issuer`,
         image: `${BASE_URL}/logo/logo.svg`
       };
     } catch {
@@ -68,7 +68,7 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
       return {
         "@context": "https://w3id.org/openbadges/v2",
         type: "Assertion",
-        id: `${BASE_URL}/api/openbadge/assertion/${publicId}`,
+        id: `${BASE_URL}/api/badges/assertion/${publicId}`,
         recipient: {
           type: "email",
           hashed: true,
@@ -78,7 +78,7 @@ export const openBadgeRoutes = new Elysia({ prefix: "/openbadge" })
         verification: {
           type: "HostedBadge"
         },
-        badge: `${BASE_URL}/api/openbadge/class/${publicId}`
+        badge: `${BASE_URL}/api/badges/class/${publicId}`
       };
     } catch (e) {
       console.error(e);
