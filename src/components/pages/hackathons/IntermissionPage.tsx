@@ -285,23 +285,24 @@ export default function IntermissionPage({
       const nextItem = data.schedule[index + 1];
 
       const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
       const [startH, startM] = item.startTime.split(":").map(Number);
-      const start = new Date();
-      start.setHours(startH, startM, 0, 0);
+      const startMinutes = startH * 60 + startM;
 
       if (item.endTime) {
         const [endH, endM] = item.endTime.split(":").map(Number);
-        const end = new Date();
-        end.setHours(endH, endM, 0, 0);
-        return now >= start && now <= end;
+        const endMinutes = endH * 60 + endM;
+        return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
       } else if (nextItem) {
         const [nextH, nextM] = nextItem.startTime.split(":").map(Number);
-        const next = new Date();
-        next.setHours(nextH, nextM, 0, 0);
-        return now >= start && now < next;
+        const nextStartMinutes = nextH * 60 + nextM;
+        // If next item happens "earlier" (midnight crossing), treat it as next day (add 24h) if we wanted to support it,
+        // but for now we stick to simple comparison as per "PC Time" request which implies linear day time.
+        return currentMinutes >= startMinutes && currentMinutes < nextStartMinutes;
       }
 
-      return now >= start;
+      return currentMinutes >= startMinutes;
     },
     [data]
   );
@@ -432,22 +433,24 @@ export default function IntermissionPage({
     const nextItem = data.schedule[index + 1];
 
     const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
     // Determine the effective point where this item is "over"
-    const end = new Date();
+    let endMinutes = -1;
+
     if (item.endTime) {
       const [h, m] = item.endTime.split(":").map(Number);
-      end.setHours(h, m, 0, 0);
+      endMinutes = h * 60 + m;
     } else if (nextItem) {
       // If no explicit end time, implicit end is the start of the next item
       const [h, m] = nextItem.startTime.split(":").map(Number);
-      end.setHours(h, m, 0, 0);
+      endMinutes = h * 60 + m;
     } else {
       // Last item with no end time never becomes "past"
       return false;
     }
 
-    return now > end;
+    return currentMinutes > endMinutes;
   };
 
   // Balanced sorting: tiered best in the middle
