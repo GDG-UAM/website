@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IntermissionData } from "@/components/pages/admin/hackathons/intermission/IntermissionForm";
 import { subscribeToHackathon } from "@/lib/realtime/client";
 import { CarouselRenderer } from "./CarouselRenderer";
+import { useTranslations } from "next-intl";
 
 import { createGlobalStyle } from "styled-components";
 
@@ -18,6 +19,35 @@ const GlobalIntermissionStyle = createGlobalStyle`
     height: 100vh;
     margin: 0;
     padding: 0;
+  }
+`;
+
+const MobileMessage = styled.div`
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  background: white;
+  color: var(--foreground);
+  box-sizing: border-box;
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+    font-weight: 800;
+  }
+
+  p {
+    opacity: 0.8;
+    font-size: 1.1rem;
+    max-width: 320px;
+    line-height: 1.5;
+    font-weight: 500;
   }
 `;
 
@@ -218,15 +248,28 @@ export default function IntermissionPage({
   id: string;
   initialData: IntermissionData;
 }) {
+  const t = useTranslations("intermission");
   const [data, setData] = useState<IntermissionData>(initialData);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [baseSponsorHeight, setBaseSponsorHeight] = useState(60);
   const [aspectRatios, setAspectRatios] = useState<Record<number, number>>({});
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   const scheduleListRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      // Mobile if width is less than 1024px or screen is taller than it is wide
+      setIsMobile(window.innerWidth < 1024 || window.innerHeight > window.innerWidth);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleScroll = () => {
     if (!scheduleListRef.current) return;
@@ -272,26 +315,42 @@ export default function IntermissionPage({
     return () => unsubscribe();
   }, [id]);
 
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  // Update active index
+  useEffect(() => {
+    const updateActiveIndex = () => {
+      const newIndex = data.schedule.findIndex((_, i) => isCurrentActivity(i));
+      setActiveIndex(newIndex);
+    };
+
+    updateActiveIndex();
+    const interval = setInterval(updateActiveIndex, 1000); // Check every second for precision
+    return () => clearInterval(interval);
+  }, [data.schedule, isCurrentActivity]);
+
   // Handle auto-scroll to active item
   useEffect(() => {
-    const scrollInterval = setInterval(() => {
-      const activeIndex = data.schedule.findIndex((_, i) => isCurrentActivity(i));
+    const performScroll = () => {
       if (activeIndex !== -1 && scheduleListRef.current) {
         const activeElement = itemRefs.current[activeIndex];
         if (activeElement) {
           const container = scheduleListRef.current;
           const containerHeight = container.offsetHeight;
           const elementOffset = activeElement.offsetTop;
-          const elementHeight = activeElement.offsetHeight;
 
-          const targetScroll = elementOffset - containerHeight / 2 + elementHeight / 2;
+          // Position the item a little higher than the center (at 35% of the container)
+          const targetScroll = elementOffset - containerHeight * 0.35;
           container.scrollTo({ top: targetScroll, behavior: "smooth" });
         }
       }
-    }, 5000); // Check every 5 seconds
+    };
+
+    performScroll(); // Initial scroll and on index change
+    const scrollInterval = setInterval(performScroll, 5000); // Periodically keep centered
 
     return () => clearInterval(scrollInterval);
-  }, [data.schedule, isCurrentActivity]);
+  }, [activeIndex]);
 
   useEffect(() => {
     const loadAspectRatios = async () => {
@@ -388,76 +447,83 @@ export default function IntermissionPage({
   return (
     <>
       <GlobalIntermissionStyle />
-      <Container>
-        <TopBar>
-          {data.organizerLogoUrl && <OrganizerLogo src={data.organizerLogoUrl} alt="Organizer" />}
-        </TopBar>
+      {isMobile ? (
+        <MobileMessage>
+          <h1>{t("mobile.title")}</h1>
+          <p>{t("mobile.description")}</p>
+        </MobileMessage>
+      ) : (
+        <Container>
+          <TopBar>
+            {data.organizerLogoUrl && <OrganizerLogo src={data.organizerLogoUrl} alt="Organizer" />}
+          </TopBar>
 
-        <MainContent>
-          <ScheduleSection>
-            <ScheduleTitle>Horario del Evento</ScheduleTitle>
-            <ScheduleContainer>
-              <FadeOverlay $position="top" $visible={showTopFade} />
-              <ScheduleList ref={scheduleListRef} onScroll={handleScroll}>
-                {data.schedule.map((item, i) => {
-                  const active = isCurrentActivity(i);
-                  const past = isPastActivity(i);
-                  return (
-                    <ScheduleItem
-                      key={i}
-                      $active={active}
-                      $past={past}
-                      ref={(el) => {
-                        itemRefs.current[i] = el;
-                      }}
-                    >
-                      <TimeTag $active={active} $past={past}>
-                        {item.startTime}
-                        {item.endTime ? ` - ${item.endTime}` : "+"}
-                      </TimeTag>
-                      <ActivityTitle $active={active} $past={past}>
-                        {item.title}
-                      </ActivityTitle>
-                    </ScheduleItem>
-                  );
-                })}
-              </ScheduleList>
-              <FadeOverlay $position="bottom" $visible={showBottomFade} />
-            </ScheduleContainer>
-          </ScheduleSection>
+          <MainContent>
+            <ScheduleSection>
+              <ScheduleTitle>{t("scheduleTitle")}</ScheduleTitle>
+              <ScheduleContainer>
+                <FadeOverlay $position="top" $visible={showTopFade} />
+                <ScheduleList ref={scheduleListRef} onScroll={handleScroll}>
+                  {data.schedule.map((item, i) => {
+                    const active = i === activeIndex;
+                    const past = isPastActivity(i);
+                    return (
+                      <ScheduleItem
+                        key={i}
+                        $active={active}
+                        $past={past}
+                        ref={(el) => {
+                          itemRefs.current[i] = el;
+                        }}
+                      >
+                        <TimeTag $active={active} $past={past}>
+                          {item.startTime}
+                          {item.endTime ? ` - ${item.endTime}` : "+"}
+                        </TimeTag>
+                        <ActivityTitle $active={active} $past={past}>
+                          {item.title}
+                        </ActivityTitle>
+                      </ScheduleItem>
+                    );
+                  })}
+                </ScheduleList>
+                <FadeOverlay $position="bottom" $visible={showBottomFade} />
+              </ScheduleContainer>
+            </ScheduleSection>
 
-          <CarouselSection>
-            <AnimatePresence mode="wait">
-              {filteredCarousel.length > 0 && (
-                <CarouselItem
-                  key={carouselIndex % filteredCarousel.length}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
-                  transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-                >
-                  <CarouselRenderer
-                    element={filteredCarousel[carouselIndex % filteredCarousel.length].root}
-                  />
-                </CarouselItem>
-              )}
-            </AnimatePresence>
-          </CarouselSection>
-        </MainContent>
+            <CarouselSection>
+              <AnimatePresence mode="wait">
+                {filteredCarousel.length > 0 && (
+                  <CarouselItem
+                    key={carouselIndex % filteredCarousel.length}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                  >
+                    <CarouselRenderer
+                      element={filteredCarousel[carouselIndex % filteredCarousel.length].root}
+                    />
+                  </CarouselItem>
+                )}
+              </AnimatePresence>
+            </CarouselSection>
+          </MainContent>
 
-        <SponsorsSection>
-          <SponsorGrid $gap={SPONSOR_CONFIG.gap}>
-            {getBalancedSponsors().map((s, i) => (
-              <SponsorLogo
-                key={i}
-                src={s.logoUrl}
-                alt={s.name}
-                $height={baseSponsorHeight * (SPONSOR_CONFIG.multipliers[s.tier] || 1)}
-              />
-            ))}
-          </SponsorGrid>
-        </SponsorsSection>
-      </Container>
+          <SponsorsSection>
+            <SponsorGrid $gap={SPONSOR_CONFIG.gap}>
+              {getBalancedSponsors().map((s, i) => (
+                <SponsorLogo
+                  key={i}
+                  src={s.logoUrl}
+                  alt={s.name}
+                  $height={baseSponsorHeight * (SPONSOR_CONFIG.multipliers[s.tier] || 1)}
+                />
+              ))}
+            </SponsorGrid>
+          </SponsorsSection>
+        </Container>
+      )}
     </>
   );
 }

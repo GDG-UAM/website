@@ -9,19 +9,10 @@ import {
   DeleteButton,
   EditButton
 } from "@/components/Buttons";
-import {
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
-} from "@mui/material";
+import { TextField, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { useTranslations } from "next-intl";
 import { CarouselEditor } from "./CarouselEditor";
+import Modal from "@/components/Modal";
 
 const Form = styled.form`
   display: flex;
@@ -258,7 +249,7 @@ export function IntermissionForm({
     const newSlide: CarouselSlide = {
       id: Math.random().toString(36).substr(2, 9),
       duration: 30,
-      label: `Slide ${data.carousel.length + 1}`,
+      label: ti("defaults.slideLabel", { index: data.carousel.length + 1 }),
       root: {
         id: "root",
         type: "container",
@@ -267,7 +258,7 @@ export function IntermissionForm({
           {
             id: Math.random().toString(36).substr(2, 9),
             type: "text",
-            props: { content: "New Slide", variant: "h2", align: "center" }
+            props: { content: ti("defaults.newSlide"), variant: "h2", align: "center" }
           }
         ]
       }
@@ -382,9 +373,14 @@ export function IntermissionForm({
               <ListItem key={index}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>{item.label || `Slide ${index + 1}`}</div>
+                    <div style={{ fontWeight: 600 }}>
+                      {item.label || ti("defaults.slideLabel", { index: index + 1 })}
+                    </div>
                     <div style={{ fontSize: "0.85rem", color: "#666" }}>
-                      {item.duration}s • {item.root.children?.length || 0} elements
+                      {ti("helpers.slideDetails", {
+                        duration: item.duration,
+                        count: item.root.children?.length || 0
+                      })}
                     </div>
                   </div>
                   <EditButton onClick={() => setEditingSlideIndex(index)} iconSize={20} />
@@ -400,25 +396,23 @@ export function IntermissionForm({
           </ScrollContainer>
         </EntryBox>
 
-        <Dialog
-          open={editingSlideIndex !== null}
-          onClose={() => setEditingSlideIndex(null)}
-          maxWidth="lg"
-          fullWidth
+        <Modal
+          isOpen={editingSlideIndex !== null}
+          width="lg"
+          title={ti("editTitle")}
+          buttons={[
+            <SaveButton key="save" onClick={() => setEditingSlideIndex(null)}>
+              {ti("actions.done")}
+            </SaveButton>
+          ]}
         >
-          <DialogTitle>Edit Slide Layout</DialogTitle>
-          <DialogContent dividers>
-            {editingSlideIndex !== null && (
-              <CarouselEditor
-                slide={data.carousel[editingSlideIndex]}
-                onChange={(updatedSlide) => updateCarouselSlide(editingSlideIndex, updatedSlide)}
-              />
-            )}
-          </DialogContent>
-          <DialogActions>
-            <SaveButton onClick={() => setEditingSlideIndex(null)}>Done</SaveButton>
-          </DialogActions>
-        </Dialog>
+          {editingSlideIndex !== null && (
+            <CarouselEditor
+              slide={data.carousel[editingSlideIndex]}
+              onChange={(updatedSlide) => updateCarouselSlide(editingSlideIndex, updatedSlide)}
+            />
+          )}
+        </Modal>
       </Section>
 
       <Section>

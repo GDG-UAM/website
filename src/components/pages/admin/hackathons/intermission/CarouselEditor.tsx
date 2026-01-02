@@ -3,18 +3,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { AddButton, DeleteButton, UpButton, DownButton } from "@/components/Buttons";
-import {
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Box,
-  Typography,
-  Paper,
-  Divider
-} from "@mui/material";
+import { TextField, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { CarouselElement, CarouselElementType, CarouselSlide } from "./IntermissionForm";
+import { useTranslations } from "next-intl";
 
 const EditorContainer = styled.div`
   display: flex;
@@ -32,6 +23,8 @@ const TreeItem = styled.div<{ $selected?: boolean; $depth: number }>`
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  min-width: 100%;
+  width: fit-content;
 
   &:hover {
     background: ${(props) =>
@@ -39,7 +32,21 @@ const TreeItem = styled.div<{ $selected?: boolean; $depth: number }>`
   }
 `;
 
-const PropertyPanel = styled(Paper)`
+const Panel = styled.div`
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  background-color: white;
+  overflow: hidden;
+`;
+
+const LayoutTreePanel = styled(Panel)`
+  padding: 16px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: auto;
+`;
+
+const PropertyPanel = styled(Panel)`
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -50,9 +57,105 @@ const SlideHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const StyledDivider = styled.hr`
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin: 0;
+  width: 100%;
+`;
+
+const FlexBox = styled.div<{
+  $direction?: string;
+  $gap?: number | string;
+  $align?: string;
+  $justify?: string;
+  $wrap?: string;
+  $width?: string;
+  $mt?: number;
+  $mb?: number;
+}>`
+  display: flex;
+  flex-direction: ${(props) => props.$direction || "row"};
+  gap: ${(props) => (typeof props.$gap === "number" ? `${props.$gap * 8}px` : props.$gap || "0px")};
+  align-items: ${(props) => props.$align || "stretch"};
+  justify-content: ${(props) => props.$justify || "flex-start"};
+  flex-wrap: ${(props) => props.$wrap || "nowrap"};
+  width: ${(props) => props.$width || "auto"};
+  margin-top: ${(props) => (props.$mt ? `${props.$mt * 8}px` : "0")};
+  margin-bottom: ${(props) => (props.$mb ? `${props.$mb * 8}px` : "0")};
+`;
+
+const GridBox = styled.div<{ $columns?: string; $gap?: number }>`
+  display: grid;
+  grid-template-columns: ${(props) => props.$columns || "1fr"};
+  gap: ${(props) => (props.$gap ? `${props.$gap * 8}px` : "0px")};
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ActionBox = styled(FlexBox)`
+  gap: 4px;
+  flex-shrink: 0;
+`;
+
+const HeaderRow = styled(FlexBox)`
+  margin-bottom: 16px;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const Label = styled.div<{ $variant?: "subtitle2" | "caption" | "body2"; $color?: string }>`
+  font-family: inherit;
+  font-weight: ${(props) =>
+    props.$variant === "subtitle2" || props.$variant === "caption" ? 600 : 400};
+  font-size: ${(props) =>
+    props.$variant === "caption"
+      ? "0.75rem"
+      : props.$variant === "subtitle2"
+        ? "0.875rem"
+        : "1rem"};
+  color: ${(props) => props.$color || "inherit"};
+  margin-bottom: ${(props) => (props.$variant === "caption" ? "8px" : "0")};
+`;
+
+const Text = styled.div<{ $color?: string; $bold?: boolean; $transform?: string; $size?: string }>`
+  font-family: inherit;
+  color: ${(props) => props.$color || "inherit"};
+  font-weight: ${(props) => (props.$bold ? 600 : 400)};
+  text-transform: ${(props) => props.$transform || "none"};
+  font-size: ${(props) => props.$size || "1rem"};
+`;
+
+const SmallText = styled.span`
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  display: block;
+  margin-bottom: 8px;
+`;
+
+const ElementTypeLabel = styled(Text)`
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+`;
+
+const ElementContent = styled(Text)`
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
 `;
 
 const DEFAULT_PROPS: Record<CarouselElementType, CarouselElement["props"]> = {
@@ -74,6 +177,7 @@ export const CarouselEditor: React.FC<{
   slide: CarouselSlide;
   onChange: (slide: CarouselSlide) => void;
 }> = ({ slide, onChange }) => {
+  const t = useTranslations("admin.hackathons.intermission");
   const [selectedId, setSelectedId] = useState<string | null>(slide.root.id);
 
   const findElement = (root: CarouselElement, id: string): CarouselElement | null => {
@@ -182,38 +286,25 @@ export const CarouselEditor: React.FC<{
         $selected={selectedId === element.id}
         onClick={() => setSelectedId(element.id)}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 600,
-            color: "text.secondary",
-            textTransform: "uppercase",
-            fontSize: "0.7rem"
-          }}
-        >
-          {element.type}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-        >
+        <ElementTypeLabel>{t(`elementTypes.${element.type}`)}</ElementTypeLabel>
+        <ElementContent>
           {element.type === "text"
             ? element.props.content
             : element.type === "qr"
               ? element.props.value
               : element.type === "image"
-                ? element.props.url || "No image URL"
+                ? element.props.url || t("helpers.noImage")
                 : element.type === "container"
-                  ? `${element.props.direction} (${element.children?.length || 0})`
+                  ? `${t("values." + (element.props.direction || "column"))} (${element.children?.length || 0})`
                   : ""}
-        </Typography>
-        <Box sx={{ display: "flex", gap: 0.5 }}>
+        </ElementContent>
+        <ActionBox>
           <UpButton slim iconSize={16} onClick={() => moveElement(element.id, "up")} />
           <DownButton slim iconSize={16} onClick={() => moveElement(element.id, "down")} />
           {element.id !== slide.root.id && (
             <DeleteButton slim iconSize={16} onClick={() => removeElement(element.id)} />
           )}
-        </Box>
+        </ActionBox>
       </TreeItem>
       {element.children?.map((child) => renderTree(child, depth + 1))}
     </React.Fragment>
@@ -222,56 +313,56 @@ export const CarouselEditor: React.FC<{
   return (
     <EditorContainer>
       <SlideHeader>
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <TextField
-            label="Slide Label"
-            value={slide.label || ""}
-            onChange={(e) => onChange({ ...slide, label: e.target.value })}
-            size="small"
-          />
-          <TextField
-            label="Duration (s)"
-            type="number"
-            value={slide.duration}
-            onChange={(e) => onChange({ ...slide, duration: parseInt(e.target.value) })}
-            size="small"
-            sx={{ width: 100 }}
-          />
-        </Box>
+        <TextField
+          label={t("fields.carouselLabel")}
+          value={slide.label || ""}
+          onChange={(e) => onChange({ ...slide, label: e.target.value })}
+          size="small"
+          fullWidth
+        />
+        <TextField
+          label={t("fields.carouselDuration")}
+          type="number"
+          value={slide.duration}
+          onChange={(e) => onChange({ ...slide, duration: parseInt(e.target.value) })}
+          size="small"
+          sx={{ width: { xs: "100%", sm: 100 } }}
+        />
       </SlideHeader>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3 }}>
-        <Paper variant="outlined" sx={{ p: 2, maxHeight: 600, overflow: "auto" }}>
-          <Box
-            sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}
-          >
-            <Typography variant="subtitle2">Layout Tree</Typography>
-          </Box>
+      <GridBox $columns="1fr 1fr" $gap={3}>
+        <LayoutTreePanel>
+          <HeaderRow>
+            <Label $variant="subtitle2">{t("sections.layoutTree")}</Label>
+          </HeaderRow>
           {renderTree(slide.root)}
-        </Paper>
+        </LayoutTreePanel>
 
-        <PropertyPanel variant="outlined">
-          <Typography variant="subtitle2">Properties: {selectedElement?.type}</Typography>
-          <Divider />
+        <PropertyPanel>
+          <Label $variant="subtitle2">
+            {t("sections.properties")}:{" "}
+            {selectedElement ? t(`elementTypes.${selectedElement.type}`) : ""}
+          </Label>
+          <StyledDivider />
           {selectedElement && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <FlexBox $direction="column" $gap={2}>
               {selectedElement.type === "container" && (
                 <>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Direction</InputLabel>
+                    <InputLabel>{t("fields.direction")}</InputLabel>
                     <Select
                       value={selectedElement.props.direction}
-                      label="Direction"
+                      label={t("fields.direction")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "direction", e.target.value)
                       }
                     >
-                      <MenuItem value="column">Column</MenuItem>
-                      <MenuItem value="row">Row</MenuItem>
+                      <MenuItem value="column">{t("values.column")}</MenuItem>
+                      <MenuItem value="row">{t("values.row")}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Gap"
+                    label={t("fields.gap")}
                     type="number"
                     fullWidth
                     size="small"
@@ -281,38 +372,38 @@ export const CarouselEditor: React.FC<{
                     }
                   />
                   <FormControl fullWidth size="small">
-                    <InputLabel>Align Items</InputLabel>
+                    <InputLabel>{t("fields.alignItems")}</InputLabel>
                     <Select
                       value={selectedElement.props.alignItems}
-                      label="Align Items"
+                      label={t("fields.alignItems")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "alignItems", e.target.value)
                       }
                     >
-                      <MenuItem value="flex-start">Start</MenuItem>
-                      <MenuItem value="center">Center</MenuItem>
-                      <MenuItem value="flex-end">End</MenuItem>
-                      <MenuItem value="stretch">Stretch</MenuItem>
+                      <MenuItem value="flex-start">{t("values.start")}</MenuItem>
+                      <MenuItem value="center">{t("values.center")}</MenuItem>
+                      <MenuItem value="flex-end">{t("values.end")}</MenuItem>
+                      <MenuItem value="stretch">{t("values.stretch")}</MenuItem>
                     </Select>
                   </FormControl>
                   <FormControl fullWidth size="small">
-                    <InputLabel>Justify Content</InputLabel>
+                    <InputLabel>{t("fields.justifyContent")}</InputLabel>
                     <Select
                       value={selectedElement.props.justifyContent}
-                      label="Justify Content"
+                      label={t("fields.justifyContent")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "justifyContent", e.target.value)
                       }
                     >
-                      <MenuItem value="flex-start">Start</MenuItem>
-                      <MenuItem value="center">Center</MenuItem>
-                      <MenuItem value="flex-end">End</MenuItem>
-                      <MenuItem value="space-between">Space Between</MenuItem>
-                      <MenuItem value="space-around">Space Around</MenuItem>
+                      <MenuItem value="flex-start">{t("values.start")}</MenuItem>
+                      <MenuItem value="center">{t("values.center")}</MenuItem>
+                      <MenuItem value="flex-end">{t("values.end")}</MenuItem>
+                      <MenuItem value="space-between">{t("values.spaceBetween")}</MenuItem>
+                      <MenuItem value="space-around">{t("values.spaceAround")}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Padding (e.g. 20px 40px)"
+                    label={t("fields.padding")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.padding || ""}
@@ -320,35 +411,33 @@ export const CarouselEditor: React.FC<{
                       handlePropChange(selectedElement.id, "padding", e.target.value)
                     }
                   />
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-                      Add Child
-                    </Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  <FlexBox $mt={1} $direction="column">
+                    <SmallText>{t("helpers.addChild")}</SmallText>
+                    <FlexBox $wrap="wrap" $gap={1}>
                       <AddButton slim onClick={() => addElement(selectedElement.id, "text")}>
-                        Text
+                        {t("elementTypes.text")}
                       </AddButton>
                       <AddButton slim onClick={() => addElement(selectedElement.id, "qr")}>
-                        QR
+                        {t("elementTypes.qr")}
                       </AddButton>
                       <AddButton slim onClick={() => addElement(selectedElement.id, "image")}>
-                        Image
+                        {t("elementTypes.image")}
                       </AddButton>
                       <AddButton slim onClick={() => addElement(selectedElement.id, "container")}>
-                        Container
+                        {t("elementTypes.container")}
                       </AddButton>
                       <AddButton slim onClick={() => addElement(selectedElement.id, "spacer")}>
-                        Spacer
+                        {t("elementTypes.spacer")}
                       </AddButton>
-                    </Box>
-                  </Box>
+                    </FlexBox>
+                  </FlexBox>
                 </>
               )}
 
               {selectedElement.type === "text" && (
                 <>
                   <TextField
-                    label="Content"
+                    label={t("fields.content")}
                     fullWidth
                     multiline
                     rows={4}
@@ -359,22 +448,22 @@ export const CarouselEditor: React.FC<{
                     }
                   />
                   <FormControl fullWidth size="small">
-                    <InputLabel>Variant</InputLabel>
+                    <InputLabel>{t("fields.variant")}</InputLabel>
                     <Select
                       value={selectedElement.props.variant}
-                      label="Variant"
+                      label={t("fields.variant")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "variant", e.target.value)
                       }
                     >
-                      <MenuItem value="h1">H1 (Hero)</MenuItem>
-                      <MenuItem value="h2">H2 (Title)</MenuItem>
-                      <MenuItem value="h3">H3 (Subtitle)</MenuItem>
-                      <MenuItem value="body">Body</MenuItem>
+                      <MenuItem value="h1">{t("values.hero")}</MenuItem>
+                      <MenuItem value="h2">{t("values.title")}</MenuItem>
+                      <MenuItem value="h3">{t("values.subtitle")}</MenuItem>
+                      <MenuItem value="body">{t("values.body")}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Font Size (e.g. 4rem)"
+                    label={t("fields.fontSize")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.fontSize || ""}
@@ -383,7 +472,7 @@ export const CarouselEditor: React.FC<{
                     }
                   />
                   <TextField
-                    label="Font Weight (e.g. 800)"
+                    label={t("fields.fontWeight")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.fontWeight || ""}
@@ -392,21 +481,21 @@ export const CarouselEditor: React.FC<{
                     }
                   />
                   <FormControl fullWidth size="small">
-                    <InputLabel>Alignment</InputLabel>
+                    <InputLabel>{t("fields.alignment")}</InputLabel>
                     <Select
                       value={selectedElement.props.align}
-                      label="Alignment"
+                      label={t("fields.alignment")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "align", e.target.value)
                       }
                     >
-                      <MenuItem value="left">Left</MenuItem>
-                      <MenuItem value="center">Center</MenuItem>
-                      <MenuItem value="right">Right</MenuItem>
+                      <MenuItem value="left">{t("values.left")}</MenuItem>
+                      <MenuItem value="center">{t("values.center")}</MenuItem>
+                      <MenuItem value="right">{t("values.right")}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Color (hex or var)"
+                    label={t("fields.color")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.color || ""}
@@ -418,15 +507,15 @@ export const CarouselEditor: React.FC<{
               {selectedElement.type === "qr" && (
                 <>
                   <TextField
-                    label="QR Value"
+                    label={t("fields.qrValue")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.value}
                     onChange={(e) => handlePropChange(selectedElement.id, "value", e.target.value)}
                   />
-                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                  <GridBox $columns="1fr 1fr" $gap={2}>
                     <TextField
-                      label="Size (px)"
+                      label={t("fields.size")}
                       type="number"
                       fullWidth
                       size="small"
@@ -436,7 +525,7 @@ export const CarouselEditor: React.FC<{
                       }
                     />
                     <TextField
-                      label="Corner Size (px)"
+                      label={t("fields.cornerSize")}
                       type="number"
                       fullWidth
                       size="small"
@@ -445,9 +534,9 @@ export const CarouselEditor: React.FC<{
                         handlePropChange(selectedElement.id, "cornerSize", parseInt(e.target.value))
                       }
                     />
-                  </Box>
+                  </GridBox>
                   <TextField
-                    label="Corner Color (optional)"
+                    label={t("fields.cornerColor")}
                     fullWidth
                     size="small"
                     placeholder="e.g. #4285F4"
@@ -455,10 +544,10 @@ export const CarouselEditor: React.FC<{
                     onChange={(e) =>
                       handlePropChange(selectedElement.id, "cornerColor", e.target.value)
                     }
-                    helperText="Leave empty for default Google colors"
+                    helperText={t("helpers.googleColors")}
                   />
                   <TextField
-                    label="Logo URL (optional)"
+                    label={t("fields.logoUrl")}
                     fullWidth
                     size="small"
                     placeholder="https://..."
@@ -468,7 +557,7 @@ export const CarouselEditor: React.FC<{
                     }
                   />
                   <TextField
-                    label="Logo Size (%)"
+                    label={t("fields.logoSize")}
                     type="number"
                     fullWidth
                     size="small"
@@ -476,7 +565,7 @@ export const CarouselEditor: React.FC<{
                     onChange={(e) =>
                       handlePropChange(selectedElement.id, "logoSize", parseInt(e.target.value))
                     }
-                    helperText="Recommended: 15-25%"
+                    helperText={t("helpers.recommendedSize")}
                   />
                 </>
               )}
@@ -484,30 +573,30 @@ export const CarouselEditor: React.FC<{
               {selectedElement.type === "image" && (
                 <>
                   <TextField
-                    label="Image URL"
+                    label={t("fields.imageUrl")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.url}
                     onChange={(e) => handlePropChange(selectedElement.id, "url", e.target.value)}
                   />
                   <TextField
-                    label="Height (e.g. 200px)"
+                    label={t("fields.height")}
                     fullWidth
                     size="small"
                     value={selectedElement.props.height}
                     onChange={(e) => handlePropChange(selectedElement.id, "height", e.target.value)}
                   />
                   <FormControl fullWidth size="small">
-                    <InputLabel>Object Fit</InputLabel>
+                    <InputLabel>{t("fields.objectFit")}</InputLabel>
                     <Select
                       value={selectedElement.props.objectFit}
-                      label="Object Fit"
+                      label={t("fields.objectFit")}
                       onChange={(e) =>
                         handlePropChange(selectedElement.id, "objectFit", e.target.value)
                       }
                     >
-                      <MenuItem value="contain">Contain</MenuItem>
-                      <MenuItem value="cover">Cover</MenuItem>
+                      <MenuItem value="contain">{t("values.contain")}</MenuItem>
+                      <MenuItem value="cover">{t("values.cover")}</MenuItem>
                     </Select>
                   </FormControl>
                 </>
@@ -515,7 +604,7 @@ export const CarouselEditor: React.FC<{
 
               {selectedElement.type === "spacer" && (
                 <TextField
-                  label="Flex Grow"
+                  label={t("fields.flexGrow")}
                   type="number"
                   fullWidth
                   size="small"
@@ -526,9 +615,9 @@ export const CarouselEditor: React.FC<{
                 />
               )}
 
-              <Box sx={{ mt: 2 }}>
+              <FlexBox $mt={2}>
                 <TextField
-                  label="Flex Basis / Width (if row)"
+                  label={t("fields.flexBasis")}
                   type="number"
                   fullWidth
                   size="small"
@@ -541,16 +630,16 @@ export const CarouselEditor: React.FC<{
                     )
                   }
                 />
-              </Box>
-            </Box>
+              </FlexBox>
+            </FlexBox>
           )}
           {!selectedElement && (
-            <Typography variant="body2" color="text.secondary">
-              Select an element to edit its properties
-            </Typography>
+            <Text $size="0.875rem" $color="rgba(0, 0, 0, 0.6)">
+              {t("helpers.selectElement")}
+            </Text>
           )}
         </PropertyPanel>
-      </Box>
+      </GridBox>
     </EditorContainer>
   );
 };

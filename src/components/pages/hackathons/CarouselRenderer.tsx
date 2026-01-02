@@ -49,6 +49,7 @@ const ImageElement = styled.img<{
   object-fit: ${(props) => props.$objectFit || "contain"};
   max-width: 100%;
   display: block;
+  border-radius: 20px;
 `;
 
 const SpacerElement = styled.div<{

@@ -118,6 +118,15 @@
     "title": "404",
     "message": "Página no encontrada."
   },
+  "intermission": {
+    "pageTitle": "Página de Espera",
+    "scheduleTitle": "Horario del Evento",
+    "organizerLogo": "Logo del organizador",
+    "mobile": {
+      "title": "Vista no disponible",
+      "description": "Esta página solo está disponible en pantallas de PC."
+    }
+  },
   "navbar": {
     "home": "Inicio",
     "events": "Eventos",
@@ -1051,14 +1060,38 @@
         "intermission": "Página entre Charlas"
       },
       "intermission": {
-        "title": "Configuración de Intermedio",
+        "title": "Gestión de Intermedios",
         "sections": {
+          "layoutTree": "Árbol de Diseño",
+          "properties": "Propiedades",
           "general": "General",
           "schedule": "Horario",
           "carousel": "Carrusel",
           "sponsors": "Patrocinadores"
         },
         "fields": {
+          "direction": "Dirección",
+          "gap": "Espaciado (Gap)",
+          "alignItems": "Alinear Ítems",
+          "justifyContent": "Justificar Contenido",
+          "padding": "Relleno (ej. 20px 40px)",
+          "content": "Contenido",
+          "variant": "Variante",
+          "fontSize": "Tamaño de Fuente (ej. 4rem)",
+          "fontWeight": "Peso de Fuente (ej. 800)",
+          "alignment": "Alineación",
+          "color": "Color (hex o var)",
+          "qrValue": "Valor QR",
+          "size": "Tamaño (px)",
+          "cornerSize": "Tamaño de Esquina (px)",
+          "cornerColor": "Color de Esquina (opcional)",
+          "logoUrl": "URL del Logo (opcional)",
+          "logoSize": "Tamaño del Logo (%)",
+          "imageUrl": "URL de Imagen",
+          "height": "Altura (ej. 200px)",
+          "objectFit": "Ajuste de Objeto",
+          "flexGrow": "Flex Grow",
+          "flexBasis": "Flex Basis / Ancho (si es fila)",
           "organizerLogo": "URL del Logo del Organizador",
           "startTime": "Inicio",
           "endTime": "Fin",
@@ -1071,6 +1104,39 @@
           "sponsorLogo": "URL del Logo",
           "sponsorTier": "Nivel"
         },
+        "elementTypes": {
+          "text": "Texto",
+          "qr": "QR",
+          "image": "Imagen",
+          "container": "Contenedor",
+          "spacer": "Espaciador"
+        },
+        "values": {
+          "column": "Columna",
+          "row": "Fila",
+          "start": "Inicio",
+          "center": "Centro",
+          "end": "Fin",
+          "stretch": "Estirar",
+          "spaceBetween": "Espacio Entre",
+          "spaceAround": "Espacio Alrededor",
+          "left": "Izquierda",
+          "right": "Derecha",
+          "contain": "Contener",
+          "cover": "Cubrir",
+          "hero": "H1 (Héroe)",
+          "title": "H2 (Título)",
+          "subtitle": "H3 (Subtítulo)",
+          "body": "Cuerpo"
+        },
+        "helpers": {
+          "googleColors": "Dejar vacío para colores predeterminados de Google",
+          "recommendedSize": "Recomendado: 15-25%",
+          "selectElement": "Selecciona un elemento para editar sus propiedades",
+          "addChild": "Añadir Hijo",
+          "slideDetails": "{duration}s • {count} elementos",
+          "noImage": "Sin URL de imagen"
+        },
         "types": {
           "text": "Texto / Información",
           "qr": "Código QR",
@@ -1082,9 +1148,15 @@
           "gold": "Oro (Mediano)",
           "silver": "Plata (Pequeño)"
         },
+        "defaults": {
+          "slideLabel": "Diapositiva {index}",
+          "newSlide": "Nueva Diapositiva"
+        },
+        "editTitle": "Editar Diseño de Diapositiva",
         "actions": {
+          "done": "Guardar",
           "addEntry": "Añadir Entrada",
-          "addItem": "Añadir Elemento al Carrusel",
+          "addItem": "Añadir Elemento Carrusel",
           "addSponsor": "Añadir Patrocinador"
         },
         "empty": {

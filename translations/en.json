@@ -118,6 +118,15 @@
     "title": "404",
     "message": "Page not found."
   },
+  "intermission": {
+    "pageTitle": "Intermission Page",
+    "scheduleTitle": "Event Schedule",
+    "organizerLogo": "Organizer Logo",
+    "mobile": {
+      "title": "View Unavailable",
+      "description": "The intermission page is only available on PC displays."
+    }
+  },
   "navbar": {
     "home": "Home",
     "events": "Events",
@@ -1053,12 +1062,36 @@
       "intermission": {
         "title": "Intermission Management",
         "sections": {
+          "layoutTree": "Layout Tree",
+          "properties": "Properties",
           "general": "General",
           "schedule": "Schedule",
           "carousel": "Carousel",
           "sponsors": "Sponsors"
         },
         "fields": {
+          "direction": "Direction",
+          "gap": "Gap",
+          "alignItems": "Align Items",
+          "justifyContent": "Justify Content",
+          "padding": "Padding (e.g. 20px 40px)",
+          "content": "Content",
+          "variant": "Variant",
+          "fontSize": "Font Size (e.g. 4rem)",
+          "fontWeight": "Font Weight (e.g. 800)",
+          "alignment": "Alignment",
+          "color": "Color (hex or var)",
+          "qrValue": "QR Value",
+          "size": "Size (px)",
+          "cornerSize": "Corner Size (px)",
+          "cornerColor": "Corner Color (optional)",
+          "logoUrl": "Logo URL (optional)",
+          "logoSize": "Logo Size (%)",
+          "imageUrl": "Image URL",
+          "height": "Height (e.g. 200px)",
+          "objectFit": "Object Fit",
+          "flexGrow": "Flex Grow",
+          "flexBasis": "Flex Basis / Width (if row)",
           "organizerLogo": "Organizer Logo URL",
           "startTime": "Start",
           "endTime": "End",
@@ -1071,6 +1104,39 @@
           "sponsorLogo": "Logo URL",
           "sponsorTier": "Tier"
         },
+        "elementTypes": {
+          "text": "Text",
+          "qr": "QR",
+          "image": "Image",
+          "container": "Container",
+          "spacer": "Spacer"
+        },
+        "values": {
+          "column": "Column",
+          "row": "Row",
+          "start": "Start",
+          "center": "Center",
+          "end": "End",
+          "stretch": "Stretch",
+          "spaceBetween": "Space Between",
+          "spaceAround": "Space Around",
+          "left": "Left",
+          "right": "Right",
+          "contain": "Contain",
+          "cover": "Cover",
+          "hero": "H1 (Hero)",
+          "title": "H2 (Title)",
+          "subtitle": "H3 (Subtitle)",
+          "body": "Body"
+        },
+        "helpers": {
+          "googleColors": "Leave empty for default Google colors",
+          "recommendedSize": "Recommended: 15-25%",
+          "selectElement": "Select an element to edit its properties",
+          "addChild": "Add Child",
+          "slideDetails": "{duration}s • {count} elements",
+          "noImage": "No image URL"
+        },
         "types": {
           "text": "Text / Information",
           "qr": "QR Code",
@@ -1082,7 +1148,13 @@
           "gold": "Gold (Medium)",
           "silver": "Silver (Small)"
         },
+        "defaults": {
+          "slideLabel": "Slide {index}",
+          "newSlide": "New Slide"
+        },
+        "editTitle": "Edit Slide Layout",
         "actions": {
+          "done": "Save",
           "addEntry": "Add Entry",
           "addItem": "Add Carousel Item",
           "addSponsor": "Add Sponsor"

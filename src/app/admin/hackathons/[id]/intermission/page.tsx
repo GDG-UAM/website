@@ -18,6 +18,10 @@ const Container = styled.div`
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
+
+  @media (max-width: 600px) {
+    padding: 8px;
+  }
 `;
 
 const Header = styled.div`

@@ -1,6 +1,11 @@
 import { getHackathonById } from "@/lib/controllers/hackathonController";
 import { notFound } from "next/navigation";
 import IntermissionPage from "@/components/pages/hackathons/IntermissionPage";
+import { buildSectionMetadata } from "@/lib/metadata";
+
+export async function generateMetadata() {
+  return buildSectionMetadata("intermission");
+}
 
 export default async function PublicIntermissionPage({
   params

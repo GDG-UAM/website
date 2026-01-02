@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import styled from "styled-components";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
-import { AdminNavigationButton } from "@/components/Buttons";
+import { AdminNavigationButton, OpenLinkButton } from "@/components/Buttons";
 import { newErrorToast } from "@/components/Toast";
 
 const Container = styled.div`
@@ -57,6 +57,17 @@ const ButtonList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+
+  & > :first-child {
+    flex: 1;
+  }
 `;
 
 interface HackathonInfo {
@@ -149,12 +160,15 @@ export default function HackathonDashboardPage() {
             <Category>
               <CategoryTitle>{t("dashboard.intermission")}</CategoryTitle>
               <ButtonList>
-                <AdminNavigationButton
-                  type="hackathon-intermission"
-                  onClick={() => handleNavigation("/intermission")}
-                >
-                  {t("dashboard.intermission")}
-                </AdminNavigationButton>
+                <ButtonRow>
+                  <AdminNavigationButton
+                    type="hackathon-intermission"
+                    onClick={() => handleNavigation("/intermission")}
+                  >
+                    {t("dashboard.intermission")}
+                  </AdminNavigationButton>
+                  <OpenLinkButton href={`/hackathon/${id}/intermission`} color="secondary" />
+                </ButtonRow>
               </ButtonList>
             </Category>
           </Grid>
