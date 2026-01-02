@@ -5,9 +5,15 @@ let socket: Socket | null = null;
 export function getSocket(): Socket {
   if (!socket) {
     const base = process.env.NEXT_PUBLIC_BASE_URL || "";
+
+    // Initialize server-side socket if not already running
+    // We don't await this here to keep getSocket synchronous,
+    // but the first connection attempt will happen while/after this fetch starts.
+    fetch(`${base}/api/socket`).catch(() => {});
+
     socket = io(base, {
-      path: "/api/socket",
-      transports: ["websocket", "polling"],
+      path: "/api/socket/",
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 500,
@@ -22,9 +28,7 @@ export function subscribeToGiveaway(giveawayId: string, onCount: (count: number)
   const s = getSocket();
   const room = `giveaway:${giveawayId}`;
   const join = () => {
-    try {
-      console.log("[socket] joining room", room);
-    } catch {}
+    // console.log("[socket] joining room", room);
     s.emit("join", { room });
   };
 
@@ -32,14 +36,10 @@ export function subscribeToGiveaway(giveawayId: string, onCount: (count: number)
   if (s.connected) join();
   const onConnect = () => join();
   const onConnectError = (err: unknown) => {
-    try {
-      console.warn("[socket] connect error", err);
-    } catch {}
+    console.warn("[socket] connect error", err);
   };
-  const onDisconnect = (reason: string) => {
-    try {
-      console.log("[socket] disconnected:", reason);
-    } catch {}
+  const onDisconnect = () => {
+    // console.log("[socket] disconnected:", reason);
   };
   s.on("connect", onConnect);
   s.on("connect_error", onConnectError);
@@ -53,9 +53,7 @@ export function subscribeToGiveaway(giveawayId: string, onCount: (count: number)
   } catch {}
   const handler = (payload: { count: number }) => {
     if (typeof payload?.count === "number") {
-      try {
-        console.log("[socket] Received giveaway:count =>", payload.count);
-      } catch {}
+      // console.log("[socket] Received giveaway:count =>", payload.count);
       onCount(payload.count);
     }
   };
@@ -66,5 +64,32 @@ export function subscribeToGiveaway(giveawayId: string, onCount: (count: number)
     s.off("connect_error", onConnectError);
     s.off("disconnect", onDisconnect);
     if (hb) clearInterval(hb);
+  };
+}
+
+export function subscribeToHackathon(hackathonId: string, onUpdate: (data: unknown) => void) {
+  const s = getSocket();
+  const room = `hackathon:${hackathonId}`;
+
+  const join = () => {
+    // console.log("[socket] joining room", room);
+    s.emit("join", { room });
+  };
+
+  if (s.connected) join();
+  const onConnect = () => join();
+
+  s.on("connect", onConnect);
+
+  const handler = (data: unknown) => {
+    // console.log("[socket] Received intermission_update =>", data);
+    onUpdate(data);
+  };
+
+  s.on("intermission_update", handler);
+
+  return () => {
+    s.off("intermission_update", handler);
+    s.off("connect", onConnect);
   };
 }

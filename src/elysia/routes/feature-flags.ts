@@ -54,9 +54,9 @@ export const featureFlagsRoutes = new Elysia({ prefix: "/feature-flags" })
             unknown
           >;
           const map = new Map<string, FF>();
-          for (const f of prod as FF[]) map.set(f.key, f);
-          for (const f of dev as FF[]) if (!map.has(f.key)) map.set(f.key, f);
-          return status(200, { items: Array.from(map.values()) as FF[] });
+          for (const f of prod as unknown as FF[]) map.set(f.key, f);
+          for (const f of dev as unknown as FF[]) if (!map.has(f.key)) map.set(f.key, f);
+          return status(200, { items: Array.from(map.values()) });
         }
         const items = await FeatureFlag.find({
           environment: { $in: ["production", "development"] }

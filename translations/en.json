@@ -87,6 +87,8 @@
     "listView": "List view",
     "search": "Search",
     "down": "Go Down",
+    "up": "Go Up",
+    "manage": "Manage",
     "send": {
       "send": "Send",
       "sent": "Sent"
@@ -471,13 +473,19 @@
       "giveaways": "Giveaways",
       "links": "Links",
       "permissions": "Permissions",
-      "certificates": "Certificates"
+      "certificates": "Certificates",
+      "hackathons": "Hackathons"
     },
     "navigation": {
       "blog": "Blog",
       "newsletter": "Newsletter",
       "events": "Events",
       "giveaways": "Giveaways",
+      "hackathons": "Hackathons",
+      "tracks": "Tracks",
+      "selection": "Selection",
+      "teams": "Teams",
+      "intermission": "Intermission",
       "games": "Games",
       "links": "Links",
       "permissions": "Permissions",
@@ -991,6 +999,99 @@
         "createError": "Failed to save link",
         "updateError": "Failed to save link",
         "loadError": "Error loading link data"
+      }
+    },
+    "hackathons": {
+      "page": {
+        "title": "Hackathon Management",
+        "createTitle": "Create New Hackathon",
+        "editTitle": "Edit Hackathon"
+      },
+      "list": {
+        "title": "Title",
+        "date": "Date",
+        "endDate": "End Date",
+        "location": "Location",
+        "create": "Create hackathon",
+        "reload": "Reload",
+        "noHackathons": "No hackathons to show.",
+        "noResults": "No results match your search",
+        "manage": "Manage Hackathon",
+        "columns": {
+          "title": "Title",
+          "date": "Date",
+          "endDate": "End Date",
+          "location": "Location"
+        }
+      },
+      "form": {
+        "title": "Title",
+        "date": "Start Date",
+        "endDate": "End Date",
+        "location": "Location",
+        "save": "Save",
+        "cancel": "Cancel",
+        "backToList": "Back to List"
+      },
+      "toasts": {
+        "created": "Hackathon created",
+        "updated": "Hackathon updated",
+        "deleted": "Hackathon deleted",
+        "loadError": "Couldn't load hackathons",
+        "createError": "Couldn't create hackathon",
+        "updateError": "Couldn't update hackathon",
+        "deleteError": "Couldn't delete hackathon",
+        "reloaded": "List reloaded"
+      },
+      "dashboard": {
+        "title": "Hackathon Dashboard",
+        "tracks": "Track Management",
+        "selection": "Selection Event",
+        "teams": "Team Management",
+        "intermission": "Intermission Info"
+      },
+      "intermission": {
+        "title": "Intermission Management",
+        "sections": {
+          "general": "General",
+          "schedule": "Schedule",
+          "carousel": "Carousel",
+          "sponsors": "Sponsors"
+        },
+        "fields": {
+          "organizerLogo": "Organizer Logo URL",
+          "startTime": "Start",
+          "endTime": "End",
+          "activityTitle": "Title",
+          "carouselType": "Type",
+          "carouselContent": "Content (Text or URL)",
+          "carouselDuration": "Duration (s)",
+          "carouselLabel": "Label (optional)",
+          "sponsorName": "Name",
+          "sponsorLogo": "Logo URL",
+          "sponsorTier": "Tier"
+        },
+        "types": {
+          "text": "Text / Information",
+          "qr": "QR Code",
+          "timer": "Timer",
+          "map": "Map"
+        },
+        "tiers": {
+          "platinum": "Platinum (Center, Large)",
+          "gold": "Gold (Medium)",
+          "silver": "Silver (Small)"
+        },
+        "actions": {
+          "addEntry": "Add Entry",
+          "addItem": "Add Carousel Item",
+          "addSponsor": "Add Sponsor"
+        },
+        "empty": {
+          "schedule": "No schedule entries yet.",
+          "carousel": "No carousel items yet.",
+          "sponsors": "No sponsors added yet."
+        }
       }
     }
   },

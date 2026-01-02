@@ -1,5 +1,5 @@
 import { AuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import Google from "next-auth/providers/google";
 import config from "@/lib/config";
 import { findOrCreateUser, findUserByEmail, findUserById } from "@/lib/controllers/userController";
 import FeatureFlagsProxy from "@/lib/featureFlags";
@@ -25,7 +25,7 @@ export const authOptions: AuthOptions = {
     }
   },
   providers: [
-    GoogleProvider({
+    ((Google as unknown as { default: typeof Google }).default || Google)({
       clientId: config.google.clientID!,
       clientSecret: config.google.clientSecret!,
       authorization: {

@@ -24,6 +24,6 @@ export function getIO(): IOServer | null {
 export function emitToRoom<T = unknown>(room: string, event: string, payload: T) {
   const io = getIO();
   if (!io) return;
-  console.log(`[socket] Emitting ${event} to room ${room} =>`, payload);
+  // console.log(`[socket] Emitting ${event} to room ${room} =>`, payload);
   io.to(room).emit(event, payload);
 }

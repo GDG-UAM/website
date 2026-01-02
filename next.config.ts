@@ -24,9 +24,6 @@ const nextConfig: NextConfig = {
         hostname: "**"
       }
     ]
-  },
-  experimental: {
-    turbopackFileSystemCacheForDev: true
   }
 };
 
@@ -64,7 +61,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
     // Tree-shaking options for reducing bundle size
     treeshake: {
       // Automatically tree-shake Sentry logger statements to reduce bundle size
-      removeDebugLogging: true,
-    },
+      removeDebugLogging: true
+    }
   }
 });

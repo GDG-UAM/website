@@ -2,7 +2,6 @@ import db from "@/lib/db";
 import Certificate, {
   IRecipient,
   ICertificate,
-  ICertificateBase,
   CertificateType,
   ISignature,
   ICourseCompletionMetadata,
@@ -10,7 +9,7 @@ import Certificate, {
   IParticipationMetadata,
   IVolunteerMetadata
 } from "@/lib/models/Certificate";
-import type { FilterQuery, SortOrder } from "mongoose";
+import type { SortOrder } from "mongoose";
 import crypto from "node:crypto";
 
 // Input types for creating/updating certificates (use strings for API input)
@@ -28,13 +27,12 @@ export type CertificateInput = {
   period?: CertificateInputPeriod;
   title: string;
   description?: string;
-  type: CertificateType;
-  metadata?:
-    | ICourseCompletionMetadata
-    | IEventAchievementMetadata
-    | IParticipationMetadata
-    | IVolunteerMetadata;
-};
+} & (
+  | { type: "COURSE_COMPLETION"; metadata?: ICourseCompletionMetadata }
+  | { type: "EVENT_ACHIEVEMENT"; metadata: IEventAchievementMetadata }
+  | { type: "PARTICIPATION"; metadata: IParticipationMetadata }
+  | { type: "VOLUNTEER"; metadata: IVolunteerMetadata }
+);
 
 export type CertificateUpdateInput = Partial<Omit<CertificateInput, "type" | "publicId">> & {
   revoke?: {
@@ -62,14 +60,7 @@ export async function createCertificate(input: CertificateInput): Promise<ICerti
 
   const certificate = await Certificate.create({
     publicId,
-    recipient: input.recipient,
-    designId: input.designId,
-    signatures: input.signatures || [],
-    period: input.period,
-    title: input.title,
-    description: input.description,
-    type: input.type,
-    metadata: input.metadata,
+    ...input,
     revoked: { isRevoked: false }
   });
 
@@ -217,7 +208,7 @@ export async function listCertificates(params?: {
     search
   } = params || {};
 
-  const filter: FilterQuery<ICertificateBase> = {};
+  const filter: Record<string, unknown> = {};
 
   // Filter by type
   if (type) {

@@ -9,7 +9,7 @@ import { toSlug } from "@/lib/utils";
 import { generateBlurHash } from "@/lib/utils/blurhash";
 import { processMarkdownSave, processMarkdownForEdit } from "@/lib/utils/markdownImages";
 import routing from "@/i18n/routing";
-import type { FilterQuery, SortOrder } from "mongoose";
+import type { QueryFilter, SortOrder, Types } from "mongoose";
 
 export type ArticleInput = {
   type: ArticleType;
@@ -19,7 +19,7 @@ export type ArticleInput = {
   content: LocalizedStringMap;
   coverImage?: string;
   status: ArticleStatus;
-  authors: string[];
+  authors: Types.ObjectId[];
   publishedAt?: Date | null;
 };
 
@@ -96,7 +96,7 @@ export async function createArticle(input: ArticleInput): Promise<IArticle> {
   const slug = (input.slug && toSlug(input.slug)) || toSlug(sourceTitle);
 
   // Generate BlurHash and get dimensions if coverImage is provided
-  let coverImageBlurHash: string | null = null;
+  let coverImageBlurHash: string | undefined;
   let coverImageWidth: number | undefined;
   let coverImageHeight: number | undefined;
   if (input.coverImage) {
@@ -133,7 +133,7 @@ export async function updateArticle(
   const update: Partial<
     ArticleInput & {
       slug: string;
-      coverImageBlurHash?: string | null;
+      coverImageBlurHash?: string;
       coverImageWidth?: number;
       coverImageHeight?: number;
     }
@@ -159,12 +159,12 @@ export async function updateArticle(
         update.coverImageWidth = blurResult.width;
         update.coverImageHeight = blurResult.height;
       } else {
-        update.coverImageBlurHash = null;
+        update.coverImageBlurHash = undefined;
         update.coverImageWidth = undefined;
         update.coverImageHeight = undefined;
       }
     } else {
-      update.coverImageBlurHash = null;
+      update.coverImageBlurHash = undefined;
       update.coverImageWidth = undefined;
       update.coverImageHeight = undefined;
     }
@@ -259,7 +259,7 @@ export async function listArticles(params: {
     includeContentInSearch = false
   } = params || {};
 
-  const filter: FilterQuery<IArticle> = {};
+  const filter: QueryFilter<IArticle> = {};
 
   if (type) filter.type = type;
   if (status) filter.status = status;
@@ -268,7 +268,7 @@ export async function listArticles(params: {
   if (search) {
     const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    const mapFieldMatches = (field: string): FilterQuery<IArticle> => ({
+    const mapFieldMatches = (field: string): QueryFilter<IArticle> => ({
       $expr: {
         $gt: [
           {
@@ -285,7 +285,7 @@ export async function listArticles(params: {
       }
     });
 
-    const filters: FilterQuery<IArticle>[] = [mapFieldMatches("title"), mapFieldMatches("excerpt")];
+    const filters: QueryFilter<IArticle>[] = [mapFieldMatches("title"), mapFieldMatches("excerpt")];
     if (includeContentInSearch) {
       filters.push(mapFieldMatches("content"));
     }

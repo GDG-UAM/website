@@ -1,5 +1,6 @@
-import { Schema, model, models, Document, Model } from "mongoose";
-import type { Types } from "mongoose";
+import mongoose from "mongoose";
+const { Schema, model, models } = mongoose;
+import type { Document, Model, Types } from "mongoose";
 
 // Certificate types
 export type CertificateType =
@@ -169,11 +170,10 @@ const CertificateBaseSchema = new Schema(
 );
 
 // Pre-save hook to automatically set revokedAt when isRevoked switches to true
-CertificateBaseSchema.pre("save", function (next) {
+CertificateBaseSchema.pre("save", function () {
   if (this.isModified("revoked.isRevoked") && this.revoked?.isRevoked && !this.revoked.revokedAt) {
     this.revoked.revokedAt = new Date();
   }
-  next();
 });
 
 // Check if model already exists to prevent discriminator re-registration

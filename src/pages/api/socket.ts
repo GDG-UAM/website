@@ -2,7 +2,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { Server as HTTPServer } from "http";
 import { Server as IOServer } from "socket.io";
 import { setIO } from "@/lib/realtime/io";
-import { countEntries } from "@/lib/controllers/giveawayController";
+import { baseHandler } from "@/lib/realtime/handlers/baseHandler";
+import { giveawayHandler } from "@/lib/realtime/handlers/giveawayHandler";
+import { hackathonHandler } from "@/lib/realtime/handlers/hackathonHandler";
 
 // Augment res.socket.server with io instance
 type WithIO = NextApiResponse & {
@@ -10,7 +12,9 @@ type WithIO = NextApiResponse & {
 };
 
 export default function handler(_req: NextApiRequest, res: WithIO) {
+  console.log("[socket] API handler called");
   if (!res.socket.server.io) {
+    console.log("[socket] initializing new IOServer...");
     const io = new IOServer(res.socket.server, {
       path: "/api/socket",
       cors: { origin: "*" },
@@ -21,35 +25,21 @@ export default function handler(_req: NextApiRequest, res: WithIO) {
     res.socket.server.io = io;
     setIO(io);
 
+    // Dynamic handler registration
+    const handlers = [
+      baseHandler,
+      giveawayHandler,
+      hackathonHandler
+      // Add more handlers here as needed
+    ];
+
     io.on("connection", (socket) => {
-      try {
-        console.log("[socket] client connected:", socket.id);
-      } catch {}
-      socket.on("join", async (data: { room?: string }) => {
-        const room = data?.room;
-        if (room) {
-          socket.join(room);
-          try {
-            console.log("[socket]", socket.id, "joined", room);
-          } catch {}
-          // If this is a giveaway room, emit the latest count immediately to the joining client
-          if (room.startsWith("giveaway:")) {
-            const id = room.split(":")[1];
-            if (id) {
-              try {
-                const total = await countEntries(id);
-                try {
-                  console.log(`[socket] Emitting giveaway:count on join for ${id} =>`, total);
-                } catch {}
-                socket.emit("giveaway:count", { count: total });
-              } catch {}
-            }
-          }
-        }
-      });
-      socket.on("ping", () => {
-        // no-op heartbeat to keep some proxies from idling the connection
-      });
+      // console.log("[socket] client connected:", socket.id);
+
+      // Initialize all handlers for each new socket
+      for (const handler of handlers) {
+        handler.init(io, socket);
+      }
     });
   }
   res.end();

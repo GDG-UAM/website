@@ -188,5 +188,5 @@ export async function trackServerEvent({
   if (userId && allowAnon) {
     doc.pseudoUserId = hashUserId(userId);
   }
-  await TelemetryEvent.create(doc);
+  // await TelemetryEvent.create(doc);
 }

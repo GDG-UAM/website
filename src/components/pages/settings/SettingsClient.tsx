@@ -7,7 +7,7 @@ import SettingsSidebar, { SettingsCategory } from "@/components/pages/settings/S
 import { useTranslations } from "next-intl";
 import { useSettings } from "@/lib/settings/SettingsContext";
 import { useSession } from "next-auth/react";
-import type { ProfileSettings } from "@/lib/validation/settingsSchemas";
+import type { ProfileSettings, UserSettingsDTO } from "@/lib/validation/settingsSchemas";
 import dynamic from "next/dynamic";
 import { Box } from "@mui/material";
 
@@ -159,7 +159,7 @@ const SettingsClient: React.FC<SettingsClientProps> = ({ categories }) => {
     try {
       const { data, error } = await api.settings.get({ query: { previews: "1" } });
       if (error) return;
-      await mutate(async () => data, { revalidate: false });
+      await mutate(async () => data as UserSettingsDTO, { revalidate: false });
     } catch {}
   }, [mutate]);
 

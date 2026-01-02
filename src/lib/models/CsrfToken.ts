@@ -1,4 +1,4 @@
-import { Schema, models, model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 export interface ICsrfToken {
   token: string;
   uid: string; // user id or client fingerprint
@@ -20,4 +20,5 @@ const CsrfTokenSchema = new Schema<ICsrfToken>(
 // NOTE: MongoDB TTL cleanup is not instantaneous; we still check exp at verify time.
 CsrfTokenSchema.index({ exp: 1 }, { expireAfterSeconds: 0 });
 
-export default models.CsrfToken || model<ICsrfToken>("CsrfToken", CsrfTokenSchema);
+export default mongoose.models.CsrfToken ||
+  mongoose.model<ICsrfToken>("CsrfToken", CsrfTokenSchema);

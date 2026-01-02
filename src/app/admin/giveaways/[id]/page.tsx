@@ -3,10 +3,10 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import styled, { keyframes } from "styled-components";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
-import QRCode from "qrcode";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { CustomQRCode } from "@/components/QRCode/CustomQRCode";
 import {
   HideButton,
   ViewButton,
@@ -49,8 +49,6 @@ export default function AdminGiveawayViewPage() {
   const params = useParams();
   const id = params?.id as string | undefined;
   const publicUrl = id ? `${baseURL}/giveaways/${id}` : "";
-  const [qrSrc, setQrSrc] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const t = useTranslations("admin.giveaways.view");
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -98,25 +96,6 @@ export default function AdminGiveawayViewPage() {
       console.warn("Fullscreen toggle failed", err);
     }
   }, []);
-
-  useEffect(() => {
-    if (!id) return;
-    let mounted = true;
-    setLoading(true);
-    QRCode.toDataURL(publicUrl, { margin: 1, width: 320 })
-      .then((url) => {
-        if (mounted) setQrSrc(url);
-      })
-      .catch(() => {
-        if (mounted) setQrSrc(null);
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [id, publicUrl]);
 
   useEffect(() => {
     const handler = () => setIsFullscreen(!!document.fullscreenElement);
@@ -468,29 +447,7 @@ export default function AdminGiveawayViewPage() {
               <h3>{t("publicLink")}</h3>
               <LinkSubtitle>{publicUrl}</LinkSubtitle>
               <Center>
-                <QRWrapper>
-                  {!loading && (
-                    <>
-                      <CornerTL $qrCornerSize={qrCornerSize} />
-                      <CornerTR $qrCornerSize={qrCornerSize} />
-                      <CornerBL $qrCornerSize={qrCornerSize} />
-                      <CornerBR $qrCornerSize={qrCornerSize} />
-                    </>
-                  )}
-                  <InnerQR>
-                    {loading ? (
-                      <div style={{ color: "#6b7280", position: "relative", zIndex: 1 }}>
-                        {t("generating")}
-                      </div>
-                    ) : qrSrc ? (
-                      <>
-                        <Image src={qrSrc} alt="QR" width={qrSize} height={qrSize} />
-                      </>
-                    ) : (
-                      <div>—</div>
-                    )}
-                  </InnerQR>
-                </QRWrapper>
+                <CustomQRCode value={publicUrl} size={qrSize} cornerSize={qrCornerSize} />
               </Center>
             </>
           )}
@@ -743,58 +700,6 @@ const Center = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const QRWrapper = styled.div`
-  position: relative;
-  width: min-content;
-  padding: 20px;
-`;
-
-const InnerQR = styled.div`
-  position: relative;
-  padding: 10px;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 0 0 5px #000;
-  display: inline-block;
-`;
-
-const CornerBase = styled.div<{ $qrCornerSize: number }>`
-  position: absolute;
-  width: ${({ $qrCornerSize }) => $qrCornerSize}px;
-  height: ${({ $qrCornerSize }) => $qrCornerSize}px;
-  border-radius: 20px;
-  border: 5px solid #000;
-  z-index: 0;
-`;
-
-const CornerTL = styled(CornerBase)`
-  top: 0;
-  left: 0;
-  background: var(--google-red);
-  border-top-left-radius: 10px;
-`;
-
-const CornerTR = styled(CornerBase)`
-  top: 0;
-  right: 0;
-  background: var(--google-green);
-  border-top-right-radius: 10px;
-`;
-
-const CornerBL = styled(CornerBase)`
-  bottom: 0;
-  left: 0;
-  background: var(--google-blue);
-  border-bottom-left-radius: 10px;
-`;
-
-const CornerBR = styled(CornerBase)`
-  bottom: 0;
-  right: 0;
-  background: var(--google-yellow);
-  border-bottom-right-radius: 10px;
 `;
 
 const LinkSubtitle = styled.p`

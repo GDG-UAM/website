@@ -16,11 +16,14 @@ export const profileSchema = z.object({
   // displayName is a virtual field (actually stored on User model); allow empty to clear
   displayName: z.string().max(80).optional(),
   shortBio: z.string().max(500).optional(),
-  github: optionalUrl,
-  linkedin: optionalUrl,
-  x: optionalUrl,
-  instagram: optionalUrl,
-  website: optionalUrl
+  github: optionalUrl.optional(),
+  linkedin: optionalUrl.optional(),
+  x: optionalUrl.optional(),
+  instagram: optionalUrl.optional(),
+  website: optionalUrl.optional(),
+  customTags: z
+    .array(z.enum(["founder", "president", "vice-president", "treasurer", "secretary"]))
+    .optional()
 });
 
 export const privacySchema = z.object({
@@ -61,7 +64,7 @@ export const accessibilitySchema = z.object({
 });
 
 export const experimentalSchema = z.object({
-  overrides: z.record(z.boolean()).default({})
+  overrides: z.record(z.string(), z.boolean()).default({})
 });
 
 export const userSettingsSchema = z.object({
@@ -73,7 +76,9 @@ export const userSettingsSchema = z.object({
   games: gamesSchema,
   notifications: notificationsSchema,
   accessibility: accessibilitySchema,
-  experimental: experimentalSchema
+  experimental: experimentalSchema,
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional()
 });
 
 export type GeneralSettings = z.infer<typeof generalSchema>;
@@ -111,7 +116,8 @@ export const DEFAULT_PROFILE: ProfileSettings = {
   linkedin: undefined,
   x: undefined,
   instagram: undefined,
-  website: undefined
+  website: undefined,
+  customTags: undefined
 };
 
 export const DEFAULT_PRIVACY: PrivacySettings = privacySchema.parse({});

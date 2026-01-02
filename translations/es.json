@@ -87,6 +87,8 @@
     "listView": "Vista de lista",
     "search": "Buscar",
     "down": "Bajar",
+    "up": "Subir",
+    "manage": "Configurar",
     "send": {
       "send": "Enviar",
       "sent": "Enviado"
@@ -471,13 +473,19 @@
       "giveaways": "Sorteos",
       "links": "Enlaces",
       "permissions": "Permisos",
-      "certificates": "Certificados"
+      "certificates": "Certificados",
+      "hackathons": "Hackathons"
     },
     "navigation": {
       "blog": "Blog",
       "newsletter": "Newsletter",
       "events": "Eventos",
       "giveaways": "Sorteos",
+      "hackathons": "Hackathons",
+      "tracks": "Tracks",
+      "selection": "Selección",
+      "teams": "Equipos",
+      "intermission": "Página entre Charlas",
       "games": "Juegos",
       "links": "Enlaces",
       "permissions": "Permisos",
@@ -991,6 +999,99 @@
         "createError": "Error al guardar el enlace",
         "updateError": "Error al guardar el enlace",
         "loadError": "Error al cargar los datos del enlace"
+      }
+    },
+    "hackathons": {
+      "page": {
+        "title": "Gestión de Hackathons",
+        "createTitle": "Crear Nuevo Hackathon",
+        "editTitle": "Editar Hackathon"
+      },
+      "list": {
+        "title": "Título",
+        "date": "Fecha",
+        "endDate": "Fecha de Fin",
+        "location": "Ubicación",
+        "create": "Crear hackathon",
+        "reload": "Recargar",
+        "noHackathons": "No hay hackathons para mostrar.",
+        "noResults": "No hay resultados para la búsqueda",
+        "manage": "Configurar Hackathon",
+        "columns": {
+          "title": "Título",
+          "date": "Fecha",
+          "endDate": "Fecha de Fin",
+          "location": "Ubicación"
+        }
+      },
+      "form": {
+        "title": "Título",
+        "date": "Fecha de Inicio",
+        "endDate": "Fecha de Fin",
+        "location": "Ubicación",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "backToList": "Volver a la lista"
+      },
+      "toasts": {
+        "created": "Hackathon creado",
+        "updated": "Hackathon actualizado",
+        "deleted": "Hackathon eliminado",
+        "loadError": "No se pudieron cargar los hackathons",
+        "createError": "No se pudo crear el hackathon",
+        "updateError": "No se pudo actualizar el hackathon",
+        "deleteError": "No se pudo eliminar el hackathon",
+        "reloaded": "Lista recargada"
+      },
+      "dashboard": {
+        "title": "Panel del Hackathon",
+        "tracks": "Gestión de Tracks",
+        "selection": "Evento de Selección",
+        "teams": "Gestión de Equipos",
+        "intermission": "Página entre Charlas"
+      },
+      "intermission": {
+        "title": "Configuración de Intermedio",
+        "sections": {
+          "general": "General",
+          "schedule": "Horario",
+          "carousel": "Carrusel",
+          "sponsors": "Patrocinadores"
+        },
+        "fields": {
+          "organizerLogo": "URL del Logo del Organizador",
+          "startTime": "Inicio",
+          "endTime": "Fin",
+          "activityTitle": "Título",
+          "carouselType": "Tipo",
+          "carouselContent": "Contenido (Texto o URL)",
+          "carouselDuration": "Duración (s)",
+          "carouselLabel": "Etiqueta (opcional)",
+          "sponsorName": "Nombre",
+          "sponsorLogo": "URL del Logo",
+          "sponsorTier": "Nivel"
+        },
+        "types": {
+          "text": "Texto / Información",
+          "qr": "Código QR",
+          "timer": "Temporizador",
+          "map": "Mapa"
+        },
+        "tiers": {
+          "platinum": "Platino (Centro, Grande)",
+          "gold": "Oro (Mediano)",
+          "silver": "Plata (Pequeño)"
+        },
+        "actions": {
+          "addEntry": "Añadir Entrada",
+          "addItem": "Añadir Elemento al Carrusel",
+          "addSponsor": "Añadir Patrocinador"
+        },
+        "empty": {
+          "schedule": "No hay entradas en el horario.",
+          "carousel": "No hay elementos en el carrusel.",
+          "sponsors": "No hay patrocinadores añadidos."
+        }
       }
     }
   },

@@ -96,7 +96,7 @@ export const adminCertificatesRoutes = new Elysia({ prefix: "/certificates" })
           return status(403, { error: "Invalid CSRF" });
 
         // Transform period dates if provided
-        const input: CertificateInput = {
+        const input = {
           ...body,
           recipient: {
             ...body.recipient,
@@ -108,7 +108,7 @@ export const adminCertificatesRoutes = new Elysia({ prefix: "/certificates" })
                 endDate: body.period.endDate ? new Date(body.period.endDate) : undefined
               }
             : undefined
-        };
+        } as CertificateInput;
 
         const created = await createCertificate(input);
         return status(200, created as unknown as typeof CertificateItem.static);
@@ -165,7 +165,7 @@ export const adminCertificatesRoutes = new Elysia({ prefix: "/certificates" })
         if (!userId || !token || !(await verifyCsrf(token, userId)))
           return status(403, { error: "Invalid CSRF" });
 
-        const input: CertificateUpdateInput = {
+        const input = {
           ...body,
           recipient:
             body.recipient && body.recipient.name
@@ -180,7 +180,7 @@ export const adminCertificatesRoutes = new Elysia({ prefix: "/certificates" })
                 endDate: body.period.endDate ? new Date(body.period.endDate) : undefined
               }
             : undefined
-        };
+        } as CertificateUpdateInput;
 
         const updated = await updateCertificate(id, input);
         if (!updated) return status(404, { error: "Certificate not found" });

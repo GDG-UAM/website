@@ -3,7 +3,7 @@ import Event, { IEvent, EventStatus, EventDateStatus } from "@/lib/models/Event"
 import { toSlug } from "@/lib/utils";
 import { generateBlurHash } from "@/lib/utils/blurhash";
 import { processMarkdownSave, processMarkdownForEdit } from "@/lib/utils/markdownImages";
-import type { FilterQuery, SortOrder } from "mongoose";
+import type { QueryFilter, SortOrder } from "mongoose";
 
 // Use shared robust slug function
 
@@ -35,7 +35,7 @@ export async function createEvent(input: EventInput): Promise<IEvent> {
   const slug = (input.slug && toSlug(input.slug)) || toSlug(input.title);
 
   // Generate BlurHash and get dimensions if image is provided
-  let imageBlurHash: string | null = null;
+  let imageBlurHash: string | undefined = undefined;
   let imageWidth: number | undefined;
   let imageHeight: number | undefined;
   if (input.image) {
@@ -95,12 +95,12 @@ export async function updateEvent(id: string, input: Partial<EventInput>): Promi
         update.imageWidth = blurResult.width;
         update.imageHeight = blurResult.height;
       } else {
-        update.imageBlurHash = null;
+        update.imageBlurHash = undefined;
         update.imageWidth = undefined;
         update.imageHeight = undefined;
       }
     } else {
-      update.imageBlurHash = null;
+      update.imageBlurHash = undefined;
       update.imageWidth = undefined;
       update.imageHeight = undefined;
     }
@@ -189,7 +189,7 @@ export async function listEvents(params: {
   // Default pagination and sorting parameters
   const { status, dateStatus, page = 1, pageSize = 10, sort = "newest" } = params || {};
 
-  const filter: FilterQuery<IEvent> = {};
+  const filter: QueryFilter<IEvent> = {};
   // Apply status filter if provided
   if (status) {
     // filter by status

@@ -113,14 +113,14 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
                   {t("giveaways")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
-                  type="certificates"
-                  onClick={() => handleNavigation("/admin/certificates")}
+                  type="hackathons"
+                  onClick={() => handleNavigation("/admin/hackathons")}
                 >
-                  {t("certificates")}
+                  {t("hackathons")}
                 </AdminNavigationButton>
-                <AdminNavigationButton type="games" disabled>
+                {/* <AdminNavigationButton type="games" disabled>
                   {t("games")}
-                </AdminNavigationButton>
+                </AdminNavigationButton> */}
               </ButtonList>
             </Category>
 
@@ -135,16 +135,22 @@ export default function AdminContent({ testRoutes }: AdminContentProps) {
                   {t("links")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
-                  type="permissions"
-                  onClick={() => handleNavigation("/admin/permissions")}
+                  type="certificates"
+                  onClick={() => handleNavigation("/admin/certificates")}
                 >
-                  {t("permissions")}
+                  {t("certificates")}
                 </AdminNavigationButton>
                 <AdminNavigationButton
                   type="featureFlags"
                   onClick={() => handleNavigation("/admin/feature-flags")}
                 >
                   {t("featureFlags")}
+                </AdminNavigationButton>
+                <AdminNavigationButton
+                  type="permissions"
+                  onClick={() => handleNavigation("/admin/permissions")}
+                >
+                  {t("permissions")}
                 </AdminNavigationButton>
               </ButtonList>
             </Category>

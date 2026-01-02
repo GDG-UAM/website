@@ -3,7 +3,7 @@ import User, { IUser } from "@/lib/models/User";
 import UserSettings from "@/lib/models/UserSettings";
 import TelemetryEvent from "@/lib/models/TelemetryEvent";
 import hashUserId from "@/lib/utils/hash";
-import type { ObjectId, PipelineStage } from "mongoose";
+import type { ObjectId, PipelineStage, Types } from "mongoose";
 import config from "@/lib/config";
 // Local, narrow type for selecting only public-safe profile fields
 type PublicSettingsProfile = {
@@ -430,7 +430,7 @@ export async function getPublicUserProfile(
 
   if (!user || (user.showProfilePublicly === false && id !== requesterId)) return null;
 
-  const settings = (await UserSettings.findOne({ userId: user._id })
+  const settings = (await UserSettings.findOne({ userId: user._id as Types.ObjectId })
     .select(
       "profile.shortBio profile.github profile.linkedin profile.x profile.instagram profile.website profile.customTags"
     )

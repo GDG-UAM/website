@@ -264,7 +264,8 @@ export async function updateUserSettingsCategory<T extends SettingsCategoryKey>(
   }
   if (category === "experimental" && Object.prototype.hasOwnProperty.call(body, "overrides")) {
     // keep copying overrides to User model for quick access
-    const overridesSchema = (shape["overrides"] as z.ZodTypeAny) || z.record(z.boolean());
+    const overridesSchema =
+      (shape["overrides"] as z.ZodTypeAny) || z.record(z.string(), z.boolean());
     const parsedOverrides = overridesSchema.parse(body["overrides"]);
     await User.findByIdAndUpdate(userId, { $set: { experimentalOverrides: parsedOverrides } });
   }

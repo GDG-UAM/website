@@ -72,7 +72,7 @@ export const giveawaysRoutes = new Elysia({ prefix: "/giveaways" })
         const g = await getGiveaway(id);
         // expose only the public fields the client needs
         return status(200, {
-          id: (g._id || g.id).toString(),
+          id: g._id.toString(),
           title: g.title,
           mustBeLoggedIn: !!g.mustBeLoggedIn,
           requirePhotoUsageConsent: !!g.requirePhotoUsageConsent,
@@ -161,7 +161,7 @@ export const giveawaysRoutes = new Elysia({ prefix: "/giveaways" })
     "/:id/entries",
     async ({ params: { id }, body, user, status }) => {
       try {
-        const { acceptTerms, finalConfirmations, anonId: bodyAnonId } = body;
+        const { acceptTerms, anonId: bodyAnonId } = body;
         if (!acceptTerms) return status(400, { error: "Terms not accepted" });
 
         const userId = user?.id;
@@ -222,9 +222,7 @@ export const giveawaysRoutes = new Elysia({ prefix: "/giveaways" })
         const created = await GiveawayEntryModel.create({
           giveawayId: id,
           userId: userId ?? null,
-          anonId: anonId ?? null,
-          isWinner: false,
-          finalConfirmations: finalConfirmations ?? {}
+          anonId: anonId ?? null
         });
 
         // Emit updated count to room subscribers
