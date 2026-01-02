@@ -421,14 +421,31 @@ export default function IntermissionPage({
   }, [carouselIndex, filteredCarousel]);
 
   const isPastActivity = (index: number) => {
+    // Optimization: If a verified active item exists, anything before it is past.
+    if (activeIndex !== -1) {
+      return index < activeIndex;
+    }
+
+    // Fallback: Check times manually (for gaps where no item is active)
     if (!data?.schedule) return false;
     const item = data.schedule[index];
-    if (!item.endTime) return false;
+    const nextItem = data.schedule[index + 1];
 
     const now = new Date();
-    const [endH, endM] = item.endTime.split(":").map(Number);
+
+    // Determine the effective point where this item is "over"
     const end = new Date();
-    end.setHours(endH, endM, 0, 0);
+    if (item.endTime) {
+      const [h, m] = item.endTime.split(":").map(Number);
+      end.setHours(h, m, 0, 0);
+    } else if (nextItem) {
+      // If no explicit end time, implicit end is the start of the next item
+      const [h, m] = nextItem.startTime.split(":").map(Number);
+      end.setHours(h, m, 0, 0);
+    } else {
+      // Last item with no end time never becomes "past"
+      return false;
+    }
 
     return now > end;
   };
