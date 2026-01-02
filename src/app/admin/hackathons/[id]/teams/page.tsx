@@ -6,7 +6,11 @@ import { useTranslations } from "next-intl";
 import styled from "styled-components";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import { BackButton } from "@/components/Buttons";
-import { newErrorToast } from "@/components/Toast";
+import { newErrorToast, newInfoToast } from "@/components/Toast";
+import TeamList from "@/components/pages/admin/hackathons/TeamList";
+import { api } from "@/lib/eden";
+import { getCsrfToken } from "@/lib/security/csrfClient";
+import TeamForm, { TeamFormData } from "@/components/pages/admin/hackathons/TeamForm";
 
 const Container = styled.div`
   padding: 20px;
@@ -24,17 +28,6 @@ const Title = styled.h1`
   margin: 0 0 8px 0;
 `;
 
-const Placeholder = styled.div`
-  padding: 40px;
-  border: 2px dashed #ccc;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  color: #666;
-`;
-
 interface HackathonInfo {
   _id: string;
   title: string;
@@ -44,11 +37,21 @@ export default function HackathonTeamsPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations("admin.hackathons");
+  const tTeams = useTranslations("admin.hackathons.teams");
   const tNav = useTranslations("admin.breadcrumbs");
   const id = params?.id as string;
 
+  const [mode, setMode] = useState<"list" | "create" | "edit">("list");
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [hackathon, setHackathon] = useState<HackathonInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [initialData, setInitialData] = useState<TeamFormData>({
+    name: "",
+    projectDescription: "",
+    users: []
+  });
+  const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
     const fetchHackathon = async () => {
@@ -66,6 +69,87 @@ export default function HackathonTeamsPage() {
     fetchHackathon();
   }, [id, t]);
 
+  const handleCreate = () => {
+    setMode("create");
+    setInitialData({
+      name: "",
+      projectDescription: "",
+      users: []
+    });
+  };
+
+  const handleEdit = async (teamId: string) => {
+    setEditingTeamId(teamId);
+    setMode("edit");
+    setFormLoading(true);
+    try {
+      const { data, error } = await api.admin.hackathons.teams({ teamId }).get();
+      if (error) throw error;
+      setInitialData({
+        name: data.name,
+        trackId:
+          data.trackId && typeof data.trackId === "object"
+            ? data.trackId._id.toString()
+            : data.trackId || "",
+        projectDescription: data.projectDescription,
+        users: data.users
+      });
+    } catch {
+      newErrorToast(t("toasts.loadError"));
+      setMode("list");
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const goList = () => {
+    setMode("list");
+    setEditingTeamId(null);
+    setInitialData({
+      name: "",
+      projectDescription: "",
+      users: []
+    });
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleSave = async (data: TeamFormData) => {
+    try {
+      const token = await getCsrfToken();
+      if (mode === "edit" && editingTeamId) {
+        const { error } = await api.admin.hackathons.teams({ teamId: editingTeamId }).patch(data, {
+          headers: { "x-csrf-token": token || "" }
+        });
+        if (error) throw error;
+        newInfoToast(tTeams("toasts.updated"));
+      } else {
+        const { error } = await api.admin.hackathons.teams.post(data, {
+          query: { hackathonId: id },
+          headers: { "x-csrf-token": token || "" }
+        });
+        if (error) throw error;
+        newInfoToast(tTeams("toasts.created"));
+      }
+      goList();
+    } catch {
+      newErrorToast(tTeams("toasts.saveError"));
+    }
+  };
+
+  const handleDelete = async (teamId: string) => {
+    try {
+      const token = await getCsrfToken();
+      const { error } = await api.admin.hackathons.teams({ teamId }).delete(null, {
+        headers: { "x-csrf-token": token || "" }
+      });
+      if (error) throw error;
+      newInfoToast(tTeams("toasts.deleted"));
+      setRefreshKey((k) => k + 1);
+    } catch {
+      newErrorToast(tTeams("toasts.deleteError"));
+    }
+  };
+
   if (loading) return null;
 
   return (
@@ -75,23 +159,41 @@ export default function HackathonTeamsPage() {
           { label: tNav("admin"), href: "/admin" },
           { label: tNav("hackathons"), href: "/admin/hackathons" },
           { label: hackathon?.title || "...", href: `/admin/hackathons/${id}` },
-          { label: t("dashboard.teams"), href: `/admin/hackathons/${id}/teams` }
+          { label: t("dashboard.teams"), href: `/admin/hackathons/${id}/teams` },
+          ...(mode === "create" ? [{ label: tTeams("form.createTitle"), href: "#" }] : []),
+          ...(mode === "edit" ? [{ label: tTeams("form.editTitle"), href: "#" }] : [])
         ]}
       />
 
       <Header>
-        <Title>{t("dashboard.teams")}</Title>
+        <Title>
+          {mode === "list" && t("dashboard.teams")}
+          {mode === "create" && tTeams("form.createTitle")}
+          {mode === "edit" && tTeams("form.editTitle")}
+        </Title>
       </Header>
 
       <div style={{ marginBottom: "20px" }}>
-        <BackButton onClick={() => router.push(`/admin/hackathons/${id}`)}>
+        <BackButton
+          onClick={mode === "list" ? () => router.push(`/admin/hackathons/${id}`) : goList}
+        >
           {t("form.backToList")}
         </BackButton>
       </div>
 
-      <Placeholder>
-        <h2>WORK IN PROGRESS</h2>
-      </Placeholder>
+      {mode === "list" ? (
+        <TeamList
+          hackathonId={id}
+          onCreate={handleCreate}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          refreshToken={refreshKey}
+        />
+      ) : formLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <TeamForm hackathonId={id} initial={initialData} onCancel={goList} onSubmit={handleSave} />
+      )}
     </Container>
   );
 }

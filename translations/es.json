@@ -1059,6 +1059,77 @@
         "teams": "Gestión de Equipos",
         "intermission": "Página entre Charlas"
       },
+      "tracks": {
+        "columns": {
+          "name": "Nombre",
+          "judges": "Jueces",
+          "rubrics": "Rúbricas",
+          "created": "Creado el"
+        },
+        "form": {
+          "createTitle": "Crear Track",
+          "editTitle": "Editar Track",
+          "name": "Nombre del Track",
+          "judges": "Jueces",
+          "addJudge": "Añadir juez...",
+          "rubrics": "Rúbricas de Evaluación",
+          "addRubric": "Añadir Criterio",
+          "rubricName": "Nombre del Criterio",
+          "maxScore": "Puntaje Máx",
+          "weight": "Peso",
+          "save": "Guardar",
+          "cancel": "Cancelar"
+        },
+        "toasts": {
+          "created": "Track creado",
+          "updated": "Track actualizado",
+          "deleted": "Track eliminado",
+          "saveError": "No se pudo guardar el track",
+          "deleteError": "No se pudo eliminar el track"
+        },
+        "create": "Crear Track",
+        "reload": "Recargar",
+        "noTracks": "No hay tracks para mostrar.",
+        "noResults": "No se encontraron resultados."
+      },
+      "teams": {
+        "columns": {
+          "name": "Nombre del Equipo",
+          "track": "Track",
+          "projectDescription": "Descripción del Proyecto",
+          "users": "Miembros",
+          "password": "Contraseña"
+        },
+        "form": {
+          "createTitle": "Crear Equipo",
+          "editTitle": "Editar Equipo",
+          "name": "Nombre del Equipo",
+          "track": "Track",
+          "noTrack": "Sin track",
+          "projectDescription": "Descripción del Proyecto",
+          "users": "Miembros",
+          "usersPlaceholder": "Busca un usuario o escribe un nombre...",
+          "addCustom": "Añadir nombre manualmente",
+          "customName": "Entrada manual",
+          "loading": "Buscando...",
+          "noTracksAvailable": "No hay tracks disponibles. Crea uno primero.",
+          "save": "Guardar",
+          "cancel": "Cancelar"
+        },
+        "toasts": {
+          "created": "Equipo creado",
+          "updated": "Equipo actualizado",
+          "deleted": "Equipo eliminado",
+          "saveError": "No se pudo guardar el equipo",
+          "deleteError": "No se pudo eliminar el equipo"
+        },
+        "create": "Crear Equipo",
+        "reload": "Recargar",
+        "noTeams": "No hay equipos para mostrar.",
+        "noResults": "No se encontraron resultados.",
+        "copyPassword": "Copiar Contraseña",
+        "passwordCopied": "Contraseña copiada al portapapeles"
+      },
       "intermission": {
         "title": "Gestión de Intermedios",
         "sections": {

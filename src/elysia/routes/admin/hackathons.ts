@@ -17,8 +17,12 @@ import {
   AdminUpdateHackathonBody,
   AdminHackathonItem
 } from "../../models/admin/hackathons";
+import { adminTracksRoutes } from "./hackathons/tracks";
+import { adminTeamsRoutes } from "./hackathons/teams";
 
 export const adminHackathonsRoutes = new Elysia({ prefix: "/hackathons" })
+  .use(adminTracksRoutes)
+  .use(adminTeamsRoutes)
   .derive(async () => {
     const session = await getSession();
     return {

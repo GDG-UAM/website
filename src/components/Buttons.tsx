@@ -920,7 +920,7 @@ const AdminButtonPaths: Record<string, string> = {
 };
 
 export const AdminNavigationButton: React.FC<
-  Omit<CustomButtonProps, PropsToOmit> & { type: keyof typeof AdminButtonPaths }
+  Omit<CustomButtonProps, PropsToOmit | "type"> & { type: keyof typeof AdminButtonPaths }
 > = ({ type, ariaLabel, color = "primary", ...props }) => {
   const t = useTranslations("admin.navigation");
 

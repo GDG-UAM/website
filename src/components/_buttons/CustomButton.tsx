@@ -175,6 +175,7 @@ export interface CustomButtonProps {
   fullWidth?: boolean;
   dontUseContext?: boolean;
   justify?: "center" | "flex-start" | "flex-end" | "space-between" | "space-around";
+  type?: "button" | "submit" | "reset";
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({

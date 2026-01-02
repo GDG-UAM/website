@@ -4,6 +4,7 @@ export const AdminUserItem = t.Object({
   _id: t.Any(), // ObjectId
   id: t.Optional(t.String()),
   name: t.String(),
+  displayName: t.Optional(t.String()),
   email: t.Optional(t.String()),
   image: t.Optional(t.String()),
   bio: t.Optional(t.String()),

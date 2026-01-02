@@ -1059,6 +1059,77 @@
         "teams": "Team Management",
         "intermission": "Intermission Info"
       },
+      "tracks": {
+        "columns": {
+          "name": "Name",
+          "judges": "Judges",
+          "rubrics": "Rubrics",
+          "created": "Created At"
+        },
+        "form": {
+          "createTitle": "Create Track",
+          "editTitle": "Edit Track",
+          "name": "Track Name",
+          "judges": "Judges",
+          "addJudge": "Add a judge...",
+          "rubrics": "Evaluation Rubrics",
+          "addRubric": "Add Criterion",
+          "rubricName": "Criterion Name",
+          "maxScore": "Max Score",
+          "weight": "Weight",
+          "save": "Save",
+          "cancel": "Cancel"
+        },
+        "toasts": {
+          "created": "Track created",
+          "updated": "Track updated",
+          "deleted": "Track deleted",
+          "saveError": "Couldn't save track",
+          "deleteError": "Couldn't delete track"
+        },
+        "create": "Create Track",
+        "reload": "Reload",
+        "noTracks": "No tracks to show.",
+        "noResults": "No results found."
+      },
+      "teams": {
+        "columns": {
+          "name": "Team Name",
+          "track": "Track",
+          "projectDescription": "Project Description",
+          "users": "Members",
+          "password": "Password"
+        },
+        "form": {
+          "createTitle": "Create Team",
+          "editTitle": "Edit Team",
+          "name": "Team Name",
+          "track": "Track",
+          "noTrack": "No track",
+          "projectDescription": "Project Description",
+          "users": "Members",
+          "usersPlaceholder": "Search for a user or enter a name...",
+          "addCustom": "Add name manually",
+          "customName": "Manual entry",
+          "loading": "Searching...",
+          "noTracksAvailable": "No tracks available. Create one first.",
+          "save": "Save",
+          "cancel": "Cancel"
+        },
+        "toasts": {
+          "created": "Team created",
+          "updated": "Team updated",
+          "deleted": "Team deleted",
+          "saveError": "Couldn't save team",
+          "deleteError": "Couldn't delete team"
+        },
+        "create": "Create Team",
+        "reload": "Reload",
+        "noTeams": "No teams to show.",
+        "noResults": "No results found.",
+        "copyPassword": "Copy Password",
+        "passwordCopied": "Password copied to clipboard"
+      },
       "intermission": {
         "title": "Intermission Management",
         "sections": {
