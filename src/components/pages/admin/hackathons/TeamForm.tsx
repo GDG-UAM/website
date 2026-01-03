@@ -24,7 +24,7 @@ export type TeamFormData = {
   name: string;
   trackId?: string | null;
   projectDescription?: string;
-  users: string[];
+  users: { id: string; name: string }[];
 };
 
 function TeamForm({
@@ -112,7 +112,7 @@ function TeamForm({
       <TeamUserSelector
         label={t("users")}
         value={data.users}
-        onChange={(ids) => setData({ ...data, users: ids })}
+        onChange={(users) => setData({ ...data, users })}
       />
 
       <Actions>

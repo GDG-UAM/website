@@ -20,7 +20,13 @@ export default async function PublicIntermissionPage({
     return notFound();
   }
 
-  return (
-    <IntermissionPage id={id} initialData={JSON.parse(JSON.stringify(hackathon.intermission))} />
-  );
+  const intermission = JSON.parse(JSON.stringify(hackathon.intermission));
+  if (intermission.carousel) {
+    intermission.carousel = intermission.carousel.map((slide) => ({
+      ...slide,
+      duration: slide.hidden ? 0 : slide.duration
+    }));
+  }
+
+  return <IntermissionPage id={id} initialData={intermission} />;
 }

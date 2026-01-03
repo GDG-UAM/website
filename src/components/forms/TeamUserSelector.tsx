@@ -127,8 +127,8 @@ type UserLite = {
 };
 
 interface TeamUserSelectorProps {
-  value: string[]; // array of strings (user IDs or plain names)
-  onChange: (value: string[]) => void;
+  value: { id: string; name: string }[]; // array of objects (user ID/manual ID and name)
+  onChange: (value: { id: string; name: string }[]) => void;
   label?: string;
 }
 
@@ -167,10 +167,12 @@ export default function TeamUserSelector({ value, onChange, label }: TeamUserSel
 
   // Resolve existing IDs in the value list to full user objects
   useEffect(() => {
-    const unresolvedIds = value.filter((id) => {
-      const isId = /^[0-9a-fA-F]{24}$/.test(id);
-      return isId && !resolvedUsers[id];
-    });
+    const unresolvedIds = value
+      .filter((v) => {
+        const isId = /^[0-9a-fA-F]{24}$/.test(v.id);
+        return isId && !resolvedUsers[v.id];
+      })
+      .map((v) => v.id);
 
     if (unresolvedIds.length > 0) {
       unresolvedIds.forEach((id) => {
@@ -198,22 +200,23 @@ export default function TeamUserSelector({ value, onChange, label }: TeamUserSel
   }, []);
 
   const handleAddUser = (user: UserLite) => {
-    if (value.includes(user._id)) return;
-    onChange([...value, user._id]);
+    if (value.some((v) => v.id === user._id)) return;
+    onChange([...value, { id: user._id, name: user.displayName || user.name }]);
     setQuery("");
     setShowDropdown(false);
   };
 
   const handleAddCustom = () => {
     if (!query.trim()) return;
-    if (value.includes(query)) return;
-    onChange([...value, query]);
+    if (value.some((v) => v.name === query)) return;
+    // Use the name as the temporary ID for manual entries
+    onChange([...value, { id: query, name: query }]);
     setQuery("");
     setShowDropdown(false);
   };
 
-  const handleRemove = (item: string) => {
-    onChange(value.filter((v) => v !== item));
+  const handleRemove = (id: string) => {
+    onChange(value.filter((v) => v.id !== id));
   };
 
   return (
@@ -266,19 +269,19 @@ export default function TeamUserSelector({ value, onChange, label }: TeamUserSel
       {value.length > 0 && (
         <EntryList>
           {value.map((item, index) => {
-            const user = resolvedUsers[item];
+            const user = resolvedUsers[item.id];
             const isResolved = !!user;
-            const displayName = isResolved ? user.displayName || user.name : item;
+            const displayName = item.name;
 
             return (
               <EntryItem key={index}>
                 <Avatar src={user?.image} />
                 <ItemInfo>
                   <MainText>{displayName}</MainText>
-                  <SubText>{isResolved ? item : t("customName") || "Manual Entry"}</SubText>
+                  <SubText>{isResolved ? item.id : t("customName") || "Manual Entry"}</SubText>
                 </ItemInfo>
                 <EntryActions>
-                  <DeleteButton onClick={() => handleRemove(item)} iconSize={20} />
+                  <DeleteButton onClick={() => handleRemove(item.id)} iconSize={20} />
                 </EntryActions>
               </EntryItem>
             );

@@ -1,13 +1,10 @@
 import { Elysia, t } from "elysia";
-import {
-  getCertificateByPublicId,
-  verifyCertificate
-} from "@/lib/controllers/certificateController";
+import { getCertificateById, verifyCertificate } from "@/lib/controllers/certificateController";
 import { CertificateTypeEnum, SignatureSchema } from "../models/admin/certificates";
 
 // Public certificate response schema (limited info)
 const PublicCertificateItem = t.Object({
-  publicId: t.String(),
+  id: t.String(),
   recipient: t.Object({
     name: t.String()
   }),
@@ -45,12 +42,12 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
       return response;
     }
   }))
-  // Get certificate by public ID
+  // Get certificate by ID
   .get(
-    "/:publicId",
-    async ({ params: { publicId }, status }) => {
+    "/:id",
+    async ({ params: { id }, status }) => {
       try {
-        const certificate = await getCertificateByPublicId(publicId);
+        const certificate = await getCertificateById(id);
 
         if (!certificate) {
           return status(404, { error: "Certificate not found" });
@@ -58,7 +55,7 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
 
         // Return public-safe data (no userId, etc.)
         return status(200, {
-          publicId: certificate.publicId,
+          id: certificate._id.toString(),
           recipient: {
             name: certificate.recipient.name
           },
@@ -84,7 +81,7 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
     },
     {
       params: t.Object({
-        publicId: t.String()
+        id: t.String()
       }),
       response: {
         200: PublicCertificateItem,
@@ -93,12 +90,12 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
       }
     }
   )
-  // Verify a certificate by public ID
+  // Verify a certificate by ID
   .get(
-    "/:publicId/verify",
-    async ({ params: { publicId }, status }) => {
+    "/:id/verify",
+    async ({ params: { id }, status }) => {
       try {
-        const result = await verifyCertificate(publicId);
+        const result = await verifyCertificate(id);
 
         if (!result.certificate) {
           return status(200, {
@@ -111,26 +108,28 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
         // Return public-safe verification result
         return status(200, {
           valid: result.valid,
-          certificate: {
-            publicId: result.certificate.publicId,
-            recipient: {
-              name: result.certificate.recipient.name
-            },
-            designId: result.certificate.designId,
-            signatures: result.certificate.signatures,
-            period: result.certificate.period,
-            title: result.certificate.title,
-            description: result.certificate.description,
-            type: result.certificate.type,
-            metadata: result.certificate.metadata,
-            revoked: result.certificate.revoked
-              ? {
-                  isRevoked: result.certificate.revoked.isRevoked,
-                  revokedAt: result.certificate.revoked.revokedAt
-                }
-              : undefined,
-            createdAt: result.certificate.createdAt
-          },
+          certificate: result.certificate
+            ? {
+                id: result.certificate._id.toString(),
+                recipient: {
+                  name: result.certificate.recipient.name
+                },
+                designId: result.certificate.designId,
+                signatures: result.certificate.signatures,
+                period: result.certificate.period,
+                title: result.certificate.title,
+                description: result.certificate.description,
+                type: result.certificate.type,
+                metadata: result.certificate.metadata,
+                revoked: result.certificate.revoked
+                  ? {
+                      isRevoked: result.certificate.revoked.isRevoked,
+                      revokedAt: result.certificate.revoked.revokedAt
+                    }
+                  : undefined,
+                createdAt: result.certificate.createdAt
+              }
+            : null,
           revokedReason: result.revokedReason
         });
       } catch (e) {
@@ -140,7 +139,7 @@ export const certificatesRoutes = new Elysia({ prefix: "/certificates" })
     },
     {
       params: t.Object({
-        publicId: t.String()
+        id: t.String()
       }),
       response: {
         200: VerifyResponse,

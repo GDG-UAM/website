@@ -7,7 +7,8 @@ import {
   ShareButton,
   LinkedInShareButton,
   OpenBadgeButton,
-  OpenLinkButton
+  OpenLinkButton,
+  CopyButton
 } from "@/components/Buttons";
 import Modal from "@/components/Modal";
 import { useTranslations } from "next-intl";
@@ -99,9 +100,48 @@ const CertificateId = styled.div`
   margin-top: 8px;
 `;
 
+const ModalSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ModalSectionTitle = styled.div`
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151;
+  margin-top: 4px;
+`;
+
+const InstructionText = styled.div`
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+`;
+
+const LinkContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 4px 4px 4px 12px;
+  border-radius: 8px;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+`;
+
+const LinkText = styled.div`
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 export interface CertificateViewProps {
   data: CertificateData;
-  publicId: string;
+  id: string;
   isRevoked?: boolean;
   revokedAt?: Date;
   createdAt?: Date;
@@ -113,7 +153,7 @@ export interface CertificateViewProps {
 
 export default function CertificateView({
   data,
-  publicId,
+  id,
   isRevoked = false,
   revokedAt,
   createdAt,
@@ -213,28 +253,12 @@ export default function CertificateView({
         title = `${data.title} Volunteer${hours}`;
         break;
     }
-    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(title)}&organizationName=GDG%20on%20Campus%20-%20Universidad%20Aut%C3%B3noma%20de%20Madrid&issueMonth=${createdAt?.getUTCMonth()}&issueYear=${createdAt?.getUTCFullYear()}&expirationMonth=&expirationYear=&certUrl=https%3A%2F%2Fgdguam.es%2Fcert%2F${publicId}&certId=${publicId}`;
+    const linkedInUrl = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(title)}&organizationName=GDG%20on%20Campus%20-%20Universidad%20Aut%C3%B3noma%20de%20Madrid&issueMonth=${createdAt?.getUTCMonth()}&issueYear=${createdAt?.getUTCFullYear()}&expirationMonth=&expirationYear=&certUrl=https%3A%2F%2Fgdguam.es%2Fcert%2F${id}&certId=${id}`;
     window.open(linkedInUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleOpenBadge = () => {
     setShowBadgeModal(true);
-  };
-
-  const handleExport = (service: "obp" | "credly" | "badgr" | "parchment") => {
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://gdguam.es";
-    const assertionUrl = `${origin}/api/badges/assertion/${publicId}`;
-
-    let url = "";
-    switch (service) {
-      case "obp":
-        url = `https://openbadgepassport.com/app/badge/import?url=${encodeURIComponent(assertionUrl)}`;
-        break;
-      case "badgr":
-        url = `https://badgr.com/backpack/import?url=${encodeURIComponent(assertionUrl)}`;
-        break;
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -318,10 +342,10 @@ export default function CertificateView({
         <VerificationInfo>
           {/* {t("verification.description")}{" "}
           <strong>
-            {typeof window !== "undefined" ? window.location.origin : ""}/cert/{publicId}
+            {typeof window !== "undefined" ? window.location.origin : ""}/cert/{id}
           </strong> */}
           <CertificateId>
-            {t("verification.id")}: {publicId}
+            {t("verification.id")}: {id}
           </CertificateId>
         </VerificationInfo>
       )}
@@ -332,36 +356,71 @@ export default function CertificateView({
         title={t("exportModal.title")}
         width="xs"
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <OpenBadgeButton onClick={() => handleExport("obp")} fullWidth justify="flex-start">
-            {t("exportModal.openBadgePassport")}
-          </OpenBadgeButton>
-          <OpenBadgeButton onClick={() => handleExport("badgr")} fullWidth justify="flex-start">
-            {t("exportModal.badgr")}
-          </OpenBadgeButton>
-          <OpenLinkButton
-            color="primary"
-            href="https://www.credly.com/"
-            fullWidth
-            justify="flex-start"
-          >
-            {t("exportModal.credly")}
-          </OpenLinkButton>
-          <OpenLinkButton
-            color="primary"
-            href="https://www.parchment.com/"
-            fullWidth
-            justify="flex-start"
-          >
-            {t("exportModal.parchment")}
-          </OpenLinkButton>
-          <hr style={{ margin: "12px 0" }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <ModalSection>
+            <ModalSectionTitle>{t("exportModal.manualImport")}</ModalSectionTitle>
+            <InstructionText>{t("exportModal.instructions")}</InstructionText>
+            <LinkContainer>
+              <LinkText>
+                {typeof window !== "undefined" ? window.location.origin : "https://gdguam.es"}
+                /api/badges/assertion/{id}
+              </LinkText>
+              <CopyButton
+                content={`${typeof window !== "undefined" ? window.location.origin : "https://gdguam.es"}/api/badges/assertion/${id}`}
+                ariaLabel={t("exportModal.copyAssertion")}
+                iconSize={20}
+              />
+            </LinkContainer>
+          </ModalSection>
+
+          <hr style={{ margin: 0, border: "none", borderTop: "1px solid #e5e7eb" }} />
+
+          <ModalSection>
+            <ModalSectionTitle>{t("exportModal.services")}</ModalSectionTitle>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <OpenLinkButton
+                color="primary"
+                href="https://openbadgepassport.com/"
+                fullWidth
+                justify="flex-start"
+              >
+                {t("exportModal.openBadgePassport")}
+              </OpenLinkButton>
+              <OpenLinkButton
+                color="primary"
+                href="https://badgr.com/"
+                fullWidth
+                justify="flex-start"
+              >
+                {t("exportModal.badgr")}
+              </OpenLinkButton>
+              <OpenLinkButton
+                color="primary"
+                href="https://www.credly.com/"
+                fullWidth
+                justify="flex-start"
+              >
+                {t("exportModal.credly")}
+              </OpenLinkButton>
+              <OpenLinkButton
+                color="primary"
+                href="https://www.parchment.com/"
+                fullWidth
+                justify="flex-start"
+              >
+                {t("exportModal.parchment")}
+              </OpenLinkButton>
+            </div>
+          </ModalSection>
+
+          <hr style={{ margin: 0, border: "none", borderTop: "1px solid #e5e7eb" }} />
+
           <OpenLinkButton
             color="secondary"
             href={`https://badgecheck.io/?url=${encodeURIComponent(
               (typeof window !== "undefined" ? window.location.origin : "https://gdguam.es") +
                 "/api/badges/assertion/" +
-                publicId
+                id
             )}`}
             fullWidth
             justify="flex-start"

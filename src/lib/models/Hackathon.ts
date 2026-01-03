@@ -45,6 +45,7 @@ export interface IHackathon extends Document {
     carousel: {
       id: string;
       duration: number;
+      hidden?: boolean;
       root: ICarouselElement;
       label?: string | null;
     }[];
@@ -52,6 +53,14 @@ export interface IHackathon extends Document {
       name: string;
       logoUrl: string;
       tier: number; // 0: Platinum/Center/Big, 1: Gold, etc.
+    }[];
+  } | null;
+  certificateDefaults?: {
+    title?: string | null;
+    signatures: {
+      name?: string;
+      role?: string;
+      imageUrl?: string;
     }[];
   } | null;
   createdAt: Date;
@@ -71,6 +80,7 @@ const CarouselSlideSchema = new Schema(
   {
     id: { type: String, required: true },
     duration: { type: Number, required: true },
+    hidden: { type: Boolean, default: false },
     root: { type: Schema.Types.Mixed, required: true },
     label: { type: String }
   },
@@ -97,6 +107,16 @@ const HackathonSchema: Schema<IHackathon> = new Schema(
       schedule: [ScheduleItemSchema],
       carousel: [CarouselSlideSchema],
       sponsors: [SponsorSchema]
+    },
+    certificateDefaults: {
+      title: { type: String, required: false, default: null },
+      signatures: [
+        {
+          name: { type: String },
+          role: { type: String },
+          imageUrl: { type: String }
+        }
+      ]
     }
   },
   {

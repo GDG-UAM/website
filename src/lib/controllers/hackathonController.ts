@@ -1,5 +1,6 @@
 import db from "@/lib/db";
 import Hackathon, { IHackathon } from "@/lib/models/Hackathon";
+import { syncHackathonCertificates } from "./certificateController";
 import type { QueryFilter, SortOrder } from "mongoose";
 
 export type HackathonInput = {
@@ -8,6 +9,7 @@ export type HackathonInput = {
   endDate: Date;
   location?: string | null;
   intermission?: IHackathon["intermission"];
+  certificateDefaults?: IHackathon["certificateDefaults"];
 };
 
 export type SortTypes = "newest" | "oldest";
@@ -31,6 +33,17 @@ export async function updateHackathon(
   })
     .select("-__v")
     .lean();
+
+  if (
+    hackathon &&
+    (input.title !== undefined ||
+      input.date !== undefined ||
+      input.endDate !== undefined ||
+      input.certificateDefaults !== undefined)
+  ) {
+    await syncHackathonCertificates(id);
+  }
+
   return hackathon as unknown as IHackathon | null;
 }
 

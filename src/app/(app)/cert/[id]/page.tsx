@@ -1,4 +1,4 @@
-import { getCertificateByPublicId } from "@/lib/controllers/certificateController";
+import { getCertificateById } from "@/lib/controllers/certificateController";
 import { buildSectionMetadata } from "@/lib/metadata";
 import { notFound } from "next/navigation";
 import CertificateView from "@/components/pages/cert/CertificateView";
@@ -6,16 +6,16 @@ import type { CertificateData } from "@/components/Certificate";
 
 export const revalidate = 60;
 
-function isValidPublicId(id: string) {
-  // Public ID is a 32-character hex string
-  return /^[a-f0-9]{32}$/.test(id);
+function isValidId(id: string) {
+  // MongoDB ObjectId is a 24-character hex string
+  return /^[a-f0-9]{24}$/.test(id);
 }
 
 export async function generateMetadata(context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
-  if (!isValidPublicId(id)) return buildSectionMetadata("certificates");
+  if (!isValidId(id)) return buildSectionMetadata("certificates");
 
-  const certificate = await getCertificateByPublicId(id);
+  const certificate = await getCertificateById(id);
   if (!certificate) return buildSectionMetadata("certificates");
 
   const entityName = certificate.title || "Certificate";
@@ -26,11 +26,11 @@ export async function generateMetadata(context: { params: Promise<{ id: string }
 export default async function CertificatePublicPage(context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
 
-  if (!isValidPublicId(id)) {
+  if (!isValidId(id)) {
     notFound();
   }
 
-  const certificate = await getCertificateByPublicId(id);
+  const certificate = await getCertificateById(id);
   if (!certificate) {
     notFound();
   }
@@ -70,7 +70,7 @@ export default async function CertificatePublicPage(context: { params: Promise<{
     >
       <CertificateView
         data={certificateData}
-        publicId={certificate.publicId}
+        id={certificate._id.toString()}
         isRevoked={isRevoked}
         revokedAt={revokedAt}
         createdAt={createdAt}

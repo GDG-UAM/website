@@ -78,6 +78,7 @@ export const AdminHackathonIntermission = t.Object({
     t.Object({
       id: t.String(),
       duration: t.Number(),
+      hidden: t.Optional(t.Boolean()),
       root: CarouselElementSchema,
       label: t.Optional(t.Nullable(t.String()))
     })
@@ -98,6 +99,20 @@ export const AdminHackathonItem = t.Object({
   endDate: t.Any(), // Date or string
   location: t.Optional(t.Nullable(t.String())),
   intermission: t.Optional(t.Nullable(AdminHackathonIntermission)),
+  certificateDefaults: t.Optional(
+    t.Nullable(
+      t.Object({
+        title: t.Optional(t.Nullable(t.String())),
+        signatures: t.Array(
+          t.Object({
+            name: t.Optional(t.String()),
+            role: t.Optional(t.String()),
+            imageUrl: t.Optional(t.String())
+          })
+        )
+      })
+    )
+  ),
   createdAt: t.Any(),
   updatedAt: t.Any()
 });
@@ -114,7 +129,21 @@ export const AdminCreateHackathonBody = t.Object({
   date: t.Union([t.String(), t.Date()]),
   endDate: t.Union([t.String(), t.Date()]),
   location: t.Optional(t.Nullable(t.String())),
-  intermission: t.Optional(t.Nullable(AdminHackathonIntermission))
+  intermission: t.Optional(t.Nullable(AdminHackathonIntermission)),
+  certificateDefaults: t.Optional(
+    t.Nullable(
+      t.Object({
+        title: t.Optional(t.Nullable(t.String())),
+        signatures: t.Array(
+          t.Object({
+            name: t.Optional(t.String()),
+            role: t.Optional(t.String()),
+            imageUrl: t.Optional(t.String())
+          })
+        )
+      })
+    )
+  )
 });
 
 export const AdminUpdateHackathonBody = t.Partial(AdminCreateHackathonBody);

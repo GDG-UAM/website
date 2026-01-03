@@ -143,13 +143,21 @@ export const adminHackathonsRoutes = new Elysia({ prefix: "/hackathons" })
         if (body.endDate) updateBody.endDate = new Date(body.endDate);
         if (body.location) updateBody.location = body.location;
         if (body.intermission) updateBody.intermission = body.intermission;
+        if (body.certificateDefaults) updateBody.certificateDefaults = body.certificateDefaults;
 
         const updated = await updateHackathon(id, updateBody);
         if (!updated) return status(404, { error: "Not found" });
 
         // Broadcast update via Socket.io
-        if (body.intermission) {
-          emitToRoom(`hackathon:${id}`, "intermission_update", updated.intermission);
+        if (body.intermission && updated.intermission) {
+          const publicIntermission = {
+            ...updated.intermission,
+            carousel: (updated.intermission.carousel || []).map((slide) => ({
+              ...slide,
+              duration: slide.hidden ? 0 : slide.duration
+            }))
+          };
+          emitToRoom(`hackathon:${id}`, "intermission_update", publicIntermission);
         }
 
         return status(200, updated as typeof AdminHackathonItem.static);

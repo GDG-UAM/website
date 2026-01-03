@@ -7,7 +7,9 @@ import {
   CancelButton,
   AddButton,
   DeleteButton,
-  EditButton
+  EditButton,
+  HideButton,
+  ViewButton
 } from "@/components/Buttons";
 import { TextField, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { useTranslations } from "next-intl";
@@ -61,17 +63,24 @@ const ScrollContainer = styled.div`
   }
 `;
 
-const ListItem = styled.div`
+const ListItem = styled.div<{ $hidden?: boolean }>`
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
   align-items: center;
   padding: 16px;
-  background: transparent;
+  transition: all 0.2s ease-in-out;
 
   &:not(:last-child) {
     border-bottom: 1px solid #eee;
   }
+`;
+
+const SlideInfo = styled.div<{ $hidden?: boolean }>`
+  flex: 1;
+  opacity: ${(props) => (props.$hidden ? 0.5 : 1)};
+  filter: ${(props) => (props.$hidden ? "grayscale(1)" : "none")};
+  transition: all 0.2s ease-in-out;
 `;
 
 const SectionTitle = styled.h2`
@@ -158,6 +167,7 @@ export interface CarouselElement {
 export interface CarouselSlide {
   id: string;
   duration: number;
+  hidden?: boolean;
   root: CarouselElement;
   label?: string; // Keep label for administrative naming
 }
@@ -282,6 +292,12 @@ export function IntermissionForm({
     setData({ ...data, carousel: newCarousel });
   };
 
+  const toggleCarouselSlideVisibility = (index: number) => {
+    const newCarousel = [...data.carousel];
+    newCarousel[index] = { ...newCarousel[index], hidden: !newCarousel[index].hidden };
+    setData({ ...data, carousel: newCarousel });
+  };
+
   // Sponsor management
   const addSponsor = () => {
     setData({
@@ -367,12 +383,13 @@ export function IntermissionForm({
             {ti("actions.addItem")}
           </AddButton>
         </Row>
+
         <EntryBox>
           <ScrollContainer>
             {data.carousel.map((item, index) => (
-              <ListItem key={index}>
+              <ListItem key={index} $hidden={item.hidden}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px", flex: 1 }}>
-                  <div style={{ flex: 1 }}>
+                  <SlideInfo $hidden={item.hidden}>
                     <div style={{ fontWeight: 600 }}>
                       {item.label || ti("defaults.slideLabel", { index: index + 1 })}
                     </div>
@@ -382,7 +399,20 @@ export function IntermissionForm({
                         count: item.root.children?.length || 0
                       })}
                     </div>
-                  </div>
+                  </SlideInfo>
+                  {item.hidden ? (
+                    <ViewButton
+                      onClick={() => toggleCarouselSlideVisibility(index)}
+                      iconSize={20}
+                      confirmationDuration={500}
+                    />
+                  ) : (
+                    <HideButton
+                      onClick={() => toggleCarouselSlideVisibility(index)}
+                      iconSize={20}
+                      confirmationDuration={500}
+                    />
+                  )}
                   <EditButton onClick={() => setEditingSlideIndex(index)} iconSize={20} />
                 </div>
                 <DeleteButton onClick={() => removeCarouselItem(index)} iconSize={20} />

@@ -171,6 +171,19 @@ export default function HackathonDashboardPage() {
                 </ButtonRow>
               </ButtonList>
             </Category>
+
+            {/* Certificate Operations */}
+            <Category>
+              <CategoryTitle>{t("dashboard.certificates")}</CategoryTitle>
+              <ButtonList>
+                <AdminNavigationButton
+                  type="hackathon-certificates"
+                  onClick={() => handleNavigation("/certificates")}
+                >
+                  {t("dashboard.certificates")}
+                </AdminNavigationButton>
+              </ButtonList>
+            </Category>
           </Grid>
         </GridContainer>
       </Content>

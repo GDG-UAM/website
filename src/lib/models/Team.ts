@@ -1,12 +1,17 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
+export interface ITeamUser {
+  id: string;
+  name: string;
+}
+
 export interface ITeam extends Document {
   name: string;
   hackathonId: mongoose.Types.ObjectId;
   trackId?: mongoose.Types.ObjectId;
   password: string;
   projectDescription?: string;
-  users: string[]; // List of user names or references
+  users: ITeamUser[]; // List of user objects with id and name
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +23,15 @@ const TeamSchema: Schema<ITeam> = new Schema(
     trackId: { type: Schema.Types.ObjectId, ref: "Track" },
     password: { type: String, required: true },
     projectDescription: { type: String },
-    users: { type: [String], default: [] }
+    users: {
+      type: [
+        {
+          id: { type: String, required: true },
+          name: { type: String, required: true }
+        }
+      ],
+      default: []
+    }
   },
   {
     timestamps: true

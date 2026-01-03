@@ -150,6 +150,10 @@ export default function HackathonTeamsPage() {
     }
   };
 
+  const handleManageCertificates = (teamId: string) => {
+    router.push(`/admin/hackathons/${id}/teams/${teamId}/certificates`);
+  };
+
   if (loading) return null;
 
   return (
@@ -187,6 +191,7 @@ export default function HackathonTeamsPage() {
           onCreate={handleCreate}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onManageCertificates={handleManageCertificates}
           refreshToken={refreshKey}
         />
       ) : formLoading ? (

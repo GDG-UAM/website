@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import { getCertificateByPublicId } from "@/lib/controllers/certificateController";
+import { getCertificateById } from "@/lib/controllers/certificateController";
 import { findUserById } from "@/lib/controllers/userController";
 import crypto from "node:crypto";
 
@@ -18,9 +18,9 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
     };
   })
 
-  .get("/class/:publicId", async ({ params: { publicId }, set }) => {
+  .get("/class/:id", async ({ params: { id }, set }) => {
     try {
-      const certificate = await getCertificateByPublicId(publicId);
+      const certificate = await getCertificateById(id);
       if (!certificate || certificate.revoked?.isRevoked) {
         set.status = 404;
         return { error: "Certificate not found or revoked" };
@@ -29,7 +29,7 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
       return {
         "@context": "https://w3id.org/openbadges/v2",
         type: "BadgeClass",
-        id: `${BASE_URL}/api/badges/class/${publicId}`,
+        id: `${BASE_URL}/api/badges/class/${id}`,
         name: certificate.title,
         description: certificate.description || certificate.title,
         criteria: {
@@ -44,9 +44,9 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
     }
   })
 
-  .get("/assertion/:publicId", async ({ params: { publicId }, set }) => {
+  .get("/assertion/:id", async ({ params: { id }, set }) => {
     try {
-      const certificate = await getCertificateByPublicId(publicId);
+      const certificate = await getCertificateById(id);
       if (!certificate || certificate.revoked?.isRevoked) {
         set.status = 404;
         return { error: "Certificate not found or revoked" };
@@ -68,7 +68,7 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
       return {
         "@context": "https://w3id.org/openbadges/v2",
         type: "Assertion",
-        id: `${BASE_URL}/api/badges/assertion/${publicId}`,
+        id: `${BASE_URL}/api/badges/assertion/${id}`,
         recipient: {
           type: "email",
           hashed: true,
@@ -78,7 +78,7 @@ export const badgesRoutes = new Elysia({ prefix: "/badges" })
         verification: {
           type: "HostedBadge"
         },
-        badge: `${BASE_URL}/api/badges/class/${publicId}`
+        badge: `${BASE_URL}/api/badges/class/${id}`
       };
     } catch (e) {
       console.error(e);

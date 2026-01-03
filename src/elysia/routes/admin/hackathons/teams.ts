@@ -31,9 +31,13 @@ export const adminTeamsRoutes = new Elysia({ prefix: "/teams" })
   }))
   .get(
     "/",
-    async ({ query: { hackathonId }, status }) => {
+    async ({ query: { hackathonId, page, pageSize }, status }) => {
       try {
-        const teams = await listTeams(hackathonId);
+        const teams = await listTeams({
+          hackathonId,
+          page,
+          pageSize
+        });
         return status(200, teams as typeof AdminTeamsListResponse.static);
       } catch (e) {
         return status(500, { error: e instanceof Error ? e.message : "Failed to list teams" });
@@ -41,7 +45,9 @@ export const adminTeamsRoutes = new Elysia({ prefix: "/teams" })
     },
     {
       query: t.Object({
-        hackathonId: t.String()
+        hackathonId: t.Optional(t.String()),
+        page: t.Optional(t.Number({ default: 1, minimum: 1 })),
+        pageSize: t.Optional(t.Number({ default: 10, minimum: 1, maximum: 100 }))
       }),
       response: {
         200: AdminTeamsListResponse,

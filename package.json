@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,11 +10,12 @@
     "flags:sync": "tsx scripts/sync-feature-flags.ts",
     "next-build": "next build --webpack",
     "build": "npm run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build",
-    "build-local": "npm run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build --webpack",
+    "build-local": "del .next -r && npm run sitemap && cross-env NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "start": "cross-env NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "next lint",
     "sitemap": "tsx scripts/sitemap.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit"
   },
   "lint-staged": {
     "{src,translations,scripts}/**/*.{js,jsx,ts,tsx,json,css,html}": [

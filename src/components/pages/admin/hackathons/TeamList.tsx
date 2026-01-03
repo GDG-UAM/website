@@ -1,7 +1,13 @@
 "use client";
 import { api } from "@/lib/eden";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { AddButton, EditButton, DeleteButton, CopyButton } from "@/components/Buttons";
+import {
+  AddButton,
+  EditButton,
+  DeleteButton,
+  CopyButton,
+  CertificateButton
+} from "@/components/Buttons";
 import { useTranslations } from "next-intl";
 import { newErrorToast, newInfoToast } from "@/components/Toast";
 import { AdminTable } from "@/components/admin/AdminTable";
@@ -14,7 +20,8 @@ interface TeamInterface {
   trackId?: { _id: string; name: string } | string;
   projectDescription?: string;
   password: string;
-  users: string[];
+  users: { id: string; name: string }[];
+  certificateCount?: number;
 }
 
 function TeamList({
@@ -22,12 +29,14 @@ function TeamList({
   onCreate,
   onEdit,
   onDelete,
+  onManageCertificates,
   refreshToken
 }: {
   hackathonId: string;
   onCreate: () => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onManageCertificates: (id: string) => void;
   refreshToken?: number;
 }) {
   const t = useTranslations("admin.hackathons.teams");
@@ -43,7 +52,7 @@ function TeamList({
         });
         if (error) throw error;
         setRows(
-          data.map((x) => ({
+          data.items.map((x) => ({
             ...x,
             _id: x._id.toString(),
             trackId:
@@ -86,10 +95,10 @@ function TeamList({
       customColumn<TeamInterface>("users", t("columns.users"), (r) => (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
           {r.users.map((u, i) => {
-            const isId = /^[0-9a-fA-F]{24}$/.test(u);
+            const isId = /^[0-9a-fA-F]{24}$/.test(u.id);
             return (
               <span key={i}>
-                {isId ? <UserMention userId={u} isAdmin /> : u}
+                {isId ? <UserMention userId={u.id} isAdmin /> : u.name}
                 {i < r.users.length - 1 && ", "}
               </span>
             );
@@ -116,6 +125,17 @@ function TeamList({
       headerActions={<AddButton onClick={onCreate}>{t("create")}</AddButton>}
       rowActions={(r) => (
         <>
+          <CertificateButton
+            onClick={() => onManageCertificates(r._id)}
+            iconSize={20}
+            ariaLabel={t("emitCertificates")}
+          >
+            {r.certificateCount !== undefined && r.certificateCount > 0 && (
+              <span style={{ fontSize: "0.75rem", fontWeight: "bold", marginLeft: "4px" }}>
+                {r.certificateCount}
+              </span>
+            )}
+          </CertificateButton>
           <EditButton onClick={() => onEdit(r._id)} iconSize={20} />
           <DeleteButton onClick={() => onDelete(r._id)} confirmationDuration={3000} iconSize={20} />
         </>
